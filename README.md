@@ -51,6 +51,13 @@ Make sure the database is up to date by applying any migrations:
 python manage.py migrate
 ```
 
+### 3b. Create a Superuser (Optional)
+
+```bash
+python manage.py createsuperuser
+```
+Follow the prompts to create the superuser account.
+
 ### 4. Start the Django Development Server
 
 Start the Django backend server:
@@ -63,7 +70,7 @@ The backend will be available at `http://127.0.0.1:8000/`.
 
 ### 5. Navigate to the React Frontend Directory
 
-Go to the React frontend directory:
+IN A DIFFERENT TERMINAL, go to the React frontend directory:
 
 ```bash
 cd clarafrontend
