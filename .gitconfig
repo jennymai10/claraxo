@@ -1,0 +1,10 @@
+[alias]
+    save = "!f() { \
+        branch=$(git rev-parse --abbrev-ref HEAD); \
+        if [ \"$branch\" = \"main\" ]; then \
+            echo 'You cannot commit directly to the main branch.'; \
+            exit 1; \
+        else \
+            git commit \"$@\"; \
+        fi \
+    }; f"
