@@ -1,21 +1,11 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Login from './Login';
-import Dashboard from './Dashboard';
-
+import './App.css';
 
 function App() {
-    return (
-        <Router>
-            <div className="App">
-                <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={<Navigate to="/login" />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                </Routes>
-            </div>
-        </Router>
-    );
+  return (
+    <div>
+      <h1>Welcome to Tic Tac Toe Front End!</h1>
+    </div>
+  );
 }
 
 export default App;
