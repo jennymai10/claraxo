@@ -71,7 +71,7 @@ python manage.py runserver
 
 Go to `http://127.0.0.1:8000/`, you should see API status: {"apistatus": "Backend is running"}.
 
-Go to `http://127.0.0.1:8000/tictactoe/`, you should see "Welcome to the Tic Tac Toe Game!"
+Go to `http://127.0.0.1:8000/tictactoe/`, you should see "Welcome to the Tic Tac Toe Back End!"
 
 => Then, you are good!
 
