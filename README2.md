@@ -1,6 +1,3 @@
-Here’s how you can document the setup and commands in your `README.md` file:
-
-```markdown
 # Tic-Tac-Toe Project
 
 This project is a web-based Tic-Tac-Toe game with GPT-4 integration, built using Django for the backend and React for the frontend.
@@ -18,7 +15,7 @@ This project is a web-based Tic-Tac-Toe game with GPT-4 integration, built using
 - **Python 3.12** or later.
 - **Node.js** and **npm** installed.
 
-## Setup Instructions
+## FOR FIRST TIME SET UP ONLY
 
 ### 1. Create and Activate the Virtual Environment
 
@@ -90,7 +87,7 @@ npm start
 
 The frontend will be available at `http://localhost:3000/`.
 
-## Running the Project
+## WHENEVER YOU COME BACK TO WORK ON THE PROJECT
 
 1. **Activate the Virtual Environment:**
 
