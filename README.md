@@ -99,7 +99,11 @@ Start the React frontend server:
 npm start
 ```
 
-The frontend will be available at `http://localhost:3000/`.
+#### To check if your frontend is good:
+
+Go to `http://localhost:3000/`, you should see "Welcome to Tic Tac Toe Front End!"
+
+=> Then, you are good!
 
 ## WHENEVER YOU COME BACK TO WORK ON THE PROJECT
 
@@ -127,12 +131,6 @@ The frontend will be available at `http://localhost:3000/`.
     cd clarafrontend
     npm start
     ```
-
-#### To check if your backend is good:
-
-Go to `http://localhost:3000/`, you should see "Welcome to Tic Tac Toe Front End!"
-
-=> Then, you are good!
 
 ## Additional Notes
 
