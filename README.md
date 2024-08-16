@@ -14,6 +14,7 @@ This project is a web-based Tic-Tac-Toe game with GPT-4 integration, built using
 
 - **Python 3.12** or later.
 - **Node.js** and **npm** installed.
+- **pip** installed.
 
 ## FOR FIRST TIME SET UP ONLY
 
