@@ -67,7 +67,13 @@ Start the Django backend server:
 python manage.py runserver
 ```
 
-The backend will be available at `http://127.0.0.1:8000/`.
+#### To check if your backend is good:
+
+Go to `http://127.0.0.1:8000/`, you should see API status: {"apistatus": "Backend is running"}.
+
+Go to `http://127.0.0.1:8000/tictactoe/`, you should see "Welcome to the Tic Tac Toe Game!"
+
+=> Then, you are good!
 
 ### 5. Navigate to the React Frontend Directory
 
@@ -95,8 +101,6 @@ npm start
 
 The frontend will be available at `http://localhost:3000/`.
 
-At this point, it should auto-direct you to the log in page. Put in the superuser login details you created earlier. If you land on the Dashboard page, you're logged in. In your backend terminal, you should see a 200-code successful POST request to login: "POST /auth/login/ HTTP/1.1" 200. If you see a red 400-code "POST /auth/login/ HTTP/1.1" 400, something went wrong (can be wrong username, password,...).
-
 ## WHENEVER YOU COME BACK TO WORK ON THE PROJECT
 
 1. **Activate the Virtual Environment:**
@@ -123,6 +127,12 @@ At this point, it should auto-direct you to the log in page. Put in the superuse
     cd clarafrontend
     npm start
     ```
+
+#### To check if your backend is good:
+
+Go to `http://localhost:3000/`, you should see "Welcome to Tic Tac Toe Front End!"
+
+=> Then, you are good!
 
 ## Additional Notes
 

@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',  # Optional, for social auth
 
     # Your apps
-    'authentication',  # Your custom app, if applicable
+    'tictactoe',  # Your custom app, if applicable
     'rest_framework.authtoken',
 ]
 
