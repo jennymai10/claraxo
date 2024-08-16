@@ -20,7 +20,7 @@ from authentication.views import api_status
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('dj_rest_auth.urls')),
-    path('auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('', api_status),
+    path('authentication/', include("authentication.urls")),
     path('api/status/', api_status),
 ]
