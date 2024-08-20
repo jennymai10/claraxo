@@ -114,12 +114,47 @@ Before committing changes to the repository, ensure the `.gitignore` file exclud
 
 For deployment, you will need to set environment variables in your production environment (e.g., using Heroku or another platform) and switch the `CLARA_ENVIRONMENT` to `heroku`.
 
-## Contributing
+## Contributing (Please read).
 
 When coding and contributing to the git repo, the repo has enabled branch protection rules.
 
-You can only commit to your own branch (create one from `main`), and then create a pull request from your branch to main.
+You can only commit to your own branch (create one from `main`), and then create a pull request from your branch to `main`.
 
-At least 1 code review is require to merge your code into `main`.
+At least 1 code review is required to merge your code into `main`. Please reach out =))
 
-This `README.md` provides comprehensive instructions for setting up and working on the project, which should help your team get started quickly and effectively.
+### Whenever you code, the folder `tictactoe_app` (backend) and `tictactoe_frontend` are the only 2 folders you should care about or modify. All the others are belonged to the client's previous codebase and should not be modified.
+
+Go into your virtual env:
+```bash
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+```
+
+Update dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+Apply the database migrations to set up your database schema:
+
+```bash
+python manage.py migrate
+```
+
+Start both the Q-cluster and the Django development server.
+
+Terminal 1: Start the Q-cluster
+
+```bash
+python manage.py qcluster
+```
+
+Terminal 2 (A DIFFERENT TERMINAL): Start the Django Development Server
+
+```bash
+python manage.py runserver
+```
+
+Open your web browser and go to (bookmark these on the browser for quick retrieval later on):
+
+- The Tic Tac Toe interface: `http://localhost:8000/tictactoe/`
+- The Django admin: `http://localhost:8000/admin/`
