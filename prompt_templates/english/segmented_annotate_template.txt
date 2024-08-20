@@ -1,0 +1,19 @@
+Annotate the following English text, dividing it up in a natural way into pages, and each page into sentence-like segments. 
+
+Pages are separated using instances of the <page> tag.
+
+Segments are separated using instances of a double bar, ||.
+
+If a word in the text appears to be a compound noun, compound adjective or compound adverb that can be divided into smaller words, and the meaning of the word can be inferred from the meaning of the components, separate the components with vertical bars. Do not split up words in other ways.
+
+Do not change the layout. In particular, if the text appears to be formatted as a poem, leave the line-breaks as they are.
+
+Here are some examples:
+
+{examples}
+
+Here is the text to annotate:
+
+{text}
+
+The output will be read by a Python script, so produce just the text without any comments or introduction.

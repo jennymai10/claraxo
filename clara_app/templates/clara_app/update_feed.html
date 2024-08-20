@@ -1,0 +1,32 @@
+{% extends "clara_app/base.html" %}
+
+{% block content %}
+  <h2>Update Feed</h2>
+  <ul>
+    {% for update in updates %}
+      <li>
+	    {{ update.timestamp }}:
+		{% if update.update_type == 'FRIEND' %}
+		   <a href="{% url 'external_profile' update.content_object.sender.id %}">{{ update.content_object.sender.username }}</a>
+           is now friends with 
+           <a href="{% url 'external_profile' update.content_object.receiver.id %}">{{ update.content_object.receiver.username }}</a>
+		{% elif update.update_type == 'RATE' %}
+		   <a href="{% url 'external_profile' update.content_object.user.id %}">{{ update.content_object.user.username }}</a>
+		   gave {{ update.content_object.rating }} stars to 
+		   <a href="{% url 'content_detail' update.content_object.content.id %}">{{ update.content_object.content.title }}</a>
+		{% elif update.update_type == 'COMMENT' %}
+		   <a href="{% url 'external_profile' update.content_object.user.id %}">{{ update.content_object.user.username }}</a>
+		   posted a comment on 
+		   <a href="{% url 'content_detail' update.content_object.content.id %}">{{ update.content_object.content.title }}</a>:</br>
+		   "{{ update.content_object.comment }}"
+		{% elif update.update_type == 'PUBLISH' %}
+		   <a href="{% url 'external_profile' update.user.id %}">{{ update.user.username }}</a>
+		   published 
+		   <a href="{% url 'content_detail' update.content_object.id %}">{{ update.content_object.title }}</a>
+		{% endif %}
+      </li>
+    {% empty %}
+      <li>No updates to show.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

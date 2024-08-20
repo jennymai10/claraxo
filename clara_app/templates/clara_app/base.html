@@ -1,0 +1,369 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    var csrf_token = "{% csrf_token %}";
+  </script>
+  <style>
+  main {
+  margin-left: 20px; /* Adjust the value as needed */
+  /* background-color: #F1F7FA; Very light and greyish blue */
+  background-color: #F5F1E9; /* Approx colour of C-LARA blog */
+  
+  body {
+  font-size: 16px; /* Or whatever size you prefer */
+  }
+  
+  table {
+  border-collapse: collapse;
+  }
+
+  td {
+    padding: 8px;
+    border: 1px solid #ddd; /* light grey border for the cells */
+  }
+
+  .disabled-link {
+    pointer-events: none;
+    color: #ccc;
+   }
+
+  .textarea-class {
+    width: 200%; 
+    height: 300px; 
+  }
+  
+  .flex-container {
+        display: flex;
+    }
+
+    #high-level-status-messages {
+        flex: 0 1 40%; /* flex-grow: 0, flex-shrink: 1, flex-basis: 40% */
+        min-width: 300px; /* Minimum width of the left div */
+        overflow-y: auto;
+        max-height: 300px;
+        padding-right: 10px; /* Space between the divs */
+    }
+
+    #status-messages {
+        flex: 1 1 auto; /* flex-grow: 1, flex-shrink: 1, flex-basis: auto */
+        overflow-y: auto;
+        max-height: 300px;
+    }
+
+  .status-messages-class {
+    height: 200px;  /* Adjust as needed */
+    overflow-y: auto;
+  }
+  
+.sticky-footer {
+   position: fixed;
+   bottom: 0;
+   width: 100%;
+   background-color: #f1f1f1;
+   text-align: left;
+   padding: 10px 0;
+   border-top: 1px solid #ccc;
+   z-index: 1000;
+   font-weight: bold;
+}
+  
+  .btn-special {
+    background-color: #007bff;  /* Change to any color you prefer */
+    color: white;
+  }
+
+  .btn-special:hover {
+    background-color: #0056b3;  /* Darker shade for hover */
+  }
+  
+  a[data-tooltip] {
+    position: relative;
+}
+  
+  a[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(20%);
+	transform: translateY(200%);
+    background-color: #333;
+    color: #fff;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 14px;
+    z-index: 1;
+    white-space: nowrap;
+}
+
+.rating {
+  unicode-bidi: bidi-override;
+  direction: rtl;
+}
+
+.rating-input {
+  display: none;
+}
+
+.rating-star {
+  color: #ddd; /* Color of non-selected stars */
+  display: inline-block;
+  padding: 0 0px; /* Spacing between stars */
+  cursor: pointer;
+  font-size: 32px; /* Size of stars */
+}
+
+.rating-star:before {
+  content: "★";
+}
+
+.rating-input:checked ~ .rating-star:before,
+.rating-input:checked ~ .rating-star ~ .rating-star:before,
+.rating:hover ~ .rating-star:before,
+.rating:hover ~ .rating-star ~ .rating-star:before {
+  color: #f5ac0f; /* Color of selected stars */
+}
+
+  </style>
+  <title>{% block title %}C-LARA{% endblock %}</title>
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+	  <a class="navbar-brand" href="https://www.c-lara.org/" target="_blank"><img src="https://live.staticflickr.com/65535/53529141387_fccded8f69_t.jpg" style="max-width: 60px; max-height: 60px;"></a>
+	  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	  </button>
+	  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+		<ul class="navbar-nav">
+        {% if user.is_authenticated %}
+		  <!-- Home -->
+		   <li class="nav-item">
+			  <a class="nav-link" href="{% url 'home_page' %}" data-toggle="tooltip" title="Home page: show recent activities and content"><i class="fas fa-home"></i></a>
+		   </li>	 
+		  <!-- C-LARA social network -->
+		  <li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			  Social network
+			</a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+			  <a class="dropdown-item" href="{% url 'content_list' %}"
+					 data-toggle="tooltip" title="List all the content that has been registered in the C-LARA social network.">
+					 Published content</a>
+			  <a class="dropdown-item" href="{% url 'list_activities' %}"
+					 data-toggle="tooltip" title="List ongoing project activities or register a new activity.">
+					 Project activities</a>
+			  <a class="dropdown-item" href="{% url 'reading_history' 'english' 'init' %}"
+					 data-toggle="tooltip" title="Access your reading history for a given language, or add a new project to it.">
+					 Reading histories</a>
+			  <a class="dropdown-item" href="{% url 'update_feed' %}"
+					 data-toggle="tooltip" title="Get a summary of recent C-LARA activity from you and your friends.">
+					 Update feed</a>
+			  <a class="dropdown-item" href="{% url 'list_users' %}"
+					 data-toggle="tooltip" title="Show all users. You can send friend requests to users with public profiles.">
+					 Users</a>
+			  <a class="dropdown-item" href="{% url 'friends' %}"
+					 data-toggle="tooltip" title="Show friends and outstanding friend requests.">
+					 Friends</a>
+			  <a class="dropdown-item" href="{% url 'language_statistics' %}"
+					 data-toggle="tooltip" title="Show tables listing numbers of projects of pieces of content, broken down by language.">
+					 Project and content statistics</a>
+			  <a class="dropdown-item" href="{% url 'aggregated_questionnaire_results' %}"
+					 data-toggle="tooltip" title="Show summary results for satisfaction questionnaires.">
+					 Questionnaire summary</a>
+			  <a class="dropdown-item" href="{% url 'funding_request' %}"
+					 data-toggle="tooltip" title="Submit a request to get a small amount of OpenAI credit">
+					 Funding request</a>
+			  </div>
+          </li>
+		  
+		  <!-- My projects -->
+		  <li class="nav-item dropdown">
+			  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			  My projects
+			  </a>
+			    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+				  <a class="dropdown-item" href="{% url 'project_list' 'simple_clara' %}"
+						 data-toggle="tooltip" title="List all the projects you have created or have been assigned a role in, using Simple-C-LARA.">
+						 List my C-LARA projects using Simple-C-LARA</a>
+				  {% if clara_version != 'simple_clara' %}
+					  <a class="dropdown-item" href="{% url 'project_list' 'full_clara' %}"
+							 data-toggle="tooltip" title="List all the projects you have created or have been assigned a role in.">
+							 List my C-LARA projects using Advanced C-LARA</a>
+				  {% endif %}
+				  <a class="dropdown-item" href="{% url 'simple_clara' 0 'initial' %}"
+						 data-toggle="tooltip" title="Create a new C-LARA project using Simple-C-LARA.">
+						 Create new C-LARA project using Simple-C-LARA</a>
+				  {% if clara_version != 'simple_clara' %}
+					  <a class="dropdown-item" href="{% url 'create_project' %}"
+							 data-toggle="tooltip" title="Create a new C-LARA project, specifying the title, the text language, and the annotation language.">
+							 Create new C-LARA project using Advanced C-LARA</a>
+				  {% endif %}
+				  {% if clara_version != 'simple_clara' %}
+					  <a class="dropdown-item" href="{% url 'import_project' %}"
+							 data-toggle="tooltip" title="Import a project from a zipfile created using the 'Export zipfile' command.">
+							 Import C-LARA project from zipfile</a>
+				  {% endif %}
+				  {% if clara_version != 'simple_clara' %}
+					  <a class="dropdown-item" href="{% url 'register_content' %}"
+							 data-toggle="tooltip" title="Register a piece of LARA content to make it accessible through the C-LARA social network.">
+							 Register external LARA content</a>
+				  {% endif %}
+				</div>
+           </li>
+		  
+		  <!-- Admin functions -->
+		  {% if user.userprofile.is_admin %}
+		    <li class="nav-item dropdown">
+			  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			  Admin
+			  </a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="{% url 'list_activities_text' %}"
+						   data-toggle="tooltip" title="List ongoing project activities in plain text form. Mainly for AI.">
+						   Activities (plain text version)</a>
+					<a class="dropdown-item" href="{% url 'ai_activities_reply' %}"
+						   data-toggle="tooltip" title="Post a JSON structure written by the AI, which updates the activities.">
+						   Post AI updates to activities</a>
+					<a class="dropdown-item" href="{% url 'add_credit' %}"
+						   data-toggle="tooltip" title="Add credit to a user's GPT-4 call account">
+						   Add credit to user</a>
+					<a class="dropdown-item" href="{% url 'manage_user_permissions' %}"
+						   data-toggle="tooltip" title="Manage permissions for funding request reviewer, moderator and admin">
+						   Manage permissions</a>
+					<a class="dropdown-item" href="{% url 'admin_password_reset' %}"
+						   data-toggle="tooltip" title="Manually reset a user's password, in case they cannot use the normal password reset.">
+						   Manually reset user's password</a>
+					<a class="dropdown-item" href="{% url 'admin_project_ownership' %}"
+						   data-toggle="tooltip" title="Give yourself a COOWNER role on a project, if you are an admin and need to access it urgently for some reason.">
+						   Make yourself co-owner of a project</a>
+					<a class="dropdown-item" href="{% url 'manage_language_masters' %}"
+						   data-toggle="tooltip" title="Give users 'language master' privileges, so that they can customise annotation prompts and edit phonetic lexicon data.">
+						   Manage language masters</a>
+					<a class="dropdown-item" href="{% url 'delete_tts_data' %}"
+						   data-toggle="tooltip" title="Remove all cached TTS data for a given language.">
+						   Delete TTS data</a>
+				</div>
+            </li>
+          {% endif %}
+		  
+		  		  <!-- Language master functions -->
+		  {% if user.userprofile.is_language_master %}
+		    <li class="nav-item dropdown">
+			  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			  Language master
+			  </a>
+			    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="{% url 'edit_prompt' %}"
+						   data-toggle="tooltip" title="Edit the GPT-4 prompt templates and examples used to create text annotations for languages where you are a language master.">
+						   Edit annotation prompts</a>
+					<a class="dropdown-item" href="{% url 'edit_phonetic_lexicon' %}"
+						   data-toggle="tooltip" title="Upload or edit phonetic lexicon data for languages where you are a language master.">
+						   Edit phonetic lexicon</a>
+				</div>
+            </li>
+	      {% endif %}
+		  
+		  <!-- Funding reviewer functions -->
+		  {% if user.userprofile.is_funding_reviewer %}
+		    <li class="nav-item dropdown">
+			  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			  Funding reviewer
+			  </a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="{% url 'review_funding_requests' %}"
+						   data-toggle="tooltip" title="Review funding requests">
+						   Review funding requests</a>
+				</div>
+            </li>
+          {% endif %}
+		  
+		  <!-- Questionnaire reviewer functions -->
+		  {% if user.userprofile.is_questionnaire_reviewer %}
+		    <li class="nav-item dropdown">
+			  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			  Questionnaire reviewer
+			  </a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="{% url 'manage_questionnaires' %}"
+						   data-toggle="tooltip" title="Review and possibly delete questionnaires">
+						   Review questionnaires</a>
+				</div>
+            </li>
+          {% endif %}
+		  
+		  <!-- User profile, configuration, credit, task updates -->
+		  <li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			   <i class="fas fa-user"></i> 
+			</a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+			  <a class="dropdown-item" href="{% url 'profile' %}"
+					 data-toggle="tooltip" title="Display your location, bio, profile picture etc.">
+					 Display user profile</a>
+			  <a class="dropdown-item" href="{% url 'edit_profile' %}"
+					 data-toggle="tooltip" title="Enter/edit your location, bio, profile picture etc.">
+					 Edit user profile</a>
+			  <a class="dropdown-item" href="{% url 'user_config' %}"
+					 data-toggle="tooltip" title="Specify the GPT-4 model you want to use, optionally give an API key, and edit other related parameters.">
+					 Edit configuration information</a>
+			  <a class="dropdown-item" href="{% url 'credit_balance' %}"
+					 data-toggle="tooltip" title="C-LARA is free, except that calls to GPT-4 cost money. Show how much you have left on your account.">
+					 Credit balance for ChatGPT-4 API calls</a>
+			  <a class="dropdown-item" href="{% url 'transfer_credit' %}"
+					 data-toggle="tooltip" title="Transfer some of the credit from your GPT-4 call account to another user.">
+					 Transfer credit to another user</a>
+			  <a class="dropdown-item" href="{% url 'view_task_updates' %}"
+					 data-toggle="tooltip" title="Show trace output from C-LARA tasks produced during the last hour.">
+					 Recent task updates</a>
+			  <a class="dropdown-item" href="{% url 'logout' %}" data-toggle="tooltip" title="Exit C-LARA.">Logout</a>
+			</div>
+		</li>
+				 
+        {% else %}
+		  <li class="nav-item">
+			<a class="nav-link" href="{% url 'login' %}" data-toggle="tooltip" title="Log in using your userid and password.">Login</a>
+		  </li>
+		  <!-- Register -->
+		  <li class="nav-item">
+			<a class="nav-link" href="{% url 'register' %}" data-toggle="tooltip" title="Create a new account, giving a userid, password and email address.">Sign up</a>
+		  </li>
+		  <!-- Password reset 
+		  <li class="nav-item">
+			<a class="nav-link" href="{% url 'password_reset' %}" data-toggle="tooltip" title="Reset your password if you have lost it or want to change it. You need to have given an email address.">Password reset</a>
+		  </li> -->
+		  <!-- Content -->
+		  <li class="nav-item">
+			<a class="nav-link" href="{% url 'public_content_list' %}" data-toggle="tooltip" title="Browse C-LARA and LARA content without logging in.">Content</a>
+		  </li>
+        {% endif %}
+        </ul>
+	  </div>
+    </nav>
+  </header>
+
+  <main>
+    {% for message in messages %}
+       <div class="alert alert-{{ message.tags }}">
+       {{ message }}
+       </div>
+    {% endfor %}
+
+    {% block content %}
+    {% endblock %}
+  </main>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <script>
+	  $(document).ready(function(){
+		$('[data-toggle="tooltip"]').tooltip(); // Initialize tooltips
+	  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+
+This file contains a short list of current and near-future priority
+activities. It should be updated often, if possible at least twice
+a week.
+
+Last updated Nov 13 2023
+
+CURRENTLY ACTIVE PRIORITIES
+
+1. Integration of some version of "phonetic text" into C-LARA, porting
+this functionality from the LARA code. Pauline Welby will be visiting
+Adelaide Nov 22-25, and we said phonetic text would be the main item to
+discuss.
+
+2. Export/import of projects.
+
+3. Integration of Melbourne Uni student projects.
+
+4. Get more data on how C-LARA works with GPT-4 Turbo.
+
+PROBABLY ACTIVE SOON
+
+CONFERENCES
+Prepare our presentation for "Literacy and Contemporary Society:
+Creativity, Equity, Social Action", Dec 4-6.
+
+BASIC FUNCTIONALITY
+All of these should be fairly quick and straightforward. Perhaps 1-3 days of effort per task.
+  - Basic online help
+  - Password retrieval. Needs mail to be installed.
+  - Payment integration
+
+SOCIAL NETWORK 
+All of these should also be fairly simple. Perhaps 1-3 days of effort per task.
+  - Email notifications
+  - Search function
+  - Following/friending
+  - Basic flagging and moderation functionality
+
+DESIGN 
+So far, C-LARA has no styling at all, we've just concentrated on getting the functionality into place.
+Obviously this is an open-ended task, but putting in some basic CSS should have a very noticeable effect.
+Rina suggested it might be good to pay for some standard template. I can ask Chat for advice here.
+
+NEW FUNCTIONALITY
+We have various kinds of new functionality that are either in progress or could be added reasonably quickly.
+  - DALL-E-3. Integrating DALL-E-3 is probably only a day or so of work, and again one imagines many people would like this functionality.
+  - Reading histories. This idea from LARA can probably be reimplemented in C-LARA with 2-3 days of work.
+  - Manual Text/Audio alignment. The Melbourne Uni student team nearly had this integrated before they handed over to me. Perhaps 1-2 days of work.
+  - Audio recording. I'm guessing the Melbourne Uni project can be integrated in 2-3 days.
+  - Annotated images.  Unfortunately, this Melbourne Uni project looks harder to integrate. Their solution is not exactly compatible with C-LARA and needs some adjustment.
+  - Automatic Text/Audio alignment. This Melbourne Uni project also requires nontrivial effort to use. We may want to consider integrating the LARA version instead.
+  - Flashcards. Another Melbourne Uni project that requires some effort to integrate, right now not clear how much.
+
+MULTI-WORD EXPRESSIONS
+We keep mentioning this, but nothing has happened.
+I did notice however that things seems to be considerably better with GPT-4 Turbo. A first step would be to evaluate more carefully how Turbo is doing so that we can reassess.
+
+LOGGING
+Logging is an open-ended problem. There are many ways to do it - some simple ones will be quick to implement. Many people want it for running experiments. We should discuss
+
+PLUG-INS
+
+- Ongoing email discussion with Denis about AskTheCode plugin.
+  No deadline but frequent exchanges.
+
+- Ongoing discussion with Papr Memory about their memory plugin.
+  They think it should be possible for users to share memories,
+  which could have important implications for C-LARA.
+  No deadline but frequent exchanges.

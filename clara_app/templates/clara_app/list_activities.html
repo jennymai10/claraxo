@@ -1,0 +1,67 @@
+{% extends "clara_app/base.html" %}
+
+{% block content %}
+<h2>Project activities</h2>
+<br>
+  <p><b>Filter using any combination of the search boxes below</b></p>
+<form method="get" action="{% url 'list_activities' %}">
+  <table>
+    <tr>
+      <td>{{ search_form.id.label_tag }}</td>
+      <td>{{ search_form.id }}</td>
+    </tr>
+    <tr>
+      <td>{{ search_form.category.label_tag }}</td>
+      <td>{{ search_form.category }}</td>
+    </tr>
+    <tr>
+      <td>{{ search_form.status.label_tag }}</td>
+      <td>{{ search_form.status }}</td>
+    </tr>
+    <tr>
+      <td>{{ search_form.resolution.label_tag }}</td>
+      <td>{{ search_form.resolution }}</td>
+    </tr>
+    <tr>
+      <td>{{ search_form.time_period.label_tag }}</td>
+      <td>{{ search_form.time_period }}</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><button type="submit">Search</button></td>
+    </tr>
+  </table>
+<b>Activities found</b>
+<p>Scores refer to this week's voting on priorities: top priority = 10, second = 7, third = 5</p>
+<a href="{% url 'create_activity' %}">Create a new activity</a>
+<table border="2">
+    <thead>
+        <tr>
+            <th>Title</th>
+			<th>ID</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Resolution</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for activity in activities %}
+        <tr>
+            <td><a href="{% url 'activity_detail' activity.id %}">{{ activity.title }}</a></td>
+			<td>{{ activity.id }}</td>
+            <td>{{ activity.get_category_display }}</td>
+            <td>{{ activity.get_status_display }}</td>
+            <td>{{ activity.get_resolution_display }}</td>
+            <td>{{ activity.vote_score|default_if_none:"0" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No activities found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p><a href="{% url 'create_activity' %}">Create a new activity</a></p>
+{% endblock %}

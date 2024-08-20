@@ -1,0 +1,71 @@
+{% extends "clara_app/base.html" %}
+
+{% block title %}Add/Delete images{% endblock %}
+
+{% block content %}
+  <h1>Add/Delete images ("{{ project.title }}")</h1> <!-- Title Section -->
+
+  <!-- Image Display Area -->
+  {% if current_image %}
+    <p><img src="{% url 'serve_project_image' project.internal_id current_image %}" alt="Current Project Image"></p>
+  {% else %}
+    <p>No image currently associated with this project.</p>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Image Upload Button -->
+	<p>
+       <label for="new_image">Upload New Image:</label>
+       <input type="file" id="new_image" name="new_image">
+	</p>
+    
+    <!-- Associated Text Input -->
+	<p>
+       <label for="associated_text">Associated Text:</label>
+       <textarea id="associated_text" name="associated_text">{{ associated_text }}</textarea>
+	</p>
+
+    <!-- Associated Areas Input -->
+	<p>
+       <label for="associated_areas">Associated Areas:</label>
+       <textarea id="associated_areas" name="associated_areas">{{ associated_areas }}</textarea>
+	</p>
+    
+    <!-- Save Button -->
+	<p>
+       <button type="submit" name="save_image">Save Image</button>
+	</p>
+	
+	<!-- New Save Areas Button -->
+    {% if current_image %}
+       <button type="submit" name="save_areas">Save Areas</button>
+    {% endif %}
+
+    <!-- Remove Button -->
+    {% if current_image %}
+       <button type="submit" name="remove_image">Remove Image</button>
+    {% endif %}
+	
+	<!-- Page Input -->
+	<p>
+	   <label for="page">Page:</label>
+	   <input type="number" id="page" name="page" value="{{ page }}">
+	</p>
+
+	<!-- Position Input -->
+	<p>
+	   <label for="position">Position:</label>
+	   <select id="position" name="position">
+		   <option value="top">Top</option>
+		   <option value="bottom">Bottom</option>
+	   </select>
+	</p>
+	
+    <!-- Back to Project Details -->
+	<p>
+       <a href="{% url 'project_detail' project.id %}">Back to Project Details</a>
+	</p>
+  </form>
+{% endblock %}

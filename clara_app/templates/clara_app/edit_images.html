@@ -1,0 +1,166 @@
+{% extends "clara_app/base.html" %}
+
+{% block title %}Edit Images{% endblock %}
+
+{% block content %}
+  {% if errors %}
+    <div class="error-messages alert alert-danger">
+      <p>Errors found in form:</p>
+      <ul>
+        {% for form_errors in errors %}
+          {% for field, field_errors in form_errors.items %}
+            <li>{{ field }}: {{ field_errors|join:", " }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+    </div>
+  {% endif %}
+  <h2>Edit Images ("{{ project.title }}")</h2>
+  {% if uses_coherent_image_set %}
+      {% if style_form  %}
+		  <h3>Style image</h3>
+		  <form method="post" enctype="multipart/form-data">
+			{% csrf_token %}
+			<table>
+			   <thead>
+				  <tr>
+					 <th>Prompt</th><th>Image Preview</th><th>Description</th>
+				  </tr>
+				</thead>
+				<tbody>
+				  <tr>
+					 <td>
+						  {{ style_form.user_prompt }}
+					 </td>
+					 <td>
+						{% if style_form.image_base_name.value %}
+							<img src="{% url 'serve_project_image' project.internal_id style_form.image_base_name.value %}" alt="Current Style Image" style="max-width: 300px; max-height: 300px;">
+						{% else %}
+						   No image currently stored.
+						{% endif %}
+					  </td>
+					  <td>
+						  {{ style_form.style_description }}
+					  </td>
+				  </tr>
+				</tbody>
+			</table>
+			<button type="submit" name="action" value="create_dalle_style_image">Create style image</button>
+		  </form>
+	  {% endif %}
+	  {% if description_formset %}
+		 <h3>Image Description Variables</h3>
+		 <form method="post" prefix="descriptions" enctype="multipart/form-data">
+          {% csrf_token %}
+		  {{ description_formset.management_form }}
+		  <button type="submit" name="action" value="generate_image_descriptions">Generate image description variables</button>
+          <table>
+		       <tr>
+			      <th>Description variable</th>
+				  <th>Explanation</th>
+				  <th>Delete</th>
+			   </tr>
+            {% for form in description_formset %}
+               <tr>
+                  <td>{{ form.description_variable }}</td>
+                  <td>{{ form.explanation }}</td>
+				  <td>{{ form.delete }}</td>
+               </tr>
+            {% endfor %}
+          </table>
+		  <button type="submit" name="action" value="save_image_descriptions">Save image description variables</button>
+         </form>
+      {% endif %}
+	  {% if image_request_sequence_form %}
+		  <h3>Image request sequence</h3>
+		  <form method="post" enctype="multipart/form-data">
+			{% csrf_token %}
+			<button type="submit" name="action" value="create_image_request_sequence">Create image request sequence</button>
+	  {% endif %}
+  {% else %}
+	  <h3>Create a new DALL-E-3 image based on the whole text</h3>
+	  <form method="post" enctype="multipart/form-data">
+		{% csrf_token %}
+		<button type="submit" name="action" value="create_dalle_image_for_whole_text">Create</button>
+	  </form>
+  {% endif %}
+  <h3>Upload/generate/delete existing images</h3>
+  <form method="post" prefix="images" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <table>
+      <thead>
+        <tr>
+          {% if uses_coherent_image_set %}
+            <th>Request type</th><th>Image/Description</th><th>Prompt</th><th>Variables</th><th style="width: 50px;">Page</th><th>Position</th><th style="width: 100px;">Generate</th><th>Delete</th>
+          {% else %}
+            <th>Image Preview</th><th>Image Upload</th><th>Image Name</th><th style="width: 50px;">Page</th><th>Position</th><th>Delete</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in formset %}
+		  <tr>
+		    {% if uses_coherent_image_set %}
+		       <td colspan="8">{{ form.page_text }}</td>
+			{% else %}
+			   <td colspan="6">{{ form.page_text }}</td>
+			{% endif %}   
+		  </tr>
+          <tr>
+		    {% if uses_coherent_image_set %}
+			   <td>{{ form.request_type }}</td>
+			   <td>
+			    {% if form.request_type.value == 'image-generation' %}
+					{% if form.image_base_name.value %}
+					  <img src="{% url 'serve_project_image' project.internal_id form.image_base_name.value %}" alt="Current Project Image" style="max-width: 300px; max-height: 300px;">
+					{% else %}
+					  No image currently stored.
+					{% endif %}
+				{% else %}
+				    {{ form.content_description }}
+				{% endif %}
+               </td>
+			   <td>{{ form.user_prompt }}</td>
+               <td>
+			    {% if form.request_type.value == 'image-generation' %}
+				   {{ form.description_variables }}
+				{% else %}
+				   {{ form.description_variable }}
+				{% endif %}
+			   </td>
+               <td>{{ form.page }}</td>
+               <td>{{ form.position }}</td>
+			   <td>{{ form.generate }}</td>
+               <td>{{ form.delete }}</td>
+			{% else %}
+               <td>
+                {% if form.image_base_name.value %}
+                  <img src="{% url 'serve_project_image' project.internal_id form.image_base_name.value %}" alt="Current Project Image" style="max-width: 300px; max-height: 300px;">
+                {% else %}
+                  No image currently stored.
+               {% endif %}
+               </td>
+			   <td>{{ form.image_file_path }}</td>
+               <td>{{ form.image_name }}</td>
+               <td>{{ form.page }}</td>
+               <td>{{ form.position }}</td>
+               <td>{{ form.delete }}</td>
+			{% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+	{% if uses_coherent_image_set %}
+       <button type="submit" name="action" value="generate">Process</button>
+	{% else %}
+	   <button type="submit" name="action" value="save_changes">Save changes</button>
+	{% endif %}
+  </form>
+  
+  
+  <div class="sticky-footer">
+    <a href="{% url 'project_detail' project.id %}">Back to Project</a>
+  </div>
+{% endblock %}

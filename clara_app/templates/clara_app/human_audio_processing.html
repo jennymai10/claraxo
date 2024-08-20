@@ -1,0 +1,148 @@
+{% extends 'clara_app/base.html' %}
+
+{% load static %}
+
+{% block title %}Audio Processing{% endblock %}
+
+{% block content %}
+  <h2>Audio Processing ("{{ project.title }}")</h2>
+  
+  <form method="post" enctype="multipart/form-data" id="human-audio-processing-form">
+    {% csrf_token %}
+    <p>
+        <label for="{{ form.method.id_for_label }}">Method:</label>
+        {{ form.method }}
+    </p>
+	<p>
+        <label for="{{ form.preferred_tts_engine.id_for_label }}">Preferred TTS engine:</label>
+        {{ form.preferred_tts_engine }}
+    </p>
+	<p>
+        <label for="{{ form.preferred_tts_voice.id_for_label }}">Preferred TTS voice:</label>
+        {{ form.preferred_tts_voice }}
+    </p>
+	<p>
+        <label for="{{ form.use_for_words.id_for_label }}">Use human audio for words:</label>
+        {{ form.use_for_words }}
+    </p>
+    <p>
+        <label for="{{ form.use_for_segments.id_for_label }}">Use human audio for segments:</label>
+        {{ form.use_for_segments }}
+    </p>
+	<p>
+        <label for="{{ form.use_for_segments.id_for_label }}">Use context for segment audio:</label>
+        {{ form.use_context }}
+    </p>
+    <p>
+        <label for="{{ form.voice_talent_id.id_for_label }}">Human Voice ID:</label>
+        {{ form.voice_talent_id }}
+    </p>
+	
+	{% if form.method.value == "upload" %}
+		{{ formset.management_form }}
+		<table>
+		  <thead>
+			<tr>
+			  <th>Audio</th>
+			  <th>Text</th>
+			  <!-- <th>Context</th> -->
+			  <th>Upload File</th>
+			</tr>
+		  </thead>
+		  <tbody>
+			{% for audio_form in formset %}
+			<tr>
+			  <td>
+			  {% if audio_form.audio_file_base_name.value %}
+				 <audio controls>
+					<source src="{% url 'serve_audio_file' 'human_voice' project.l2 form.voice_talent_id.value audio_form.audio_file_base_name.value %}">
+					Your browser does not support the audio tag.
+				 </audio>
+			  {% else %}
+				 <p>No audio</p>
+			  {% endif %}
+			  </td>
+			  <td>{{ audio_form.text }}</td>
+			  <!-- <td>{{ audio_form.context }}</td> -->
+			  <td>{{ audio_form.audio_file_path }}</td>
+			{% endfor %}
+		  </tbody>
+		<table>
+	{% endif %}
+
+	{% if form.method.value == "record" %}
+		<!-- Control to download a metadata file in LiteDevTools format -->
+		<p>
+		  <strong>LiteDevTools Metadata Download:</strong>
+		  {% if form.use_for_segments.value %}
+		     <a href="{% url 'generate_audio_metadata' project.id 'segments' form.voice_talent_id.value %}" class="btn">Download for Segments</a>
+		  {% endif %}
+		  {% if form.use_for_words.value %}
+		     <a href="{% url 'generate_audio_metadata' project.id 'words' form.voice_talent_id.value %}" class="btn">Download for Words</a>
+		  {% endif %}
+		</p>
+
+		<!-- Control to upload a LiteDevTools zipfile -->
+		<p>
+		  <strong>Upload LiteDevTools Zipfile:</strong>
+		  <input type="file" name="audio_zip" accept=".zip">
+		</p>
+	{% endif %}
+	
+	{% if form.method.value == "manual_align" %}
+    <!-- Control to download the annotated segmented file. -->
+    <!-- <p>
+      <strong>Download Annotated Segmented File:</strong>
+      <a href="{% url 'generate_annotated_segmented_file' project.id %}" class="btn">Download</a>
+    </p> -->
+	
+	<p><strong>Segmented text with labels to use in Audacity:</strong></p>
+	<p>
+        {{ labelled_segmented_text_form.labelled_segmented_text }}
+    </p>
+
+    <!-- Control to upload the original audio file -->
+    <p>
+      <strong>Upload Original Audio File:</strong>
+	  <input type="file" name="manual_align_audio_file" accept=".mp3"> 
+	  {% if audio_file %}
+		[{{ audio_file }}]
+      {% endif %}
+
+    </p>
+
+    <!-- Control to upload the metadata file from the audio/text alignment tool, currently Audacity -->
+    <p>
+      <strong>Upload Audacity Label File:</strong>
+	  <!--  <input type="file" name="manual_align_metadata_file" accept=".json"> -->
+	  <!--  Use Audacity label file -->
+      <input type="file" name="metadata_file" accept=".txt">
+	  {% if manual_align_metadata_file %}
+		[{{ manual_align_metadata_file }}]
+      {% endif %}
+    </p>
+	
+	<!-- <p>
+      <strong>Access Uni Melbourne Alignment Tool:</strong>
+      <a href="https://manual-alignment.netlify.app/project/{{ project.id }}" class="btn btn-special" target="_blank">Go to Alignment Tool</a>
+    </p> -->
+	{% endif %}
+
+
+    <button type="submit" id="submit-button">Update & Process</button>
+  </form>
+
+  
+  <div class="sticky-footer">
+    <a href="{% url 'project_detail' project.id %}">Back to Project</a>
+  </div>
+
+  <script type="text/javascript">
+    document.getElementById('human-audio-processing-form').onsubmit = function() {
+      document.getElementById('submit-button').textContent = "Processing...";
+    };
+  </script>
+
+  <script src="{% static 'clara_app/scripts/form-button-text.js' %}"></script>
+
+{% endblock %}

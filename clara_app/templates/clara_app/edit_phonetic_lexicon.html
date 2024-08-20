@@ -1,0 +1,107 @@
+{% extends "clara_app/base.html" %}
+
+{% block content %}
+    <h1>Edit Phonetic Lexicon</h1>
+	<form method="POST" enctype="multipart/form-data">
+	  {% csrf_token %}
+	  {{ form.as_p }}
+	  
+	   {% if form.display_grapheme_to_phoneme_entries.value %}
+	      <h2>Grapheme-to-phoneme entries</h2>
+		  {{ grapheme_phoneme_formset.management_form }}
+		  <table>
+				<tr>
+					<td>Grapheme variants</td>
+					<td>Phonemes</td>
+				</tr>		  
+		  {% for grapheme_phoneme_form in grapheme_phoneme_formset %}
+				<tr>
+					<td>{{ grapheme_phoneme_form.grapheme_variants }}</td>
+					<td>{{ grapheme_phoneme_form.phonemes }}</td>
+				</tr>
+		  {% endfor %}
+		  </table>
+		  
+		  <h2>Accents</h2>
+		  {{ accents_formset.management_form }}
+		  <table>
+				<tr>
+					<td>Accent characters</td>
+				</tr>		  
+		  {% for accents_form in accents_formset %}
+				<tr>
+					<td>{{ accents_form.unicode_value }}</td>
+				</tr>
+		  {% endfor %}
+		  </table>
+	  {% endif %}
+	  
+	  {% if form.display_new_plain_lexicon_entries.value or form.display_approved_plain_lexicon_entries.value %}
+		  <h2>Plain phonetic lexicon</h2>
+			  {{ plain_lexicon_formset.management_form }}
+			  <table>
+					<tr>
+						<td>Word</td>
+						<td>Phonemes</td>
+						<td>Approve</td>
+						<td>Delete</td>
+					</tr>		  
+			  {% for plain_form in plain_lexicon_formset %}
+					<tr>
+						<td>{{ plain_form.word }}</td>
+						<td>{{ plain_form.phonemes }}</td>
+						<td>{{ plain_form.approve }}</td>
+						<td>{{ plain_form.delete }}</td>
+					</tr>
+			  {% endfor %}
+			  </table>
+	  {% endif %}
+	  
+	  {% if form.display_new_aligned_lexicon_entries.value or form.display_approved_aligned_lexicon_entries.value %}
+	      <h2>Aligned phonetic lexicon</h2>
+			  {{ aligned_lexicon_formset.management_form }}
+			  <table>
+					<tr>
+						<td>Word</td>
+						<td>Phonemes</td>
+						<td>Aligned graphemes</td>
+						<td>Aligned phonemes</td>
+						<td>Approve</td>
+						<td>Delete</td>
+					</tr>		  
+			  {% for aligned_form in aligned_lexicon_formset %}
+					<tr>
+						<td>{{ aligned_form.word }}</td>
+						<td>{{ aligned_form.phonemes }}</td>
+						<td>{{ aligned_form.aligned_graphemes }}</td>
+						<td>{{ aligned_form.aligned_phonemes }}</td>
+						<td>{{ aligned_form.approve }}</td>
+						<td>{{ aligned_form.delete }}</td>
+					</tr>
+			  {% endfor %}
+			  </table>
+	  {% endif %}	  
+	  <input type="submit" name="action" value="Refresh">
+	  <input type="submit" name="action" value="Save">
+	  <input type="submit" name="action" value="Upload">
+    </form>
+	
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var languageField = document.querySelector('select[name="language"]');
+            var letterGroupsField = document.querySelector('textarea[name="letter_groups"]');
+            var accentsField = document.querySelector('textarea[name="accents"]');
+
+            function adjustTextDirection() {
+                var isRTL = ['arabic', 'hebrew', 'farsi', 'urdu', 'yemeni'].includes(languageField.value); 
+                var direction = isRTL ? 'rtl' : 'ltr';
+                letterGroupsField.style.direction = direction;
+				// In fact, we normally want to present the accents in the form U+064B
+                //accentsField.style.direction = direction;
+            }
+
+            languageField.addEventListener('change', adjustTextDirection);
+            adjustTextDirection(); // Initial adjustment
+        });
+    </script>
+{% endblock %}

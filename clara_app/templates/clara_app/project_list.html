@@ -1,0 +1,103 @@
+{% extends "clara_app/base.html" %}
+
+{% block content %}
+  {% if clara_version_to_access_with == "simple_clara" %}
+     <h1>My Projects (Access through Simple C-LARA)</h1>
+  {% else %}
+     <h1>My Projects (Access through Advanced C-LARA)</h1>
+  {% endif %}
+  <br>
+  <p><b>Filter using any combination of the search boxes below</b></p>
+	<form method="GET">
+	  <table>
+	    <tr>
+		  <td><label for="id_title">Title:</label></td>
+		  <td>{{ search_form.title }}</td>
+		</tr>
+		<tr>
+		  <td><label for="l2">Text language:</label></td>
+		  <td>{{ search_form.l2 }}</td>
+		</tr>
+		<tr>
+		  <td><label for="l1">Annotation language:</label></td>
+		  <td>{{ search_form.l1 }}</td>
+		</tr>
+		<tr>
+		  <td></td>
+		  <td><input type="submit" value="Search"></td>
+		</tr>
+	  </table>
+	</form>
+
+  <button id="toggleCosts">Show/hide costs</button>
+  <button id="toggleDurations">Show/hide durations</button>
+  <br>
+  <br>
+  <b>Activities found</b>
+  <ul>
+    {% for project, data in page_obj %}
+      <li>
+	    {% if clara_version_to_access_with == "simple_clara" %}
+	      <a href="{% url 'simple_clara' project.id 'initial' %}">{% if project.title %} {{ project.title }} {% else %} (No title) {% endif %}</a> (Role: {{ data.role }})
+		{% else %}
+          <a href="{% url 'project_detail' project.id %}">{% if project.title %} {{ project.title }} {% else %} (No title) {% endif %}</a> (Role: {{ data.role }})
+		{% endif %}
+        <div class="costInfo" style="display: none;">
+          <p>Total cost: ${{ data.cost|floatformat:2 }}</p>
+          <p>Cost per operation:</p>
+          <ul>
+            {% for operation, cost in data.operation_costs.items %}
+              <li>{{ operation }}: ${{ cost|floatformat:2 }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="durationInfo" style="display: none;">
+          <p>Total duration: {{ data.duration|floatformat:2 }} minutes</p>
+          <p>Duration per operation:</p>
+          <ul>
+            {% for operation, duration in data.operation_durations.items %}
+              <li>{{ operation }}: {{ duration|floatformat:2 }} minutes</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <!-- Pagination navigation -->
+  {% with request.GET.urlencode as params %}
+    {% if page_obj.has_previous %}
+      <a href="?{{ params }}&page=1">&laquo; first</a>
+      <a href="?{{ params }}&page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+    <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?{{ params }}&page={{ page_obj.next_page_number }}">next</a>
+      <a href="?{{ params }}&page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+    {% endif %}
+  {% endwith %}
+
+   <script>
+    document.getElementById("toggleCosts").addEventListener("click", function() {
+      var costInfos = document.getElementsByClassName("costInfo");
+      for (var i = 0; i < costInfos.length; i++) {
+        if (costInfos[i].style.display === "none") {
+          costInfos[i].style.display = "block";
+        } else {
+          costInfos[i].style.display = "none";
+        }
+      }
+    });
+    document.getElementById("toggleDurations").addEventListener("click", function() {
+      var durationInfos = document.getElementsByClassName("durationInfo");
+      for (var i = 0; i < durationInfos.length; i++) {
+        if (durationInfos[i].style.display === "none") {
+          durationInfos[i].style.display = "block";
+        } else {
+          durationInfos[i].style.display = "none";
+        }
+      }
+    });
+  </script>
+{% endblock %}
+

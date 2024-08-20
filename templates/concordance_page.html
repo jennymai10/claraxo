@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="{{ l2_language }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concordance: {{ lemma }}</title>
+  <link rel="stylesheet" href="./static/clara_styles_concordance.css">
+</head>
+<body>
+  <div class="concordance" id="concordance_{{ lemma }}">
+  	<h1>{{ lemma }}</h1>
+	{% if inflection_table_url %}
+      <p><a href="{{ inflection_table_url }}" target="_blank">Online word information</a></p>
+    {% endif %}
+    {%- for segment in concordance_segments -%}
+    <span class="segment" 
+			data-segment-uid="{{ segment.annotations.segment_uid }}" 
+			data-segment-audio="{{ segment.annotations.tts.file_path if segment.annotations.tts else '' }}">
+	  <span class="back-arrow-icon" 
+			data-segment-uid="{{ segment.annotations.segment_uid }}" 
+			data-page-number="{{ segment.annotations.page_number }}">&#x2190;</span>
+      {%- for element in segment.content_elements -%}
+		  {%- if element.type == "Word" -%}
+			{%- if not phonetic -%}
+			  {%- if element.annotations.pinyin -%}
+				<ruby class="word {% if element.annotations.lemma == lemma %}concordance-highlight{% endif %}"
+					  data-gloss="{{ element.annotations.gloss if element.annotations.gloss else '' }}"
+					  data-lemma="{{ element.annotations.lemma|replace_punctuation if element.annotations.lemma else '' }}" 
+					  data-audio="{{ element.annotations.tts.file_path if element.annotations.tts else '' }}">
+				  {{ element.content }}<rt>{{ element.annotations.pinyin }}</rt>
+				</ruby>
+			  {%- else -%}
+				<span class="word {% if element.annotations.lemma == lemma %}concordance-highlight{% endif %}"
+					  data-gloss="{{ element.annotations.gloss if element.annotations.gloss|e else '' }}"
+					  data-lemma="{{ element.annotations.lemma|replace_punctuation if element.annotations.lemma else '' }}" 
+					  data-audio="{{ element.annotations.tts.file_path if element.annotations.tts else '' }}">{{ element.content }}</span>
+			  {%- endif -%}
+			{%- elif phonetic and element.annotations.phonetic -%}
+			  <span class="word {% if element.annotations.phonetic == lemma %}concordance-highlight{% endif %}"
+					data-gloss="{{ element.annotations.phonetic if element.annotations.phonetic else '' }}"
+					data-lemma="{{ element.annotations.phonetic|replace_punctuation if element.annotations.phonetic else '' }}" 
+					data-audio="{{ element.annotations.tts.file_path if element.annotations.tts else '' }}">{{ element.content }}</span>
+	        {%- endif -%}
+		  {%- elif element.type == "NonWordText" -%}{{ element.content }}
+		  {%- elif element.type == "Image" -%} 
+			 <img src="{{ '/accounts/projects/serve_project_image/' + element.content.project_id_internal + '/' + element.content.thumbnail_src }}" alt="Thumbnail">
+	      {%- endif -%}  
+      {%- endfor -%}
+      {%- if segment.annotations.tts -%}
+		  <span class="speaker-icon">&#128266;</span>
+      {%- endif -%}
+	  {%- if 'translated' in segment.annotations -%}
+		  <span class="translation-icon" data-translation="{{ segment.annotations.translated|e }}">&#9998;</span>
+	  {%- endif -%}
+	  <br>
+    </span>
+    {%- endfor -%}
+  </div>
+  <script src="./static/clara_scripts.js"></script>
+</body>
+</html>

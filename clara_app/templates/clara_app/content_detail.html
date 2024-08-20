@@ -1,0 +1,87 @@
+{% extends 'clara_app/base.html' %}
+{% load clara_tags %}
+
+{% block content %}
+  <h2>{{ content.title }}</h2>
+  <p>Link to published content: <a href="{{ content.url }}" target="_blank" rel="noopener">{{ content.url }}</a></p>
+  <p>Access count: {{ content.unique_access_count }}</p>
+  {% if average_rating %}
+    <p>Average Rating: {{ average_rating }}</p>
+  {% else %}
+    <p>No ratings yet</p>
+  {% endif %}
+  <form method="post">
+	  {% csrf_token %}
+	  <div class="rating">
+		  {% for choice in rating_form.fields.rating.choices %}
+			<input id="star{{ forloop.counter }}" type="radio" name="rating" value="{{ choice.0 }}" class="rating-input">
+            <label for="star{{ forloop.counter }}" class="rating-star"></label>
+		  {% endfor %}
+	  </div>
+	  <button type="submit" name="submit_rating">Submit rating</button>
+  </form>
+
+  <table>
+  <tr>
+    <td>Text language:</td>
+    <td>{{ content.l2|titlecase }}</td>
+  </tr>
+  <tr>
+    <td>Annotation language:</td>
+    <td>{{ content.l1|titlecase }}</td>
+  </tr>
+  {% if content.project %}
+  <tr>
+    <td>Created by:</td>
+    <td><a href="{% url 'external_profile' user_id=content.project.user.id %}"><strong>{{ content.project.user.username }}</strong></a></td>
+  </tr>
+  {% else %}
+  <tr>
+    <td>Created by:</td>
+    <td>{{ content.annotator }}</td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td>Summary:</td>
+    <td>{{ content.summary }}</td>
+  </tr>
+  <tr>
+    <td>Length in words:</td>
+    <td>{{ content.length_in_words }}</td>
+  </tr>
+  <tr>
+    <td>Author:</td>
+    <td>{{ content.author }}</td>
+  </tr>
+  <tr>
+    <td>Voice:</td>
+    <td>{{ content.voice }}</td>
+  </tr>
+  <tr>
+    <td>Difficulty Level:</td>
+    <td>{{ content.difficulty_level }}</td>
+  </tr>
+</table>
+  
+  {% for comment in comments %}
+    <p>
+	  <a href="{% url 'external_profile' user_id=comment.user.id %}"><strong>{{ comment.user.username }}</strong></a>
+      ({{ comment.timestamp|date:"F j, Y, P" }}):
+      {{ comment.comment }}
+    </p>
+  {% endfor %}
+  <form method="post">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <button type="submit" name="submit_comment">Submit comment</button>
+  </form>
+  
+  {% if can_delete %}
+  <form method="post">
+    {% csrf_token %}
+	{{ delete_form.as_p }}
+    <button type="submit" class="btn btn-danger" name="delete" onclick="return confirm('Are you sure you want to unregister this content? This will not delete any associated projects.');" title="Unregistering this content removes it from visible lists but does not delete any associated projects.">Unregister</button>
+  </form>
+{% endif %}
+
+{% endblock %}

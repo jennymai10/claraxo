@@ -1,0 +1,25 @@
+{% extends "clara_app/base.html" %}
+
+{% block content %}
+  <h1>Create a cloned project ("{{ project.title }}")</h1>
+  <form method="POST">
+    {% csrf_token %}
+	<p>New title: {{ form.title }}</p>
+    <p>Text language: {{ form.l2 }}</p>
+	<p>Annotation language: {{ form.l1 }}</p>
+    <button type="submit">Create Cloned Project</button>
+    {% if form.errors %}
+        <ul>
+        {% for field in form %}
+            {% for error in field.errors %}
+                <li><strong>{{ field.label }}:</strong> {{ error|escape }}</li>
+            {% endfor %}
+        {% endfor %}
+        </ul>
+    {% endif %}
+</form>
+
+  <div class="sticky-footer">
+    <a href="{% url 'project_detail' project.id %}">Back to Project</a>
+  </div>
+{% endblock %}
