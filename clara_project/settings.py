@@ -67,6 +67,7 @@ INSTALLED_APPS = [
 
     # Added IT Project 64 app
     'tictactoe_app',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
