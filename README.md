@@ -122,11 +122,12 @@ You can only commit to your own branch (create one from `main`), and then create
 
 At least 1 code review is required to merge your code into `main`. Please reach out =))
 
-### Whenever you code, the folder `tictactoe_app` (backend) and `tictactoe_frontend` are the only 2 folders you should care about or modify. All the others are belonged to the client's previous codebase and should not be modified.
+### WHENEVER YOU COME BACK TO CODE, the folder `tictactoe_app` (backend) and `tictactoe_frontend` are the only 2 folders you should care about or modify. All the others are belonged to the client's previous codebase and should not be modified.
 
 Go into your virtual env:
 ```bash
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+source venv/bin/activate 
+# On Windows use `venv\Scripts\activate`
 ```
 
 Update dependencies:
