@@ -1,11 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Londrina+Shadow&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
+
+
+
 .App {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+
+.App-board {
+  position: absolute; /* 确保能够精确定位 */width: 767.98px;
+  height: 744.47px;
+  left: 0; /* 移动到左边 */top: calc(100vh - 744.47px); /* 移动到屏幕底部 */mix-blend-mode: luminosity;
+  opacity: 0.5;
+  transform: rotate(-106.95°); /* 逆时针旋转90度 */background-clip: content-box; /* 确保背景不会超出内容区域 */
 }
+
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
@@ -14,16 +24,181 @@
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  position: fixed; /* 固定在视口上 */top: 0; /* 从视口的顶部开始 */left: 0; /* 从视口的左侧开始 */width: 100vw; /* 视口宽度 */height: 100vh; /* 视口高度 */background: #DFD8CB;
+  box-shadow: 0px4px4pxrgba(0, 0, 0, 0.25);
+  z-index: -1; /* 如果需要在其他内容之下 */
 }
 
+
+.App-pencil {
+  position: absolute;
+  width: 507.76px;
+  height: 686.35px;
+  right: 20px;
+  top: -150px;
+  background: #DFD8CB;
+  transform: rotate(28deg);
+  z-index: 1; 
+}
+
+.App-ruler {
+  position: absolute;
+  width: 392.31px;
+  height: 478.99px;
+  right: 30px; /* 与pencil略有偏移，以便两者重叠 */top: 0px;
+  background-color: rgba(0, 0, 0, 0);
+  transform: rotate(15deg);
+  z-index: 2; /* 确保ruler在pencil下方 */
+}
+
+.App-text {
+  position: absolute;
+  width: 341px;
+  height: 485px;
+  left: 407px;
+  top: 90px;
+  font-family: 'Londrina Shadow', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 130px;
+  line-height: 154px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  letter-spacing: 0.23em;
+  color: #1E1E1E;
+  mix-blend-mode: normal;
+  border: none; /* 去掉边框 */
+}
+.App-LoginForm{
+  position: absolute;
+  width: 476px;
+  height: 377px;
+  left: 712px;
+  top: 354px;
+}
+
+.App-PasswordQuery{
+  /* password query */
+  position: absolute;
+  width: 476px;
+  height: 115px;
+  left: 712px;
+  top: 490px;
+}
+.App-UPRectangle{
+  /* Rectangle 2 */
+  box-sizing: border-box;
+  position: absolute;
+  align-items: center; /* 水平居中 */justify-content: center; /* 垂直居中 */position: fixed;
+  width: 476px;
+  height: 66px;
+  left: 1000px;
+  top: 700px;
+  background: rgba(214, 205, 188, 0.86);
+  border: 2px solid #301313;
+  border-radius: 20px;
+}
+
+.App-PasswordText{
+
+  position: absolute;
+  align-items: center; /* 水平居中 */justify-content: center; /* 垂直居中 */position: fixed;
+  width: 463px;
+  height: 44px;
+  left: 850px;
+  top: 600px;
+
+  font-family: 'Gaegu';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 50px;
+
+  color: #000000;
+
+
+}
+.App-UernameRectangle{
+  box-sizing: border-box;
+  position: absolute;
+  align-items: center; /* 水平居中 */justify-content: center; /* 垂直居中 */position: fixed;
+  width: 476px;
+  height: 66px;
+  left: 1000px;
+  top: 550px;
+  background: rgba(214, 205, 188, 0.86);
+  border: 2px solid #301313;
+  border-radius: 20px;
+}
+
+.App-UsernameText{
+  position: absolute;
+  align-items: center; /* 水平居中 */justify-content: center; /* 垂直居中 */position: fixed;
+  width: 463px;
+  height: 44px;
+  left: 900px;
+  top: 450px;
+
+  font-family: 'Gaegu';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 50px;
+
+  color: #000000;
+}
+
+.App-LoginSignup{
+  /* Login-Signup button */
+
+  position: absolute;
+  width: 476px;
+  height: 58px;
+  left: 900px;
+  top: 700px;
+}
+
+.App-or{
+  /* or */
+
+  position: absolute;
+  align-items: center; /* 水平居中 */justify-content: center; /* 垂直居中 */position: fixed;
+  width: 476px;
+  height: 58px;
+  left: 1000px;
+  top: 800px;
+
+  font-family: 'Gaegu';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 40px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  letter-spacing: -0.06em;
+
+  color: #000000;
+
+}
+
+.App-loginbuttom{
+/* LogIn button */
+  position: absolute;
+  width: 206px;
+  height: 58px;
+  left: 1275px;
+  top: 800px;
+}
+
+.App-signupbuttom{
+  position: absolute;
+  width: 206px;
+  height: 58px;
+  left: 1000px;
+  top: 800px;
+}
 .App-link {
   color: #61dafb;
 }
@@ -35,4 +210,48 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+input {
+  width: 100%;
+  height: 40px;
+  padding: 0 10px;
+  font-size: 16px;
+}
+
+
+button {
+  width: 100%;
+  height: 58px;
+  border: none;
+  border-radius: 20px;
+  background-color: #301313;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #5a3a3a;
+}
+
+.App-UPRectangle input,
+.App-UernameRectangle input {
+  visibility: hidden; /* 初始时不可见 */
+  background-color: transparent;
+  border: none;
+  font-family: 'Gaegu';
+  font-size: 40px;
+  margin-top: 10px;
+}
+
+.App-UPRectangle input.visible,
+.App-UernameRectangle input.visible {
+  visibility: visible; /* 点击后可见 */
+}
+
+.App-UPRectangle input:focus,
+.App-UernameRectangle input:focus {
+  outline: none; /* 去掉默认焦点边框 */
+  border: none; /* 确保在点击后边框不显示 */
 }
