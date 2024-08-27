@@ -7,36 +7,54 @@ import loginbuttom from './LogIn button.png';
 import signupbuttom from './Sign Up button.png';
 
 function App() {
-  // 创建状态来保存用户输入和输入框的可见性
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [usernameVisible, setUsernameVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  // 处理用户名输入变化
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
   };
 
-  // 处理密码输入变化
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
   };
 
-  // 处理用户名点击事件
   const handleUsernameClick = () => {
     setUsernameVisible(true);
   };
 
-  // 处理密码点击事件
   const handlePasswordClick = () => {
     setPasswordVisible(true);
   };
 
-  // 处理表单提交（如果需要）
+  // 处理登录按钮点击事件
+  const handleLoginClick = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/tictactoe/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+      
+      if (response.ok) {
+        console.log('Login successful');
+      } else {
+        console.log('Login failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    // 这里可以添加代码来处理提交，例如发送到服务器
+    // 这里的表单提交可以是可选的，根据需要使用
     console.log('Username:', username);
     console.log('Password:', password);
   };
@@ -47,8 +65,19 @@ function App() {
         <img src={board} className="App-board" alt="board" />
         <img src={ruler} className="App-ruler" alt="ruler" />
         <img src={pencil} className="App-pencil" alt="pencil" />
-        <img src={loginbuttom} className="App-loginbuttom" alt="loginbuttom" />
-        <img src={signupbuttom} className="App-signupbuttom" alt="signupbuttom" />
+        {/* 添加点击事件处理器到图片 */}
+        <img 
+          src={loginbuttom} 
+          className="App-loginbuttom" 
+          alt="loginbuttom" 
+          onClick={handleLoginClick} 
+        />
+        <img 
+          src={signupbuttom} 
+          className="App-signupbuttom" 
+          alt="signupbuttom" 
+          onClick={() => console.log('Sign Up clicked')} 
+        />
         <div className="App-text">
           <p>tic. tac. toe.</p>
         </div>
@@ -56,7 +85,6 @@ function App() {
           <form onSubmit={handleSubmit}>
             <div className='App-PasswordQuery' onClick={handlePasswordClick}>
               <div className='App-UPRectangle'>
-                {/* 密码输入框 */}
                 <input
                   type="password"
                   value={password}
@@ -71,7 +99,6 @@ function App() {
             </div>
             <div className='App-UsernameQuery' onClick={handleUsernameClick}>
               <div className='App-UernameRectangle'>
-                {/* 用户名输入框 */}
                 <input
                   type="text"
                   value={username}
@@ -89,12 +116,7 @@ function App() {
                 <p>or</p>
               </div>
             </div>
-            <button type="submit" className="App-loginbuttom">
-              Log In
-            </button>
-            <button type="button" className="App-signupbuttom">
-              Sign Up
-            </button>
+            {/* 移除按钮，保持图片按钮 */}
           </form>
         </div>
       </header>

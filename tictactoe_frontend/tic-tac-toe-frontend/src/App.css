@@ -38,7 +38,7 @@
   top: -150px;
   background: #DFD8CB;
   transform: rotate(28deg);
-  z-index: 1; 
+  z-index: 0; 
 }
 
 .App-ruler {
@@ -48,7 +48,7 @@
   right: 30px; /* 与pencil略有偏移，以便两者重叠 */top: 0px;
   background-color: rgba(0, 0, 0, 0);
   transform: rotate(15deg);
-  z-index: 2; /* 确保ruler在pencil下方 */
+  z-index: 1; /* 确保ruler在pencil下方 */
 }
 
 .App-text {
@@ -190,6 +190,7 @@
   height: 58px;
   left: 1275px;
   top: 800px;
+  z-index: 3;
 }
 
 .App-signupbuttom{
@@ -198,6 +199,7 @@
   height: 58px;
   left: 1000px;
   top: 800px;
+  z-index: 3;
 }
 .App-link {
   color: #61dafb;
