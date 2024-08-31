@@ -12,24 +12,28 @@ function App() {
   const [usernameVisible, setUsernameVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
 
+   // Function to handle changes in the username input field
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
   };
-
+  // Function to handle changes in the password input field
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
   };
 
+   // Show the username input field when clicked
   const handleUsernameClick = () => {
     setUsernameVisible(true);
   };
 
+   // Show the password input field when clicked
   const handlePasswordClick = () => {
     setPasswordVisible(true);
   };
 
-  // 处理登录按钮点击事件
+  // Handle the login button click event
   const handleLoginClick = async () => {
+    console.log('Login button clicked');
     try {
       const response = await fetch('http://127.0.0.1:8000/tictactoe/login/', {
         method: 'POST',
@@ -54,7 +58,6 @@ function App() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // 这里的表单提交可以是可选的，根据需要使用
     console.log('Username:', username);
     console.log('Password:', password);
   };
@@ -65,7 +68,7 @@ function App() {
         <img src={board} className="App-board" alt="board" />
         <img src={ruler} className="App-ruler" alt="ruler" />
         <img src={pencil} className="App-pencil" alt="pencil" />
-        {/* 添加点击事件处理器到图片 */}
+        {/* Add click event handler to the sign-up button */}
         <img 
           src={loginbuttom} 
           className="App-loginbuttom" 
@@ -116,7 +119,7 @@ function App() {
                 <p>or</p>
               </div>
             </div>
-            {/* 移除按钮，保持图片按钮 */}
+            {/* Removed buttons, kept the image buttons */}
           </form>
         </div>
       </header>
