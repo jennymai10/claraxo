@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 
 def main():
-    load_dotenv() # config env file
+    load_dotenv()
 
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'clara_project.settings')

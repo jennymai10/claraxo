@@ -130,11 +130,6 @@ source venv/bin/activate
 # On Windows use `venv\Scripts\activate`
 ```
 
-Update dependencies:
-```bash
-pip install -r requirements.txt
-```
-
 Apply the database migrations to set up your database schema:
 
 ```bash
