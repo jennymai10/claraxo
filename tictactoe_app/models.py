@@ -8,6 +8,24 @@ class TicTacToeUserManager(BaseUserManager):
 
     Provides helper methods to create a user with specific fields.
     """
+    def change_info(self, username=None, password=None, email=None):
+        """
+        Update the user's username and/or email.
+
+        Args:
+            user (TicTacToeUser): The user instance to update.
+            username (str, optional): The new username.
+            email (str, optional): The new email address.
+
+        Returns:
+            TicTacToeUser: The updated user instance.
+        """
+        if username:
+            user.username = username
+        if email:
+            user.email = self.normalize_email(email)
+        user.save(using=self._db)
+        return user
 
     def create_user(self, username, password=None, email=None, account_type=None):
         """
@@ -40,7 +58,7 @@ class TicTacToeUserManager(BaseUserManager):
             account_type=account_type
         )
         user.set_password(password)
-        user.save(using=self._db)
+        user.save(using=self._db) # save to database
         return user
 
 class TicTacToeUser(AbstractBaseUser):
