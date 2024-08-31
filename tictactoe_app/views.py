@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 
+# Handle user registration
 @csrf_exempt
 def register_user(request):
     if request.method == 'POST':
@@ -16,19 +17,21 @@ def register_user(request):
         form = UserForm()
     return render(request, 'tictactoe_app/register.html', {'form': form})
 
+# Get all registered users
 def get_users(request):
     users = TicTacToeUser.objects.all()
     return render(request, 'tictactoe_app/users.html', {'users': users})
 
+# Handle user login
 @csrf_exempt
 def handle_login(request):
-    if request.method == 'POST':  # 修复了'method'的拼写错误
+    if request.method == 'POST':
         try:
             data = json.loads(request.body)
             username = data.get('username')
             password = data.get('password')
             
-            # 硬编码的用户名和密码
+             # Hardcoded credentials
             correct_username = 'my_username'
             correct_password = 'my_password'
             
