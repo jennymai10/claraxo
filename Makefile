@@ -31,3 +31,6 @@ backup_db:
 
 restore_db:
 	cp db.sqlite3.bkp db.sqlite3 
+
+make jenny:
+	python /Users/jennymai/Desktop/it_proj/clara_tictactoe/jenny.py
