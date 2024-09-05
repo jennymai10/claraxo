@@ -5,12 +5,17 @@ import ruler from './ruler.png';
 import pencil from './pencil.png';
 import loginbuttom from './LogIn button.png';
 import signupbuttom from './Sign Up button.png';
+import loginbuttompressed from'./LogIn button_white.png';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import playboard from './playboard';
 
 function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [usernameVisible, setUsernameVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [ispressed, setIspressed] = useState(false);
+  const navigate = useNavigate();
 
    // Function to handle changes in the username input field
   const handleUsernameChange = (event) => {
@@ -31,6 +36,14 @@ function App() {
     setPasswordVisible(true);
   };
 
+  const handleLoginPressed =() =>{
+    setIspressed(true);
+  };
+
+  const handleLoginRelease =() =>{
+    setIspressed(false);
+  };
+
   // Handle the login button click event
   const handleLoginClick = async () => {
     console.log('Login button clicked');
@@ -48,6 +61,7 @@ function App() {
       
       if (response.ok) {
         console.log('Login successful');
+        navigate('/playboard');
       } else {
         console.log('Login failed');
       }
@@ -70,10 +84,12 @@ function App() {
         <img src={pencil} className="App-pencil" alt="pencil" />
         {/* Add click event handler to the sign-up button */}
         <img 
-          src={loginbuttom} 
-          className="App-loginbuttom" 
+          src={ispressed ? loginbuttompressed : loginbuttom } 
+          className= "App-loginbuttom"
           alt="loginbuttom" 
-          onClick={handleLoginClick} 
+          onMouseDown={handleLoginPressed}
+          onMouseUp={handleLoginRelease}
+          onClick={handleLoginClick}
         />
         <img 
           src={signupbuttom} 
