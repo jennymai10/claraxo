@@ -26,8 +26,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('clara_app.urls')),
 
-    # Added url path for IT Project 64
-    path('tictactoe/', include('tictactoe_app.urls')),
+    # Separating to a separate backend
+    # path('tictactoe/', include('tictactoe_app.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

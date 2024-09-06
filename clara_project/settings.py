@@ -133,8 +133,6 @@ else:
     # # Version for sqlite3 configuration, development on local machine
     # AUTH_USER_MODEL = 'clara_app.User'
     
-# Temporarily remove User
-#AUTH_USER_MODEL = 'clara_app.User'
 AUTH_USER_MODEL = 'auth.User'
 
 LOGIN_REDIRECT_URL = 'home_page'

@@ -114,7 +114,7 @@ Before committing changes to the repository, ensure the `.gitignore` file exclud
 
 For deployment, you will need to set environment variables in your production environment (e.g., using Heroku or another platform) and switch the `CLARA_ENVIRONMENT` to `heroku`.
 
-## Contributing (Please read).
+## WORKING ON THE PROJECT:
 
 When coding and contributing to the git repo, the repo has enabled branch protection rules.
 
@@ -122,22 +122,32 @@ You can only commit to your own branch (create one from `main`), and then create
 
 At least 1 code review is required to merge your code into `main`. Please reach out =))
 
-### WHENEVER YOU COME BACK TO CODE, the folder `tictactoe_app` (backend) and `tictactoe_frontend` are the only 2 folders you should care about or modify. All the others are belonged to the client's previous codebase and should not be modified.
+### WHENEVER YOU COME BACK TO CODE, the folder `tictactoe_project` is the only folder you should care about or modify. All the others are belonged to the client's previous codebase and should not be modified.
 
 Go into your virtual env:
 ```bash
-source venv/bin/activate 
+source venv/bin/activate
+alias python=python3
 # On Windows use `venv\Scripts\activate`
+```
+
+If not already in `tictactoe_project` folder:
+```bash
+cd tictactoe_project
 ```
 
 Update dependencies:
 ```bash
+make install
+# or if doesn't work then:
 pip install -r requirements.txt
 ```
 
 Apply the database migrations to set up your database schema:
-
 ```bash
+make migrate
+# or if doesn't work then:
+python manage.py makemigrations
 python manage.py migrate
 ```
 
@@ -146,16 +156,20 @@ Start both the Q-cluster and the Django development server.
 Terminal 1: Start the Q-cluster
 
 ```bash
+make qcluster
+# or if doesn't work then:
 python manage.py qcluster
 ```
 
 Terminal 2 (A DIFFERENT TERMINAL): Start the Django Development Server
 
 ```bash
+make run
+# or if doesn't work then:
 python manage.py runserver
 ```
 
 Open your web browser and go to (bookmark these on the browser for quick retrieval later on):
 
-- The Tic Tac Toe interface: `http://localhost:8000/tictactoe/`
+- The Tic Tac Toe interface: `http://localhost:8000/`
 - The Django admin: `http://localhost:8000/admin/`

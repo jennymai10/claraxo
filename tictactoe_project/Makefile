@@ -46,7 +46,4 @@ all:
 	make run
 
 install:
-	pip install -r /Users/jennymai/Desktop/it_proj/clara_tictactoe/requirements.txt
-
-install:
 	pip install -r requirements.txt
