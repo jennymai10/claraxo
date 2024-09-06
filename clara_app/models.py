@@ -55,7 +55,7 @@ class UserConfiguration(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     clara_version = models.CharField(max_length=20, choices=CLARA_VERSION_CHOICES, default='full_clara')
     open_ai_api_key = models.CharField(max_length=200, blank=True, null=True)
-    gpt_model = models.CharField(max_length=50, default='gpt-4-1106-preview')
+    gpt_model = models.CharField(max_length=50, default='gpt-3.5-turbo') # changing default from gpt-4-1106-preview to gpt 3.5
     max_annotation_words = models.IntegerField(default=250)
 
 class LanguageMaster(models.Model):

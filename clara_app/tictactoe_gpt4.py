@@ -51,7 +51,7 @@ async def request_cot_analysis_and_move_with_voting_async(board, player, cot_tem
         if move_counts[move] == 2:
             return {'selected_move': move, 'cot_record': cot_records[move], 'prompt': formatted_request, 'api_calls': api_calls}
 
-async def call_gpt4_with_retry_async(formatted_request, available_moves, gpt_model='gpt-4o', callback=None):
+async def call_gpt4_with_retry_async(formatted_request, available_moves, gpt_model='gpt-3.5-turbo', callback=None): # change gpt model
     api_calls = []
     n_attempts = 0
     limit = max_number_of_gpt4_tries

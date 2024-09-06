@@ -1,0 +1,18 @@
+<!-- tictactoe_app/templates/tictactoe_app/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Register</button>
+    </form>
+
+    <p><a href="http://localhost:8000/login/">Already had an account? Log in.</a></p>
+</body>
+</html>
