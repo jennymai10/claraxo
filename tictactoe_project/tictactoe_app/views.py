@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms.user_registration_form import UserRegistrationForm
-from .models import TicTacToeUser
+from .models import TicTacToeUser, Game, GameLog
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
@@ -8,7 +8,237 @@ from .forms.login_form import LoginForm
 from django.conf import settings
 import random
 
+import google.generativeai as genai # type: ignore
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json, os
+from dotenv import load_dotenv
 
+load_dotenv()
+genai.configure(api_key=os.environ["API_KEY"])
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+def check_win(board):
+    """
+    Check if there is a winning combination on the board.
+
+    Args:
+        board (dict): A dictionary representing the Tic-Tac-Toe board where keys are strings ('1', '2', ..., '9') 
+                      and values are 'X', 'O', or an empty string.
+
+    Returns:
+        str: 'X' if X wins, 'O' if O wins, None if no winner yet.
+    """
+    # Define all possible winning combinations
+    winning_combinations = [
+        ['1', '2', '3'],  # Top row
+        ['4', '5', '6'],  # Middle row
+        ['7', '8', '9'],  # Bottom row
+        ['1', '4', '7'],  # Left column
+        ['2', '5', '8'],  # Middle column
+        ['3', '6', '9'],  # Right column
+        ['1', '5', '9'],  # Left diagonal
+        ['3', '5', '7']   # Right diagonal
+    ]
+
+    # Check each winning combination
+    for combo in winning_combinations:
+        if board[combo[0]] == board[combo[1]] and board[combo[1]] == board[combo[2]] and board[combo[0]] != '':
+            return board[combo[0]]  # Return 'X' or 'O' if we have a winner
+
+    # No winner
+    return None
+
+def tictactoe_result(request):
+    """
+    Render the Tic Tac Toe result page showing the winner or draw and the final board.
+    """
+    # Get the winner and board from the session
+    winner = request.session.get('winner', 'No winner')
+    board = request.session.get('board', {
+        '1': '', '2': '', '3': '',
+        '4': '', '5': '', '6': '',
+        '7': '', '8': '', '9': ''
+    })
+
+    # Convert the board to a list of tuples (cell number, value) for easier display in the template
+    board_list = [(cell, board[str(cell)]) for cell in range(1, 10)]
+
+    return render(request, 'tictactoe_app/tictactoe_result.html', {'winner': winner, 'board_list': board_list})
+
+@csrf_exempt
+def make_move(request):
+    """
+    Handle the player's move and respond with AI's move.
+    """
+    if request.method == 'POST':
+        # Load the current board state from the session, or initialize a new one if it doesn't exist
+        board = request.session.get('board', {
+            '1': '', '2': '', '3': '',
+            '4': '', '5': '', '6': '',
+            '7': '', '8': '', '9': ''
+        })
+
+        # Get the player's move from the request
+        data = json.loads(request.body)
+        move = data.get('move')
+
+        # Get or create the current game for the player (assuming authenticated)
+        if not request.session.get('game_id'):
+            game = Game.objects.create(player=request.user)
+            request.session['game_id'] = game.game_id
+        else:
+            game = Game.objects.get(game_id=request.session['game_id'])
+
+        # Get the current turn number (increment after each move)
+        turn_number = GameLog.objects.filter(game=game).count() + 1
+
+        # Update board with player's move
+        board[move] = 'X'
+
+        # Save the player's move to the GameLog
+        GameLog.objects.create(
+            game=game,
+            turn_number=turn_number,
+            player='X',
+            cell=move
+        )
+
+        # Check if the player has won
+        winner = check_win(board)
+        if winner:
+            # Store the winner and mark the game as completed
+            game.winner = winner
+            game.completed = True
+            game.save()
+
+            # Store the winner in the session and redirect to result page
+            request.session['winner'] = winner
+            return JsonResponse({
+                'status': 'success',
+                'redirect_url': '/tictactoe_result/'
+            })
+
+        # Prepare the board state for the AI
+        occupied_x = [key for key, value in board.items() if value == 'X']
+        occupied_o = [key for key, value in board.items() if value == 'O']
+        unoccupied = [key for key, value in board.items() if value == '']
+
+        # Prepare input prompt for AI
+        prompt = f"""
+        Given the current Tic-Tac-Toe board state, where the squares occupied by X and O, and the unoccupied squares, are given using chess algebraic notation:
+        Squares occupied by X: [{', '.join(occupied_x)}]
+        Squares occupied by O: [{', '.join(occupied_o)}]
+        Unoccupied squares: [{', '.join(unoccupied)}]
+        You are playing as O. Your chosen move should be one of the unoccupied squares above. In your response, return exactly one integer digit from 1 to 9, representing your chosen move.
+        """
+        print(prompt)
+        ai_move = -1
+        attempts = 0  # Limit the number of retries
+        max_attempts = 5  # Set a limit to avoid an infinite loop
+
+        while str(ai_move) not in unoccupied and attempts < max_attempts:
+            try:
+                # Call the Gemini model to get the AI's move
+                response = model.generate_content(prompt)
+                ai_move = int(response.text.strip())  # Convert AI's response to an integer
+                print("AI MOVE: ", ai_move)
+            except ValueError:
+                # Handle cases where the response isn't a valid integer
+                print(f"Invalid response from AI: {response.text.strip()}")
+                ai_move = -1  # Reset ai_move to an invalid value
+            attempts += 1
+        
+        if str(ai_move) not in unoccupied:
+            print("Max attempts reached. Selecting a random move from unoccupied.")
+            ai_move = random.choice(unoccupied)
+
+        # Update board with AI's move
+        board[str(ai_move)] = 'O'
+
+        # Save the AI's move to the GameLog
+        turn_number += 1
+        GameLog.objects.create(
+            game=game,
+            turn_number=turn_number,
+            player='O',
+            cell=str(ai_move)
+        )
+
+        # Check if the AI has won
+        winner = check_win(board)
+        if winner:
+            # Store the winner and mark the game as completed
+            game.winner = winner
+            game.completed = True
+            game.save()
+
+            # Store the winner in the session and redirect to result page
+            request.session['winner'] = winner
+            return JsonResponse({
+                'status': 'success',
+                'redirect_url': '/tictactoe_result/'
+            })
+
+        # Check if it's a draw
+        if '' not in board.values():
+            game.winner = 'Draw'
+            game.completed = True
+            game.save()
+
+            request.session['winner'] = 'Draw'
+            return JsonResponse({
+                'status': 'success',
+                'redirect_url': '/tictactoe_result/'
+            })
+
+        # Save the updated board state back to the session
+        request.session['board'] = board
+
+        # Return the AI's move
+        return JsonResponse({
+            'status': 'success',
+            'ai_move': ai_move
+        })
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+
+def tictactoe_game(request):
+    """
+    Render the Tic Tac Toe game page.
+    """
+    # Retrieve the current board from the session, or initialize it if it doesn't exist
+    board = request.session.get('board', {
+        '1': '', '2': '', '3': '',
+        '4': '', '5': '', '6': '',
+        '7': '', '8': '', '9': ''
+    })
+
+    # Convert the dictionary to a list of tuples (cell number, value) for easier template access
+    board_list = [(cell, board[str(cell)]) for cell in range(1, 10)]
+
+    # Pass both the board list and grid cells to the template
+    grid_cells = range(1, 10)
+    return render(request, 'tictactoe_app/tictactoe_game.html', {'grid_cells': grid_cells, 'board_list': board_list})
+    
+@csrf_exempt
+def reset_game(request):
+    """
+    Reset the game by clearing the session board.
+    """
+    # Clear the board from the session
+    board = {
+        '1': '', '2': '', '3': '',
+        '4': '', '5': '', '6': '',
+        '7': '', '8': '', '9': ''
+    }
+    request.session['board'] = board
+    board_list = [(cell, board[str(cell)]) for cell in range(1, 10)]
+    return render(request, 'tictactoe_app/tictactoe_game.html', {'grid_cells': range(1, 10), 'board_list': board_list})
+
+
+# ___________________________________________________
 def register_user(request):
     """
     Handle the user registration process.
@@ -140,7 +370,7 @@ def login_user(request):
                 # Check if the user's email is verified (is_active is True)
                 if user.is_active:
                     login(request, user)  # Log in the user
-                    return redirect('http://localhost:8000/users/')  # Redirect to the users page
+                    return redirect('http://localhost:8000/new_game/')  # Redirect to the users page
                 else:
                     # If the user's email is not verified, display an error message
                     return render(request, 'tictactoe_app/login.html', {'error': 'Please verify your email before logging in.'})

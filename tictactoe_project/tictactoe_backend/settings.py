@@ -145,5 +145,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'clara.tictactoe@gmail.com'
-EMAIL_HOST_PASSWORD = 'rmxu xitt uvdo skbo'  # The app-specific password
-DEFAULT_FROM_EMAIL = 'clovermaitbg@gmail.com'
+EMAIL_HOST_PASSWORD = 'coxh ynsl eaef funt'
+DEFAULT_FROM_EMAIL = 'clara.tictactoe@gmail.com'
