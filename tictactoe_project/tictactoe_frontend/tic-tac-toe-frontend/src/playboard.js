@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './playboard.css';
+import './App.css';
 
 const TicTacToe = () => {
     const [board, setBoard] = useState(Array(9).fill(null)); // 初始化棋盘状态

@@ -14,7 +14,6 @@
   height: 100vh;
   min-height: 100vh;
   overflow-y: scroll;
-  /* box-sizing: border-box; */
 }
 
 /* Style for the board, positioned at the bottom of the screen with rotation */
@@ -41,7 +40,6 @@
   background: #DFD8CB;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   overflow: hidden;
-  /* z-index: -1;  */
 }
 
 /* Style for pencil graphic */
@@ -113,17 +111,11 @@
   flex-direction: column;
   align-items: center;
   width: 30vw;
-  /* max-width: 400px; */
-  /* padding-top: 35%; */
-  /* padding-right: 10vw; */
-  /* flex-wrap: wrap; */
 }
 
 /* Style for the password query section */
 .App-PasswordQuery {
   position: relative;
-  /* width: 100%;
-  height: auto; */
   margin-bottom: 10px;
 }
 
@@ -140,12 +132,7 @@
   box-sizing: border-box;
   position: relative;
   align-items: center; 
-  justify-content: center; 
-  /* position: fixed; */
-  /* width: 476px;
-  height: 66px;
-  left: 1000px;
-  top: 700px; */
+  justify-content: center;
   background: rgba(214, 205, 188, 0.86);
   border: 2px solid #301313;
   border-radius: 22px;
@@ -155,12 +142,6 @@
 .App-PasswordText {
   position: relative;
   text-align: start;
-  /* align-items: center; 
-  justify-content: center;  */
-  /* width: 463px;
-  height: 44px;
-  left: 850px;
-  top: 600px; */
   font-family: 'Gaegu';
   font-style: normal;
   font-weight: 400;
@@ -179,12 +160,7 @@
   box-sizing: border-box;
   position: relative;
   align-items: center; 
-  justify-content: center;  
-  /* position: fixed;
-  width: 476px;
-  height: 66px;
-  left: 1000px;
-  top: 550px; */
+  justify-content: center;
   background: rgba(214, 205, 188, 0.86);
   border: 2px solid #301313;
   border-radius: 22px;
@@ -195,13 +171,6 @@
 .App-UsernameText {
   position: relative;
   text-align: start;
-  /* align-items: center; 
-  justify-content: center;  */
-  /* position: fixed;
-  width: 463px;
-  height: 44px;
-  left: 850px;
-  top: 450px; */
   font-family: 'Gaegu';
   font-style: normal;
   font-weight: 400;
@@ -217,26 +186,15 @@
 /* Container for login/signup button */
 .App-LoginSignup {
   position: relative;
-  /* width: 30vw; */
   min-width: 30%;
   margin-bottom: 10px;
-  /* position: absolute;
-  width: 476px;
-  height: 58px;
-  left: 900px;
-  top: 700px; */
 }
 
 /* Style for the 'or' text */
 .App-or {
   position: relative;
   align-items: center; 
-  justify-content: center; 
-  /* position: fixed;
-  width: 476px;
-  height: 58px;
-  left: 1000px;
-  top: 800px; */
+  justify-content: center;
   font-family: 'Gaegu';
   font-style: normal;
   font-weight: 400;
@@ -296,9 +254,6 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     transition: background-color 5000s ease-in-out 0s;
-    /* border: 0px;
-    border-radius: 5%; */
-    /* padding-bottom: 0.5%; */
 }
 
 /* General style for buttons */
