@@ -3,10 +3,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
 
 /* Center text alignment in .App */
+#root {
+  width: 100%;
+  height: 100%;
+  
+}
 .App {
   text-align: center;
   width: 100vw;
   height: 100vh;
+  min-height: 100vh;
+  overflow-y: scroll;
+  /* box-sizing: border-box; */
 }
 
 /* Style for the board, positioned at the bottom of the screen with rotation */
@@ -15,24 +23,25 @@
   width: 60vw;
   height: auto;
   left: 0; 
-  top: calc(100vh - 60vh); 
+  top: 10vh;
   mix-blend-mode: luminosity;
   opacity: 0.5;
-  transform: rotate(-106.95°);
+  transform: rotate(-106.95);
   background-clip: content-box; 
 }
 
 
 /* Fixed header with full viewport size and background color */
 .App-header {
-  position: fixed; 
+  position: relative; 
   top: 0; 
   left: 0; 
   width: 100vw; 
   height: 100vh; 
   background: #DFD8CB;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  z-index: -1; 
+  overflow: hidden;
+  /* z-index: -1;  */
 }
 
 /* Style for pencil graphic */
@@ -59,137 +68,180 @@
   z-index: 1; 
 }
 
+.App-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  height: 90%;
+}
+
 /* Styling for the main text */
 .App-text {
-  position: absolute;
-  width: 10%;
-  height: 485px;
-  left: 500px;
-  top: 90px;
+  position: relative;
+  width: 30%;
+  min-width: 100px;
+  height: auto;
+  top: 5%;
   font-family: 'Londrina Shadow', sans-serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 150px;
-  line-height: 154px;
+  font-size: 5vw;
+  line-height: 10vw;
   display: flex;
+  align-self: flex-start;
   align-items: center;
   text-align: center;
   letter-spacing: 0.23em;
   color: #1E1E1E;
   mix-blend-mode: normal;
   border: none; 
+  flex-wrap: wrap;
+}
+
+.App-text p {
+  margin: 0;
 }
 
 /* Style for the login form container */
 .App-LoginForm {
-  position: absolute;
-  width: 476px;
-  height: 377px;
-  left: 712px;
-  top: 354px;
+  position: relative;
+  display: flex;
+  align-self: flex-end;
+  flex-direction: column;
+  align-items: center;
+  width: 30vw;
+  /* max-width: 400px; */
+  /* padding-top: 35%; */
+  /* padding-right: 10vw; */
+  /* flex-wrap: wrap; */
 }
 
 /* Style for the password query section */
 .App-PasswordQuery {
-  position: absolute;
-  width: 476px;
-  height: 115px;
-  left: 712px;
-  top: 490px;
+  position: relative;
+  /* width: 100%;
+  height: auto; */
+  margin-bottom: 10px;
+}
+
+/* Style for the username query section */
+.App-UsernameQuery {
+  position: relative;
+  /* width: 30vw;
+  height: auto; */
+  margin-bottom: 10px;
 }
 
 /* Style for the password input rectangle */
 .App-UPRectangle {
   box-sizing: border-box;
-  position: absolute;
+  position: relative;
   align-items: center; 
   justify-content: center; 
-  position: fixed;
-  width: 476px;
+  /* position: fixed; */
+  /* width: 476px;
   height: 66px;
   left: 1000px;
-  top: 700px;
+  top: 700px; */
   background: rgba(214, 205, 188, 0.86);
   border: 2px solid #301313;
-  border-radius: 20px;
+  border-radius: 22px;
 }
 
 /* Style for the password text */
 .App-PasswordText {
-  position: absolute;
-  align-items: center; 
-  justify-content: center; 
-  position: fixed;
-  width: 463px;
+  position: relative;
+  text-align: start;
+  /* align-items: center; 
+  justify-content: center;  */
+  /* width: 463px;
   height: 44px;
   left: 850px;
-  top: 600px;
+  top: 600px; */
   font-family: 'Gaegu';
   font-style: normal;
   font-weight: 400;
-  font-size: 40px;
-  line-height: 50px;
+  font-size: 2vw;
+  line-height: 3vw;
   color: #000000;
 }
 
+
+.App-PasswordQuery p {
+  margin: 0;
+}
+
 /* Style for the username input rectangle */
-.App-UernameRectangle {
+.App-UsernameRectangle {
   box-sizing: border-box;
-  position: absolute;
+  position: relative;
   align-items: center; 
-  justify-content: center; 
-  position: fixed;
+  justify-content: center;  
+  /* position: fixed;
   width: 476px;
   height: 66px;
   left: 1000px;
-  top: 550px;
+  top: 550px; */
   background: rgba(214, 205, 188, 0.86);
   border: 2px solid #301313;
-  border-radius: 20px;
+  border-radius: 22px;
+  margin-bottom: 12px;
 }
 
 /* Style for the username text */
 .App-UsernameText {
-  position: absolute;
-  align-items: center; 
-  justify-content: center; 
-  position: fixed;
+  position: relative;
+  text-align: start;
+  /* align-items: center; 
+  justify-content: center;  */
+  /* position: fixed;
   width: 463px;
   height: 44px;
   left: 850px;
-  top: 450px;
+  top: 450px; */
   font-family: 'Gaegu';
   font-style: normal;
   font-weight: 400;
-  font-size: 40px;
-  line-height: 50px;
+  font-size: 2vw;
+  line-height: 3vw;
   color: #000000;
+}
+
+.App-UsernameText p {
+  margin: 0;
 }
 
 /* Container for login/signup button */
 .App-LoginSignup {
-  position: absolute;
+  position: relative;
+  /* width: 30vw; */
+  min-width: 30%;
+  margin-bottom: 10px;
+  /* position: absolute;
   width: 476px;
   height: 58px;
   left: 900px;
-  top: 700px;
+  top: 700px; */
 }
 
 /* Style for the 'or' text */
 .App-or {
-  position: absolute;
+  position: relative;
   align-items: center; 
   justify-content: center; 
-  position: fixed;
+  /* position: fixed;
   width: 476px;
   height: 58px;
   left: 1000px;
-  top: 800px;
+  top: 800px; */
   font-family: 'Gaegu';
   font-style: normal;
   font-weight: 400;
-  font-size: 32px;
-  line-height: 40px;
+  font-size: 2vw;
+  line-height: 3vw;
   display: flex;
   align-items: center;
   text-align: center;
@@ -197,29 +249,28 @@
   color: #000000;
 }
 
+.App-or p {
+  width: 20%;
+}
 /* Style for login button */
 .App-loginbuttom {
-  position: absolute;
-  width: 206px;
-  height: 58px;
-  left: 1275px;
-  top: 800px;
-  z-index: 3;
+  width: 40%;
+  height: auto;
+  z-index: 3; 
+  position: relative;
 }
 
 /* Style for signup button */
 .App-signupbuttom {
-  position: absolute;
-  width: 206px;
-  height: 58px;
-  left: 1000px;
-  top: 800px;
+  width: 40%;
+  height: auto;
   z-index: 3;
+  position: relative;
 }
 
 /* Style for links (if used) */
 .App-link {
-  color: #61dafb;
+  color: #42baff;
 }
 
 /* Keyframes for logo spin animation (if used) */
@@ -234,16 +285,26 @@
 
 /* General style for input fields */
 input {
-  width: 100%;
-  height: 40px;
-  padding: 0 10px;
-  font-size: 16px;
+  width: 90%;
+  height: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+    /* border: 0px;
+    border-radius: 5%; */
+    /* padding-bottom: 0.5%; */
 }
 
 /* General style for buttons */
 button {
   width: 100%;
-  height: 58px;
+  height: 8vh;
   border: none;
   border-radius: 20px;
   background-color: #301313;
@@ -259,24 +320,25 @@ button:hover {
 
 /* Hidden inputs within the UP and username rectangles */
 .App-UPRectangle input,
-.App-UernameRectangle input {
+.App-UsernameRectangle input {
   visibility: hidden; 
   background-color: transparent;
   border: none;
   font-family: 'Gaegu';
-  font-size: 40px;
-  margin-top: 10px;
+  font-weight: 400;
+  font-size: 2vw;
+  width: 90%;
 }
 
 /* Make inputs visible when they have the .visible class */
 .App-UPRectangle input.visible,
-.App-UernameRectangle input.visible {
+.App-UsernameRectangle input.visible {
   visibility: visible; 
 }
 
 /* Remove outline and border on input focus */
 .App-UPRectangle input:focus,
-.App-UernameRectangle input:focus {
+.App-UsernameRectangle input:focus {
   outline: none; 
   border: none; 
 }
