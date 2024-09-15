@@ -14,6 +14,12 @@ from django.http import JsonResponse
 import json, os
 from dotenv import load_dotenv
 
+from django.middleware.csrf import get_token
+
+def get_csrf_token(request):
+    csrf_token = get_token(request)
+    return JsonResponse({'csrfToken': csrf_token})
+
 load_dotenv()
 genai.configure(api_key=os.environ["API_KEY"])
 model = genai.GenerativeModel("gemini-1.5-flash")
@@ -256,7 +262,7 @@ def register_user(request):
 
     return render(request, 'tictactoe_app/register.html', {'form': form})
 
-@csrf_exempt
+
 def verify_email(request):
     """
     Handle email verification for new users.
@@ -313,7 +319,7 @@ def get_users(request):
     # Render the users template and pass the users data to the template
     return render(request, 'tictactoe_app/users.html', {'users': users})
 
-@csrf_exempt
+
 def login_user(request):
     """
     Handle user login.

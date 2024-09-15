@@ -4,6 +4,8 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', login_user, name='login_user'),
+    path('get-csrf-token/', get_csrf_token, name='get_csrf_token'),
+    
     path('login/', login_user, name='login_user'),
     path('register/', register_user, name='register_user'),
     path('verify_email/', verify_email, name='verify_email'),

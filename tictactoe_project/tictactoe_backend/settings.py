@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'tictactoe_app',
     'rest_framework',
+    'corsheaders',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +44,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -147,3 +150,14 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'clara.tictactoe@gmail.com'
 EMAIL_HOST_PASSWORD = 'coxh ynsl eaef funt'
 DEFAULT_FROM_EMAIL = 'clara.tictactoe@gmail.com'
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',  # Your React frontend URL
+]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
