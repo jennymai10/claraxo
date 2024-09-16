@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect
-from .forms.user_registration_form import UserRegistrationForm
+from .forms import UserRegistrationForm, LoginForm
 from .models import TicTacToeUser, Game, GameLog
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from .forms.login_form import LoginForm
 from django.conf import settings
 import random
 
