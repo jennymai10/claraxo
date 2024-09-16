@@ -12,6 +12,7 @@ root.render(
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/playboard" element={<Playboard />} />
       </Routes>
     </Router>

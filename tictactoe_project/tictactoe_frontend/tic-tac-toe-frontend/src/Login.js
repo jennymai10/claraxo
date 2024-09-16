@@ -62,7 +62,6 @@ function App() {
   // Function to handle login click event
   const handleLoginClick = async () => {
     const csrfToken = getCookie('csrftoken');  // Fetch CSRF token from cookies
-    console.log('CSRF Token:', csrfToken);
 
     const formData = new URLSearchParams();
     formData.append('username', username);
@@ -78,14 +77,17 @@ function App() {
         body: formData.toString(),
         credentials: 'include',
       });
-
+      const data = await response.json();
       if (response.ok) {
-        console.log('Login successful');
-        navigate('/new_game');
+        console.log(data.message)
+        if (data.status === 'success') {
+          navigate(data.redirect_url);
+        }
       } else {
         console.log('Login failed');
-        const result = await response.json();
-        console.error('Failed to log in:', result);
+        console.error('ERROR:', data.message);
+        alert("ERROR: " + data.message);
+        window.location.reload();
       }
     } catch (error) {
       console.error('Error:', error);

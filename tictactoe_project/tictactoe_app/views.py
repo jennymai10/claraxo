@@ -341,21 +341,42 @@ def login_user(request):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
+            print(username, password)
             # Authenticate the user with the provided credentials
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 # Check if the user's email is verified (is_active is True)
                 if user.is_active:
                     login(request, user)  # Log in the user
-                    return redirect('http://localhost:8000/new_game/')  # Redirect to the users page
+                    return JsonResponse({
+                        'status': 'success',
+                        'redirect_url': '/new_game/'
+                    })
                 else:
                     # If the user's email is not verified, display an error message
-                    return render(request, 'tictactoe_app/login.html', {'error': 'Please verify your email before logging in.'})
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Please verify your email before logging in.',
+                        'redirect_url': '/verify_email/'
+                    }, status=403)
             else:
                 # If the credentials are invalid, add an error to the form
-                form.add_error(None, 'Invalid username or password.')
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid username or password.',
+                    'redirect_url': '/login/'
+                }, status=401)
     else:
         # Display the empty login form for a GET request
-        form = LoginForm()
+        return JsonResponse({
+                'status': 'error',
+                'message': 'Empty form.',
+                'errors': form.errors,
+                'redirect_url': '/login/'
+            }, status=400)
 
-    return render(request, 'tictactoe_app/login.html', {'form': form})
+    return JsonResponse({
+            'status': 'error',
+            'message': 'Empty form.',
+            'redirect_url': '/login/'
+        }, status=405)
