@@ -143,7 +143,7 @@ function App() {
               <div className='App-LoginSignup'>
                 <div className='App-or'>
                   <img
-                    src={ispressed ? loginbuttompressed : loginbuttom}
+                    src={loginbuttom}
                     className="App-loginbuttom"
                     alt="loginbuttom"
                     onMouseDown={handleLoginPressed}

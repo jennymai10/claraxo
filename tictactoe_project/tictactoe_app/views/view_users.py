@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect
 from ..forms import UserRegistrationForm, LoginForm
 from ..models import TicTacToeUser
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.conf import settings
 import random
 
-# from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
 from django.middleware.csrf import get_token
@@ -146,7 +145,8 @@ def login_user(request):
             if user is not None:
                 # Check if the user's email is verified (is_active is True)
                 if user.is_active:
-                      # Log in the user
+                    # Log in the user
+                    login(request, user)
                     return JsonResponse({
                         'status': 'success',
                         'redirect_url': '/new_game/'
@@ -174,3 +174,13 @@ def login_user(request):
         #         'message': 'Empty form.',
         #         'redirect_url': '/login/'
         #     }, status=400)
+
+@login_required
+def logout_user(request):
+    """
+    Handle user logout.
+
+    This view logs out the user and redirects them to the login page.
+    """
+    logout(request)
+    return redirect('/login/')

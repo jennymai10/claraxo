@@ -12,7 +12,7 @@ load_dotenv()
 genai.configure(api_key=os.environ["API_KEY"])
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-@login_required(login_url='/login/')
+@login_required
 def game_history(request):
     """
     Display the list of completed games for the logged-in user.
@@ -21,7 +21,7 @@ def game_history(request):
     completed_games = Game.objects.filter(player=user, completed=True)
     return render(request, 'tictactoe_app/game_history.html', {'games': completed_games})
 
-@login_required(login_url='/login/')
+@login_required
 def tictactoe_result(request):
     """
     Render the Tic Tac Toe result page showing the winner or draw and the final board.
@@ -34,7 +34,7 @@ def tictactoe_result(request):
 
     return render(request, 'tictactoe_app/tictactoe_result.html', {'winner': winner, 'board_list': board_list})
 
-@login_required(login_url='/login/')
+@login_required
 def make_move(request):
     """
     Handle the player's move and respond with AI's move.
@@ -55,6 +55,7 @@ def make_move(request):
         turn_number = GameLog.objects.filter(game=game).count() + 1
         board[move] = 'X'
         GameLog.objects.create(game=game, turn_number=turn_number, player='X', cell=move)
+        game.save()
 
         # Check if the player wins
         winner = check_win(board)
@@ -78,6 +79,8 @@ def make_move(request):
 
         # Save board state
         request.session['board'] = board
+        request.session.modified = True  # Mark session as modified to ensure it is saved
+        game.save()
         return JsonResponse({'status': 'success', 'ai_move': ai_move})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
@@ -90,7 +93,6 @@ def tictactoe_game(request):
     board = request.session.get('board', initialize_board())
     board_keys = ['a3', 'b3', 'c3', 'a2', 'b2', 'c2', 'a1', 'b1', 'c1']
     board_list = [(cell, board[cell]) for cell in board_keys]
-
     return render(request, 'tictactoe_app/tictactoe_game.html', {'grid_cells': board_keys, 'board_list': board_list})
 
 @login_required
@@ -100,4 +102,5 @@ def reset_game(request):
     """
     board = initialize_board()
     request.session['board'] = board
+    request.session.pop('game_id', None)
     return redirect('tictactoe_game')
