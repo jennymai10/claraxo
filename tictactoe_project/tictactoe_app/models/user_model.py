@@ -65,7 +65,7 @@ class TicTacToeUserManager(BaseUserManager):
             # Hash the API key if provided
             user.set_api_key(api_key)
         # Save the user instance to the database
-        user.save(using=self._db)
+        user.save()
         return user
 
     def create_superuser(self, username, password=None, email=None, account_type=None, profile_name=None, age=None, api_key=None, **extra_fields):

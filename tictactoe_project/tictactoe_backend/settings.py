@@ -159,3 +159,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',  # Your React frontend URL
 ]
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/new_game/'
+LOGOUT_REDIRECT_URL = '/login/'

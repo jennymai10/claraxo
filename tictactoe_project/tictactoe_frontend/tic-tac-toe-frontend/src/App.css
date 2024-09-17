@@ -122,8 +122,6 @@
 /* Style for the username query section */
 .App-UsernameQuery {
   position: relative;
-  /* width: 30vw;
-  height: auto; */
   margin-bottom: 10px;
 }
 
@@ -297,6 +295,30 @@ button:hover {
   outline: none; 
   border: none; 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @import url('https://fonts.googleapis.com/css2?family=Londrina+Shadow&display=swap');

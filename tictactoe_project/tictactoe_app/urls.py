@@ -8,6 +8,7 @@ urlpatterns = [
     path('get-csrf-token/', get_csrf_token, name='get_csrf_token'),
     
     path('login/', login_user, name='login_user'),
+    path('logout/', logout_user, name='logout_user'),
     path('register/', register_user, name='register_user'),
     path('verify_email/', verify_email, name='verify_email'),
     path('users/', get_users, name='get_users'),
@@ -21,5 +22,5 @@ urlpatterns = [
     path('make_move/', make_move, name='make_move'),
     path('new_game/', reset_game, name='reset_game'),
     path('tictactoe_result/', tictactoe_result, name='tictactoe_result'),
-    path('history/', game_history, name='game_history')
+    path('history/', game_history, name='game_history'),
 ]
