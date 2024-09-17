@@ -185,7 +185,6 @@ class TicTacToeGameTests(TestCase):
         game = Game.objects.get(player=self.user)
         self.assertEqual(game.winner, 'X')  # X should be the winner
 
-
     def test_draw_condition(self):
         """Test draw condition in Tic-Tac-Toe."""
         session = self.client.session
