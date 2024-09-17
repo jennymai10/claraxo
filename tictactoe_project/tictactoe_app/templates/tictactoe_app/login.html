@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h2>Login</h2>
-    <form method="POST">
+    <div id="message" style="color: red;"></div>
+    <form id="loginForm" method="POST">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Login</button>
@@ -15,5 +17,28 @@
 
     <p><a href="http://localhost:8000/password_reset/">Forgot your password?</a></p>
     <p><a href="http://localhost:8000/register/">Don't have an account? Register.</a></p>
+
+    <script>
+        $(document).ready(function () {
+            $('#loginForm').on('submit', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/login/',  // Adjust URL if necessary
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function (data) {
+                        if (data.status === 'success') {
+                            window.location.href = data.redirect_url;  // Redirects user on success
+                        } else {
+                            $('#message').text(data.message);  // Show error message from JSON
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $('#message').text('An error occurred: ' + xhr.status + ' ' + xhr.statusText);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import random
 from django.db import models
 from django.core.validators import MinLengthValidator, EmailValidator, MaxValueValidator, MinValueValidator
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.hashers import make_password
 
 class TicTacToeUserManager(BaseUserManager):
@@ -13,7 +13,7 @@ class TicTacToeUserManager(BaseUserManager):
     verification codes and password hashing.
     """
 
-    def create_user(self, username, password=None, email=None, account_type=None, profile_name=None, age=None, api_key=None):
+    def create_user(self, username, password=None, email=None, account_type=None, profile_name=None, age=None, api_key=None, **extra_fields):
         """
         Creates and returns a new user with the given fields. This method ensures
         that required fields like username, password, email, account_type, profile_name, 
@@ -56,7 +56,8 @@ class TicTacToeUserManager(BaseUserManager):
             profile_name=profile_name,
             age=age,
             # Generate a random 6-digit verification code for email verification
-            verification_code=random.randint(100000, 999999)
+            verification_code=random.randint(100000, 999999),
+            **extra_fields
         )
         # Hash the password
         user.set_password(password)
@@ -67,8 +68,20 @@ class TicTacToeUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def create_superuser(self, username, password=None, email=None, account_type=None, profile_name=None, age=None, api_key=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
 
-class TicTacToeUser(AbstractBaseUser):
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(username, password, email, account_type, profile_name, age, api_key, **extra_fields)
+
+
+class TicTacToeUser(AbstractBaseUser, PermissionsMixin):
     """
     Custom user model for the Tic Tac Toe application.
 
@@ -140,6 +153,8 @@ class TicTacToeUser(AbstractBaseUser):
     )
 
     # Is the account active? (Email verified or not)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
 
     # A 6-digit verification code for email verification (optional until used)
@@ -180,4 +195,14 @@ class TicTacToeUser(AbstractBaseUser):
             bool: True if the API key matches the stored hash, False otherwise.
         """
         return self.api_key == make_password(raw_api_key)
+
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        # Simplest possible answer: Yes, always
+        return True
+
+    def has_module_perms(self, app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        # Simplest possible answer: Yes, always
+        return True
 

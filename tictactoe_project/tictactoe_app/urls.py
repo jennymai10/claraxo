@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import *
+from .views.view_users import *
+from .views.view_game import *
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -20,4 +21,5 @@ urlpatterns = [
     path('make_move/', make_move, name='make_move'),
     path('new_game/', reset_game, name='reset_game'),
     path('tictactoe_result/', tictactoe_result, name='tictactoe_result'),
+    path('history/', game_history, name='game_history')
 ]
