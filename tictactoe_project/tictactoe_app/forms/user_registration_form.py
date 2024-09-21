@@ -1,6 +1,6 @@
 from django import forms
 import re
-from ..models import TicTacToeUser
+from ..models.user_model import TicTacToeUser
 
 class UserRegistrationForm(forms.ModelForm):
     """
