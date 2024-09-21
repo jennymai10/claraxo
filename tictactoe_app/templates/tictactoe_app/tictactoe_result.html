@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Result</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+        }
+
+        .grid-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            border: 5px solid #000;
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Game Over</h1>
+    <p>Winner: {{ winner }}</p>
+
+    <h2>Final Board</h2>
+    <div class="grid-container">
+        <!-- Loop through the final board and display it -->
+        {% for cell, value in board_list %}
+        <div class="grid-item">
+            {{ value }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <br>
+
+    <!-- Button to play again -->
+    <button onclick="window.location.href='/new_game/'">Play Again</button>
+</body>
+</html>

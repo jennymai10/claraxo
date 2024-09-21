@@ -1,0 +1,70 @@
+{% block content %}
+    <h1>Game History</h1>
+
+    <!-- If there are completed games, display them -->
+    {% if games %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Game ID</th>
+                    <th>Player</th>
+                    <th>Date</th>
+                    <th>Winner</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in games %}
+                <tr>
+                    <td>{{ game.game_id }}</td>
+                    <td>{{ game.player.username }}</td>
+                    <td>{{ game.date }}</td>
+                    <td>{{ game.winner|default:"No winner yet" }}</td>
+                    <td>
+                        <button onclick="toggleMoves('moves-{{ game.game_id }}')">Show Moves</button>
+                    </td>
+                </tr>
+                <tr id="moves-{{ game.game_id }}" style="display:none;">
+                    <td colspan="5">
+                        <!-- Display moves for the game -->
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Turn Number</th>
+                                    <th>Player</th>
+                                    <th>Move</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for move in game.get_moves %}
+                                <tr>
+                                    <td>{{ move.turn_number }}</td>
+                                    <td>{{ move.player }}</td>
+                                    <td>{{ move.cell }}</td>
+                                    <td>{{ move.timestamp }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No completed games found.</p>
+    {% endif %}
+{% endblock %}
+
+<script>
+    // Function to toggle the display of moves for a game
+    function toggleMoves(movesId) {
+        var element = document.getElementById(movesId);
+        if (element.style.display === "none") {
+            element.style.display = "table-row";
+        } else {
+            element.style.display = "none";
+        }
+    }
+</script>
