@@ -29,6 +29,9 @@
   background-clip: content-box; 
 }
 
+p {
+  margin: 0px;
+}
 
 /* Fixed header with full viewport size and background color */
 .App-header {
@@ -73,122 +76,96 @@
   align-items: center;
   flex-wrap: wrap;
   width: 100%;
-  height: 90%;
+  height: 100%;
+  overflow-y: scroll;
 }
 
 /* Styling for the main text */
-.App-text {
-  position: relative;
-  width: 30%;
-  min-width: 100px;
+.App-Title {
+  width: 20%;
   height: auto;
-  top: 5%;
   font-family: 'Londrina Shadow', sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 5vw;
-  line-height: 10vw;
-  display: flex;
-  align-self: flex-start;
-  align-items: center;
-  text-align: center;
-  letter-spacing: 0.23em;
+  font-size: 13vh;
+  line-height: 20vh;
+  letter-spacing: 0.25em;
   color: #1E1E1E;
-  mix-blend-mode: normal;
-  border: none; 
-  flex-wrap: wrap;
-}
-
-.App-text p {
-  margin: 0;
+  align-self: start;
+  margin-top: 5%;
+  border: none;
 }
 
 /* Style for the login form container */
 .App-LoginForm {
-  position: relative;
+  width: 25%;
   display: flex;
   align-self: flex-end;
   flex-direction: column;
   align-items: center;
-  width: 30vw;
+  margin-bottom: 7vh;
 }
 
-/* Style for the password query section */
-.App-PasswordQuery {
+form {
+  width: 100%;
+}
+.App-FormName {
+  font-family: 'Londrina Shadow';
+  font-size: 8vh;
+  letter-spacing: 0.15em;
+  color: #1E1E1E;
+  padding-bottom: 1.5vh;
+}
+/* Style for the query section */
+.App-Query {
   position: relative;
   margin-bottom: 10px;
 }
 
-/* Style for the username query section */
-.App-UsernameQuery {
+.Signup-Query {
   position: relative;
-  margin-bottom: 10px;
+  margin-top: 15px;
 }
 
 /* Style for the password input rectangle */
-.App-UPRectangle {
+.App-Rectangle {
   box-sizing: border-box;
   position: relative;
   align-items: center; 
   justify-content: center;
   background: rgba(214, 205, 188, 0.86);
   border: 2px solid #301313;
-  border-radius: 22px;
+  border-radius: 2vw;
+}
+
+.App-Rectangle input {
+  background: transparent;
+  border: none;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.7vw;
+  width: 90%;
+  padding-top: 1%;
+  padding-bottom: 1%;
 }
 
 /* Style for the password text */
-.App-PasswordText {
-  position: relative;
+.App-NormalText {
   text-align: start;
   font-family: 'Gaegu';
-  font-style: normal;
   font-weight: 400;
-  font-size: 2vw;
-  line-height: 3vw;
-  color: #000000;
+  font-size: 1.7vw;
+  color: #301313;
 }
 
-
-.App-PasswordQuery p {
-  margin: 0;
+.App-NormalText p {
+  margin: 0px;
 }
 
-/* Style for the username input rectangle */
-.App-UsernameRectangle {
-  box-sizing: border-box;
-  position: relative;
-  align-items: center; 
-  justify-content: center;
-  background: rgba(214, 205, 188, 0.86);
-  border: 2px solid #301313;
-  border-radius: 22px;
-  margin-bottom: 12px;
-}
-
-/* Style for the username text */
-.App-UsernameText {
-  position: relative;
-  text-align: start;
-  font-family: 'Gaegu';
-  font-style: normal;
-  font-weight: 400;
-  font-size: 2vw;
-  line-height: 3vw;
-  color: #000000;
-}
-
-.App-UsernameText p {
-  margin: 0;
-}
-
-/* Container for login/signup button */
 .App-LoginSignup {
   position: relative;
   min-width: 30%;
   margin-bottom: 10px;
 }
 
-/* Style for the 'or' text */
 .App-or {
   position: relative;
   align-items: center; 
@@ -196,674 +173,91 @@
   font-family: 'Gaegu';
   font-style: normal;
   font-weight: 400;
-  font-size: 2vw;
+  font-size: 1.7vw;
   line-height: 3vw;
   display: flex;
   align-items: center;
   text-align: center;
   letter-spacing: -0.06em;
-  color: #000000;
+  color: #301313;
+  padding-top: 1vw;
 }
 
-.App-or p {
-  width: 20%;
-}
-/* Style for login button */
-.App-loginbuttom {
-  width: 40%;
-  height: auto;
-  z-index: 3; 
-  position: relative;
+.App-Or-text {
+  margin-left: 7%;
+  margin-right: 7%;
 }
 
-/* Style for signup button */
-.App-signupbuttom {
-  width: 40%;
-  height: auto;
-  z-index: 3;
-  position: relative;
+.App-Button {
+  min-height: 30px;
+  height: 6vh;
+  width: 11vw;
+  border: 2px solid #301313;
+  border-radius: 2vw;
+  background-color: #D6CDBCDB;
+  color: black; 
+  font-size: 1.7vw;
+  font-family: 'Gaegu';
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.1s ease, background-color 0.1s ease;
+  white-space: nowrap;
 }
 
-/* Style for links (if used) */
-.App-link {
-  color: #42baff;
+.App-Button:hover {
+  background-color: #301313;
+  color: #D6CDBCDB;
 }
 
-/* Keyframes for logo spin animation (if used) */
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* General style for input fields */
-input {
-  width: 90%;
-  height: auto;
-  padding-left: 15px;
-  padding-right: 15px;
+.App-Button:active {
+  transform: scale(0.9);
+  color: white
 }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    transition: background-color 5000s ease-in-out 0s;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
-/* General style for buttons */
-button {
-  width: 100%;
-  height: 8vh;
-  border: none;
-  border-radius: 20px;
-  background-color: #301313;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
+
+.App-SignupForm {
+  position: relative;
+  align-self: flex-start;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 7vh;
+  margin-top: 4vh;
+  width: 23vw;
 }
 
-/* Hover effect for buttons */
-button:hover {
-  background-color: #5a3a3a;
-}
-
-/* Hidden inputs within the UP and username rectangles */
-.App-UPRectangle input,
-.App-UsernameRectangle input {
-  visibility: hidden; 
-  background-color: transparent;
+.Signup-AccountTypeSelect {
+  background: transparent;
   border: none;
   font-family: 'Gaegu';
   font-weight: 400;
-  font-size: 2vw;
+  font-size: 1.7vw;
   width: 90%;
+  padding-top: 1%;
+  padding-bottom: 1%;
 }
 
-/* Make inputs visible when they have the .visible class */
-.App-UPRectangle input.visible,
-.App-UsernameRectangle input.visible {
-  visibility: visible; 
+.Form-Error {
+  font-family: 'Gaegu';
+  line-height: 85%;
+  text-align: left;
+  font-size: 1.4vw;
+  color: #ab1212;
+  /* margin-top: 5px; */
 }
 
-/* Remove outline and border on input focus */
-.App-UPRectangle input:focus,
-.App-UsernameRectangle input:focus {
-  outline: none; 
-  border: none; 
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@import url('https://fonts.googleapis.com/css2?family=Londrina+Shadow&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
-
-body {
-    background-color: #DFD8CB; /* 设置整个页面的背景颜色 */
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
-.Pencil {
-    position: absolute;
-    width: 507.76px;
-    height: 686.35px;
-    right: 20px;
-    top: -150px;
-    background: #DFD8CB;
-    transform: rotate(28deg);
-    z-index: 0; 
-  }
-  
-  /* Style for ruler graphic */
-.Ruler {
-    position: absolute;
-    width: 392.31px;
-    height: 478.99px;
-    right: 30px; 
-    top: 0px;
-    background-color: rgba(0, 0, 0, 0);
-    transform: rotate(15deg);
-    z-index: 1; 
-  }
-  
-  .Bboard {
-    position: absolute; 
-    width: 767.98px;
-    height: 744.47px;
-    left: 0; 
-    top: calc(100vh - 744.47px); 
-    mix-blend-mode: luminosity;
-    opacity: 0.5;
-    transform: rotate(-106.95°);
-    background-clip: content-box; 
-    pointer-events: none; /* 使鼠标事件穿透该元素 */
-}
-
-#board {
-    display: grid;
-    grid-template-columns: repeat(3, 150px); /* 每行三个按钮 */
-    grid-template-rows: repeat(3, 150px); /* 每列三个按钮 */
-    gap: 30px; /* 增加按钮之间的空隙 */
-    justify-content: start; /* 将棋盘向左对齐 */
-    margin-left: 15%; /* 使棋盘向左移动 */
-    margin-top: 195px; /* 使棋盘向下移动 */
-    padding: 20px;
-    position: relative;
-    width: 500px; /* 确保棋盘宽度，增加了空隙 */
-    height: 500px; /* 确保棋盘高度，增加了空隙 */
-}
-
-.Moves {
-    position: absolute;
-    top: 40px; /* 向上移动，减少 top 的值 */
-    left: 22%; /* 向右移动，增加 left 的值 */
-    font-size: 60px; /* 修改文字大小，根据需要调整 */
-    font-family: 'Gaegu';
-    font-style: normal;
-    font-weight: bold;
-}
-.TicBoard {
-    position: absolute;
-    top: 223px; 
-    left: 15.3%; 
-    width: 525px; 
-    height: 530px; 
-    z-index: -1; 
-}
-
-.square {
-    width: 150px;
-    height: 150px;
-    font-size: 80px;
-    text-align: center;
-    cursor: pointer;
-    background-color: transparent;
-    color: black;
-    box-sizing: border-box;
-    transition: background-color 0.3s ease;
-    border: 2px solid #DFD8CB;
-    font-family: 'Gaegu';
-    font-style: normal;
-}
-
-.square:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.square:disabled {
-    background-color: transparent;
-    color: black;
-    cursor: not-allowed;
-}
-
-/* Start Game 按钮样式 */
-.start-button {
-    margin-top: 120px; /* 按钮与棋盘之间的间距 */
-    padding: 10px 20px;
-    font-size: 20px;
-    cursor: pointer;
-    background-color: transparent;
-    color: black;
-    border: 5px solid #000000;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    width: 200px; /* 设置按钮宽度 */
-    height: 120px;
-    margin-left: 22.5%;
-    font-family: 'Gaegu';
-    font-style: normal;
-    font-weight: bold;
-}
-
-
-.start-button:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-/* Importing fonts from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Londrina+Shadow&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
-
-/* Center text alignment in .App */
-.Signup {
-    text-align: center;
-}
-
-/* Style for the board, positioned at the bottom of the screen with rotation */
-.Signup-board {
-    position: absolute;
-    width: 767.98px;
-    height: 744.47px;
-    left: 0;
-    top: calc(100vh - 744.47px);
-    mix-blend-mode: luminosity;
-    opacity: 0.5;
-    transform: rotate(-106.95°);
-    background-clip: content-box;
-}
-
-
-/* Fixed header with full viewport size and background color */
-.Signup-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #DFD8CB;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    z-index: -1;
-}
-
-/* Style for pencil graphic */
-.Signup-pencil {
-    position: absolute;
-    width: 507.76px;
-    height: 686.35px;
-    right: 20px;
-    top: -150px;
-    background: #DFD8CB;
-    transform: rotate(28deg);
-    z-index: 0;
-}
-
-/* Style for ruler graphic */
-.Signup-ruler {
-    position: absolute;
-    width: 392.31px;
-    height: 478.99px;
-    right: 30px;
-    top: 0px;
-    background-color: rgba(0, 0, 0, 0);
-    transform: rotate(15deg);
-    z-index: 1;
-}
-
-/* Styling for the main text */
-.Signup-text {
-    position: absolute;
-    width: 341px;
-    height: 485px;
-    left: 407px;
-    top: 90px;
-    font-family: 'Londrina Shadow', sans-serif;
-    font-style: normal;
-    font-weight: 400;
-    font-size: 130px;
-    line-height: 154px;
-    display: flex;
-    align-items: center;
-    text-align: center;
-    letter-spacing: 0.23em;
-    color: #1E1E1E;
-    mix-blend-mode: normal;
-    border: none;
-}
-
-/* Style for the login form container */
-.Signup-LoginForm {
-    position: absolute;
-    width: 476px;
-    height: 377px;
-    left: 712px;
-    top: 354px;
-}
-
-/* Style for the password query section */
-.Signup-PasswordQuery {
-    position: absolute;
-    width: 476px;
-    height: 115px;
-    left: 712px;
-    top: 490px;
-}
-
-.Signup-RePasswordQuery {
-    position: absolute;
-    width: 476px;
-    height: 115px;
-    left: 712px;
-    top: 590px;
-}
-
-/* Style for the password input rectangle */
-.Signup-UPRectangle {
-    box-sizing: border-box;
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    width: 476px;
-    height: 66px;
-    left: 1000px;
-    top: 700px;
-    background: rgba(214, 205, 188, 0.86);
-    border: 2px solid #301313;
-    border-radius: 20px;
-}
-
-/* Style for the password text */
-.Signup-PasswordText {
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    width: 463px;
-    height: 44px;
-    left: 860px;
-    top: 600px;
-    font-family: 'Gaegu';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 40px;
-    line-height: 50px;
-    color: #000000;
-}
-
-.Signup-REUPRectangle {
-    box-sizing: border-box;
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    width: 476px;
-    height: 66px;
-    left: 1000px;
-    top: 850px;
-    background: rgba(214, 205, 188, 0.86);
-    border: 2px solid #301313;
-    border-radius: 20px;
-}
-
-/* Style for the password text */
-.Signup-RePasswordText {
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    width: 463px;
-    height: 44px;
-    left: 950px;
-    top: 750px;
-    font-family: 'Gaegu';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 40px;
-    line-height: 50px;
-    color: #000000;
-}
-
-.Signup-AccountTypeRectangle {
-    box-sizing: border-box;
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    padding: 10px 50px 10px 10px; /*留出空间给箭头 */
-    width: 476px;
-    height: 66px;
-    left: 1000px;
-    top: 400px;
-    font-family: 'Gaegu';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 40px;
-    background: rgba(214, 205, 188, 0.86);
-    border: 2px solid #301313;
-    border-radius: 20px;
-    cursor: pointer;
-    appearance: auto;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-
-    .Signup-AccountTypeRectangle::after {
-        content: '';
-        position: absolute;
-        right: 25px; /* 根据需要调整位置 */
-        top: 50%;
-        transform: translateY(-50%);
-        width: 35px; /* 图标宽度 */
-        height: 35px; /* 图标高度 */
-        background-image: url('./assets/triangle.png'); /* 使用本地图片 */
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain; /* 确保图片完整显示 */
-        pointer-events: none;
-    }
-
-
-.Signup-AccountTypeText {
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    width: 463px;
-    height: 44px;
-    left: 900px;
-    top: 300px;
-    font-family: 'Gaegu';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 40px;
-    line-height: 50px;
-    color: #000000;
-}
-
-/* Style for the username input rectangle */
-.Signup-UernameRectangle {
-    box-sizing: border-box;
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    width: 476px;
-    height: 66px;
-    left: 1000px;
-    top: 550px;
-    background: rgba(214, 205, 188, 0.86);
-    border: 2px solid #301313;
-    border-radius: 20px;
-}
-
-/* Style for the username text */
-.Signup-UsernameText {
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    width: 463px;
-    height: 44px;
-    left: 920px;
-    top: 450px;
-    font-family: 'Gaegu';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 40px;
-    line-height: 50px;
-    color: #000000;
-}
-
-/* Container for login/signup button */
-.Signup-LoginSignup {
-    position: absolute;
-    width: 476px;
-    height: 58px;
-    left: 900px;
-    top: 700px;
-}
-
-/* Style for the 'or' text */
-.Signup-or {
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    width: 476px;
-    height: 58px;
-    left: 1000px;
-    top: 800px;
-    font-family: 'Gaegu';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 32px;
-    line-height: 40px;
-    display: flex;
-    align-items: center;
-    text-align: center;
-    letter-spacing: -0.06em;
-    color: #000000;
-}
-
-/* Style for login button */
-.Signup-loginbuttom {
-    position: absolute;
-    width: 206px;
-    height: 58px;
-    left: 1275px;
-    top: 800px;
-    z-index: 3;
-}
-
-/* Style for signup button */
-.Signup-signupbuttom {
-    position: absolute;
-    width: 206px;
-    height: 58px;
-    left: 1125px;
-    top: 1000px;
-    z-index: 3;
-}
-
-.Signup-errorMsgText {
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    width: 800px;
-    height: 44px;
-    left: 850px;
-    top: 900px;
-    font-family: 'Gaegu';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 30px;
-    line-height: 50px;
-    color: #000000;
-}
-
-/* Style for links (if used) */
-.Signup-link {
-    color: #61dafb;
-}
-
-/* Keyframes for logo spin animation (if used) */
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* General style for input fields */
-input {
-    width: 100%;
-    height: 40px;
-    padding: 0 10px;
-    font-size: 16px;
-}
-
-/* General style for buttons */
-button {
-    width: 100%;
-    height: 58px;
-    border: none;
-    border-radius: 20px;
-    background-color: #301313;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-    /* Hover effect for buttons */
-    button:hover {
-        background-color: #5a3a3a;
-    }
-
-/* Hidden inputs within the UP and username rectangles */
-.Signup-UPRectangle input,
-.Signup-REUPRectangle input,
-.Signup-UernameRectangle input {
-    visibility: hidden;
-    background-color: transparent;
-    border: none;
-    font-family: 'Gaegu';
-    font-size: 40px;
-    margin-top: 10px;
-}
-    /*.App-AccountTypeRectangle input {*/
-    /*  visibility: hidden;*/
-    /*  background-color: transparent;*/
-    /*  border: none;*/
-    /*  font-family: 'Gaegu';*/
-    /*  font-size: 40px;*/
-    /*  margin-top: 10px;*/
-    /*}*/
-
-
-    /* Make inputs visible when they have the .visible class */
-    .Signup-UPRectangle input.visible,
-    .Signup-REUPRectangle input.visible,
-    .Signup-UernameRectangle input.visible {
-        visibility: visible;
-    }
-
-.Signup-AccountTypeRectangle input.visible {
-    visibility: visible;
-}
-/* Remove outline and border on input focus */
-.Signup-UPRectangle input:focus,
-.Signup-REUPRectangle input:focus,
-.Signup-UernameRectangle input:focus {
-    outline: none;
-    border: none;
-}
-
-.Signup-AccountTypeRectangle input:focus {
-    outline: none;
-    border: none;
+.Signup-GoLoginText {
+  text-align: center;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.7vw;
+  color: #301313;
+  padding-top: 2vh;
+  padding-bottom: 1vh;
 }

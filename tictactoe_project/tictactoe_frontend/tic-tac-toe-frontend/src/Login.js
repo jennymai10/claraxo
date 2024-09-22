@@ -3,11 +3,7 @@ import board from './assets/board.png';
 import './App.css';
 import ruler from './assets/ruler.png';
 import pencil from './assets/pencil.png';
-import loginbuttom from './assets/login_button.png';
-import signupbuttom from './assets/signup_button.png';
-import loginbuttompressed from './assets/pencil.png';
 import { BrowserRouter as Router, Route, Routes, useNavigate, Link } from 'react-router-dom';
-// import playboard from './playboard';
 
 function getCookie(name) {
   let cookieValue = null;
@@ -27,77 +23,86 @@ function getCookie(name) {
 function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [usernameVisible, setUsernameVisible] = useState(false);
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [ispressed, setIspressed] = useState(false);
+  const [error, setError] = useState({});
   const navigate = useNavigate();
 
-  // Function to handle changes in the username input field
-  const handleUsernameChange = (event) => {
-    setUsername(event.target.value);
-  };
-  // Function to handle changes in the password input field
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
+  // Handle input changes and validate in real-time
+  const handleChange = (setter, validateFn) => (event) => {
+    setter(event.target.value);
+    if (validateFn) validateFn();
   };
 
-  // Show the username input field when clicked
-  const handleUsernameClick = () => {
-    setUsernameVisible(true);
+  // Validate username (5-15 characters, allows letters, numbers, '_', '-', and '.')
+  const isValidUsername = () => {
+    const usernamePattern = /^[A-Za-z0-9_.-]{4,15}$/;
+    if (!usernamePattern.test(username)) {
+        setError(prev => ({ ...prev, username: 'Username must be 5-15 characters long and can only contain letters, numbers, (_), (-), and (.).' }));
+        return false;
+    } else if (username === '') {
+        return true
+    }
+    setError(prev => ({ ...prev, username: '' }));
+    return true;
   };
 
-  // Show the password input field when clicked
-  const handlePasswordClick = () => {
-    setPasswordVisible(true);
-  };
-
-  const handleLoginPressed = () => {
-    setIspressed(true);
-  };
-
-  const handleLoginRelease = () => {
-    setIspressed(false);
+  // Password strength check
+  const isValidPassword = () => {
+    const passwordPattern = /^(?=.*[A-Z])(?=.*\d).{6,25}$/;
+    if (!passwordPattern.test(password)) {
+        setError(prev => ({ ...prev, password: 'Password must be 7-25 characters long, with at least one uppercase letter and one number.' }));
+        return false;
+    } else if (password === '') {
+        return true
+    }
+    setError(prev => ({ ...prev, password: '' }));
+    return true;
   };
 
   // Function to handle login click event
-  const handleLoginClick = async () => {
-    const csrfToken = getCookie('csrftoken');  // Fetch CSRF token from cookies
-
-    const formData = new URLSearchParams();
-    formData.append('username', username);
-    formData.append('password', password);
-
-    try {
-      const response = await fetch('http://localhost:8000/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-CSRFToken': csrfToken,
-        },
-        body: formData.toString(),
-        credentials: 'include',
-      });
-      const data = await response.json();
-      if (response.ok) {
-        console.log(data.message)
-        if (data.status === 'success') {
-          navigate(data.redirect_url);
-        }
-      } else {
-        console.log('Login failed');
-        console.error('ERROR:', data.message);
-        alert("ERROR: " + data.message);
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const handleSubmit = (event) => {
+  const handleLoginClick = async (event) => {
     event.preventDefault();
-    console.log('Username:', username);
-    console.log('Password:', password);
+    setError({}); // Reset errors before validation
+    if (
+      isValidUsername() &&
+      isValidPassword()
+    ) {
+      try {
+        const formData = new URLSearchParams();
+        formData.append('username', username);
+        formData.append('password', password);
+
+        const response = await fetch('http://localhost:8000/login/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          credentials: 'include',
+          body: formData.toString(),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          if (data.status === 'success') {
+            navigate(data.redirect_url);
+          } else if (data.status === 'error') {
+            setError(data.errors);
+            setTimeout(() => {
+              navigate(data.redirect_url);
+            }, 6000);
+          }
+        } else {
+          console.log(data.errors)
+          if (data.errors) {
+            setError(data.errors);
+          } else {
+            setError({ submit: data.message });
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
   };
 
   return (
@@ -107,56 +112,53 @@ function App() {
         <img src={ruler} className="App-ruler" alt="ruler" />
         <img src={pencil} className="App-pencil" alt="pencil" />
         <div className="App-container">
-          <div className="App-text">
+          <div className="App-Title">
             <p>tic. tac. toe.</p>
           </div>
           <div className='App-LoginForm'>
-            <form onSubmit={handleSubmit}>
-              <div className='App-UsernameQuery' onClick={handleUsernameClick}>
-                <div className='App-UsernameText'>
+            <form>
+              <div className='App-Query'>
+                <div className='App-NormalText'>
                   <p>username</p>
                 </div>
-                <div className='App-UsernameRectangle'>
+                <div className='App-Rectangle'>
                   <input
                     type="text"
                     value={username}
-                    onChange={handleUsernameChange}
+                    onChange={handleChange(setUsername)}
                     placeholder=""
-                    style={{ visibility: usernameVisible ? 'visible' : 'hidden' }}
+                    style={{}}
                   />
                 </div>
+                {/* {error.username && <p className='Form-Error'>{error.username}</p>} */}
               </div>
-              <div className='App-PasswordQuery' onClick={handlePasswordClick}>
-                <div className='App-PasswordText'>
+              <div className='App-Query'>
+                <div className='App-NormalText'>
                   <p>password</p>
                 </div>
-                <div className='App-UPRectangle'>
+                <div className='App-Rectangle'>
                   <input
                     type="password"
                     value={password}
-                    onChange={handlePasswordChange}
+                    onChange={handleChange(setPassword)}
                     placeholder=""
-                    style={{ visibility: passwordVisible ? 'visible' : 'hidden' }}
+                    style={{}}
                   />
                 </div>
+                {/* {error.password && <p className='Form-Error'>{error.password}</p>} */}
               </div>
+              {error.username && <p className='Form-Error'>{error.username}</p>}
+              {error.password && <p className='Form-Error'>{error.password}</p>}
+              {error.submit && <p className='Form-Error'>{error.submit}</p>}
               <div className='App-LoginSignup'>
                 <div className='App-or'>
-                  <img
-                    src={loginbuttom}
-                    className="App-loginbuttom"
-                    alt="loginbuttom"
-                    onMouseDown={handleLoginPressed}
-                    onMouseUp={handleLoginRelease}
-                    onClick={handleLoginClick}
-                  />
-                  <p>or</p>
-                  <img
-                    src={signupbuttom}
-                    className="App-signupbuttom"
-                    alt="signupbuttom"
-                    onClick={() => navigate('/register')}
-                  />
+                  <button className="App-Button" onClick={handleLoginClick}> 
+                  log in
+                  </button>
+                  <p className="App-Or-text">or</p>
+                  <button className="App-Button" onClick={() => navigate('/signup')}> 
+                  sign up
+                  </button>
                 </div>
               </div>
             </form>
