@@ -113,6 +113,7 @@ form {
   letter-spacing: 0.15em;
   color: #1E1E1E;
   padding-bottom: 1.5vh;
+  margin-top: 10%;
 }
 /* Style for the query section */
 .App-Query {
@@ -123,6 +124,11 @@ form {
 .Signup-Query {
   position: relative;
   margin-top: 15px;
+}
+
+.App-Panel {
+  position: relative;
+  margin-top: 10%;
 }
 
 /* Style for the password input rectangle */
@@ -249,7 +255,7 @@ input:-webkit-autofill:active {
   text-align: left;
   font-size: 1.4vw;
   color: #ab1212;
-  /* margin-top: 5px; */
+  margin-top: 2%;
 }
 
 .Signup-GoLoginText {
@@ -258,6 +264,5 @@ input:-webkit-autofill:active {
   font-weight: 400;
   font-size: 1.7vw;
   color: #301313;
-  padding-top: 2vh;
   padding-bottom: 1vh;
 }

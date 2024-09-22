@@ -136,7 +136,7 @@ class UserRegistrationForm(forms.ModelForm):
         Returns:
             TicTacToeUser: The saved user instance with hashed password and API key.
         """
-        user = super().save(commit=False)  # Get the unsaved instance
+        user = super().save()
 
         # Hash the password securely before saving
         user.set_password(self.cleaned_data['password'])

@@ -29,16 +29,16 @@ function App() {
   // Handle input changes and validate in real-time
   const handleChange = (setter, validateFn) => (event) => {
     setter(event.target.value);
-    if (validateFn) validateFn();
+    if (validateFn) validateFn(event.target.value);
   };
 
   // Validate username (5-15 characters, allows letters, numbers, '_', '-', and '.')
-  const isValidUsername = () => {
+  const isValidUsername = (value) => {
     const usernamePattern = /^[A-Za-z0-9_.-]{4,15}$/;
-    if (!usernamePattern.test(username)) {
+    if (!usernamePattern.test(value)) {
         setError(prev => ({ ...prev, username: 'Username must be 5-15 characters long and can only contain letters, numbers, (_), (-), and (.).' }));
         return false;
-    } else if (username === '') {
+    } else if (value === '') {
         return true
     }
     setError(prev => ({ ...prev, username: '' }));
@@ -46,12 +46,12 @@ function App() {
   };
 
   // Password strength check
-  const isValidPassword = () => {
+  const isValidPassword = (value) => {
     const passwordPattern = /^(?=.*[A-Z])(?=.*\d).{6,25}$/;
-    if (!passwordPattern.test(password)) {
+    if (!passwordPattern.test(value)) {
         setError(prev => ({ ...prev, password: 'Password must be 7-25 characters long, with at least one uppercase letter and one number.' }));
         return false;
-    } else if (password === '') {
+    } else if (value === '') {
         return true
     }
     setError(prev => ({ ...prev, password: '' }));
@@ -63,8 +63,8 @@ function App() {
     event.preventDefault();
     setError({}); // Reset errors before validation
     if (
-      isValidUsername() &&
-      isValidPassword()
+      isValidUsername(username) &&
+      isValidPassword(password)
     ) {
       try {
         const formData = new URLSearchParams();

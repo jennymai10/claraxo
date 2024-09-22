@@ -35,16 +35,16 @@ function Signup() {
     // Handle input changes and validate in real-time
     const handleChange = (setter, validateFn) => (event) => {
         setter(event.target.value);
-        if (validateFn) validateFn();
+        if (validateFn) validateFn(event.target.value);
     };
 
     // Validate username (5-15 characters, allows letters, numbers, '_', '-', and '.')
-    const isValidUsername = () => {
-        const usernamePattern = /^[A-Za-z0-9_.-]{4,15}$/;
-        if (!usernamePattern.test(username)) {
+    const isValidUsername = (value) => {
+        const usernamePattern = /^[A-Za-z0-9_.-]{5,15}$/;
+        if (!usernamePattern.test(value)) {
             setError(prev => ({ ...prev, username: 'Username must be 5-15 characters long and can only contain letters, numbers, (_), (-), and (.).' }));
             return false;
-        } else if (username === '') {
+        } else if (value === '') {
             return true
         }
         setError(prev => ({ ...prev, username: '' }));
@@ -52,12 +52,12 @@ function Signup() {
     };
 
     // Validate email format
-    const isValidEmail = () => {
+    const isValidEmail = (value) => {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email)) {
+        if (!emailPattern.test(value)) {
             setError(prev => ({ ...prev, email: 'Please enter a valid email address.' }));
             return false;
-        } else if (email === '') {
+        } else if (value === '') {
             return true
         }
         setError(prev => ({ ...prev, email: ''}));
@@ -65,21 +65,30 @@ function Signup() {
     };
 
     // Validate profile name (only letters and spaces)
-    const isValidFullName = () => {
+    const isValidFullName = (value) => {
         const profileNamePattern = /^[A-Za-z\s]{2,30}$/;
-        if (!profileNamePattern.test(fullname)) {
+        if (!profileNamePattern.test(value)) {
             setError(prev => ({ ...prev, fullname: 'Full name can only has letters and spaces and must be between 2 and 30 characters.' }));
             return false;
-        } else if (fullname === '') {
+        } else if (value === '') {
             return true
         }
         setError(prev => ({ ...prev, fullname: '' }));
         return true;
     };
 
+    const isValidAccountType = (value) => {
+        if (value === "0") {
+            setError(prev => ({ ...prev, accountType: 'Account type is required.' }));
+            return false;
+        }
+        setError(prev => ({ ...prev, accountType: '' }));
+        return true;
+    };
+
     // Validate age (between 0 and 120)
-    const isValidAge = () => {
-        const ageValue = parseInt(age, 10);
+    const isValidAge = (value) => {
+        const ageValue = parseInt(value, 10);
         if (ageValue < 0 || ageValue > 120) {
             setError(prev => ({ ...prev, age: 'Age must be a number between 0 and 120.' }));
             return false;
@@ -91,22 +100,22 @@ function Signup() {
     };
 
     // Validate password match
-    const validatePasswords = () => {
-        if (password2 !== password) {
+    const validatePasswords = (value) => {
+        if (value !== password) {
             setError(prev => ({ ...prev, password2: 'Passwords do not match.' }));
             return false;
         }
         setError(prev => ({ ...prev, password2: '' }));
-        return true
+        return true;
     };
 
     // Password strength check
-    const isValidPassword = () => {
-        const passwordPattern = /^(?=.*[A-Z])(?=.*\d).{6,25}$/;
-        if (!passwordPattern.test(password)) {
+    const isValidPassword = (value) => {
+        const passwordPattern = /^(?=.*[A-Z])(?=.*\d).{7,25}$/;
+        if (!passwordPattern.test(value)) {
             setError(prev => ({ ...prev, password: 'Password must be 7-25 characters long, with at least one uppercase letter and one number.' }));
             return false;
-        } else if (password === '') {
+        } else if (value === '') {
             return true
         }
         setError(prev => ({ ...prev, password: '' }));
@@ -118,12 +127,13 @@ function Signup() {
         setError({}); // Reset errors before validation
 
         if (
-            isValidUsername() &&
-            isValidEmail() &&
-            isValidFullName() &&
-            isValidAge() &&
-            validatePasswords() &&
-            isValidPassword()
+            isValidUsername(username) &&
+            isValidEmail(email) &&
+            isValidFullName(fullname) &&
+            isValidAge(age) &&
+            validatePasswords(password2) &&
+            isValidPassword(password) &&
+            isValidAccountType(accountType)
         ) {
             try {
                 const formData = new URLSearchParams();
@@ -150,7 +160,7 @@ function Signup() {
 
                 if (response.ok) {
                     if (data.status === 'success') {
-                        navigate(data.redirect_url);
+                        navigate(`/verify_email/${username}`);
                     }
                 } else {
                     console.log(data.errors)
@@ -180,7 +190,6 @@ function Signup() {
                             <p>sign up</p>
                         </div>
                         <form>
-                            {error.submit && <p className='Form-Error'>{error.submit}</p>}
                             <div className="Signup-Query">
                                 <div className="App-NormalText">
                                     <p>username</p>
@@ -204,13 +213,14 @@ function Signup() {
                                     <select
                                         className="Signup-AccountTypeSelect"
                                         value={accountType}
-                                        onChange={handleChange(setAccountType)}
+                                        onChange={handleChange(setAccountType, isValidAccountType)}
                                     >
-                                        <option value="0">choose a role</option>
+                                        <option value="0"></option>
                                         <option value="1">player</option>
                                         <option value="2">researcher</option>
                                     </select>
                                 </div>
+                                {error.accountType && <p className='Form-Error'>{error.accountType}</p>}
                             </div>
 
                             <div className="Signup-Query">
@@ -301,13 +311,8 @@ function Signup() {
                                 </div>
                                 {error.fullname && <p className='Form-Error'>{error.fullname}</p>}
                             </div>
-
-                            {/* <div className="App-NormalText">
-                                {error.submit && <p style={{ color: 'red' }}> {error.submit} </p>}
-                            </div> */}
-
-                            <div className="Signup-Query">
-                                {error.submit && <p className='Form-Error'>{error.submit}</p>}
+                            {error.submit && <p className='Form-Error'>{error.submit}</p>}
+                            <div className="App-Panel">
                                 <a href="/login">
                                     <div className="Signup-GoLoginText">
                                         <p>already have an account?</p>

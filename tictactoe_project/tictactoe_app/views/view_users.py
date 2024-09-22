@@ -78,7 +78,7 @@ def register_user(request):
             return JsonResponse({
                         'status': 'success',
                         'message': 'Successfully created an account. Proceeding to Email Verification.',
-                        'redirect_url': '/verify_email/'
+                        'redirect_url': "/verify_email/${" + user.username + "}"
                     }, status=200)
         else:
             errors = {field: error[0] for field, error in form.errors.items()}
@@ -111,7 +111,7 @@ def verify_email(request):
     """
     if request.method == 'POST':
         username = request.POST['username']
-        code = request.POST['code']
+        code = request.POST['verification_code']
         try:
             # Retrieve the user by their username and verification code
             user = TicTacToeUser.objects.get(username=username, verification_code=code)
@@ -122,10 +122,18 @@ def verify_email(request):
             # Automatically log in the user after verification
             login(request, user)
             # Redirect to the login page
-            return redirect('http://localhost:8000/login/')
+            return JsonResponse({
+                    'status': 'success',
+                    'redirect_url': "/new_game/",
+                }, status=200)
         except TicTacToeUser.DoesNotExist:
             # If the username or code is incorrect, render the verification page with an error
-            return render(request, 'tictactoe_app/verify_email.html', {'error': 'Invalid code or username'})
+            errors = {'verification_code': 'Invalid verification code.'}
+            return JsonResponse({
+                    'status': 'error',
+                    'message': "Invalid verification code.",
+                    'errors': errors
+                }, status=401)
     return render(request, 'tictactoe_app/verify_email.html')
 
 
