@@ -54,7 +54,7 @@ function VerifyEmail() {
                 formData.append('username', username);
                 formData.append('verification_code', verification_code);
 
-                const response = await fetch('http://localhost:8000/verify_email/', {
+                const response = await fetch('http://localhost:8000/verifyemail/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -88,14 +88,14 @@ function VerifyEmail() {
     return (
         <div className="App">
             <header className="App-header">
-                <img src={board} className="App-board" alt="board" />
-                <img src={ruler} className="App-ruler" alt="ruler" />
-                <img src={pencil} className="App-pencil" alt="pencil" />
+                <img src={board} className="App-board" draggable="false" />
+                <img src={ruler} className="App-ruler" draggable="false" />
+                <img src={pencil} className="App-pencil" draggable="false" />
 
                 <div className="App-container">
                     <div className="App-SignupForm">
                         <div className="App-FormName">
-                            <p>verify email</p>
+                            <h4>verify email</h4>
                         </div>
                         <form>
                             <div className="Signup-Query">

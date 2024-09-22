@@ -75,10 +75,11 @@ def register_user(request):
                 fail_silently=False,
             )
             # Redirect to the email verification page
+            redirect_url = '/verifyemail/' + user.username
             return JsonResponse({
                         'status': 'success',
                         'message': 'Successfully created an account. Proceeding to Email Verification.',
-                        'redirect_url': "/verify_email/${" + user.username + "}"
+                        'redirect_url': redirect_url
                     }, status=200)
         else:
             errors = {field: error[0] for field, error in form.errors.items()}
@@ -93,7 +94,7 @@ def register_user(request):
     return render(request, 'tictactoe_app/register.html', {'form': form})
 
 
-def verify_email(request):
+def verifyemail(request):
     """
     Handle email verification for new users.
 
@@ -134,7 +135,7 @@ def verify_email(request):
                     'message': "Invalid verification code.",
                     'errors': errors
                 }, status=401)
-    return render(request, 'tictactoe_app/verify_email.html')
+    return render(request, 'tictactoe_app/verifyemail.html')
 
 
 @login_required
@@ -199,12 +200,13 @@ def login_user(request):
                         'redirect_url': '/new_game/'
                     })
                 else:
+                    redirect_url = '/verifyemail/' + user.username
                     # If the user's email is not verified, display an error message
                     return JsonResponse({
                         'status': 'error',
                         'message': 'Email has not been verify.',
                         'errors': {'submit' : 'Email has not been verify. You will be redirected to verify your email in 5s.'},
-                        'redirect_url': '/verify_email/'
+                        'redirect_url': redirect_url,
                     }, status=200)
             else:
                 # If the credentials are invalid, add an error to the form

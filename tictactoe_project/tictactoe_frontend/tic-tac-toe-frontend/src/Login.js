@@ -108,9 +108,9 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={board} className="App-board" alt="board" />
-        <img src={ruler} className="App-ruler" alt="ruler" />
-        <img src={pencil} className="App-pencil" alt="pencil" />
+        <img src={board} className="App-board" draggable="false" />
+        <img src={ruler} className="App-ruler" draggable="false" />
+        <img src={pencil} className="App-pencil" draggable="false" />
         <div className="App-container">
           <div className="App-Title">
             <p>tic. tac. toe.</p>

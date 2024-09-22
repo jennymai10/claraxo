@@ -26,7 +26,7 @@
   mix-blend-mode: luminosity;
   opacity: 0.5;
   transform: rotate(-106.95);
-  background-clip: content-box; 
+  background-clip: content-box;
 }
 
 p {
@@ -84,14 +84,13 @@ p {
 .App-Title {
   width: 20%;
   height: auto;
-  font-family: 'Londrina Shadow', sans-serif;
+  font-family: 'Londrina Shadow';
   font-size: 13vh;
+  font-weight: 600;
   line-height: 20vh;
   letter-spacing: 0.25em;
   color: #1E1E1E;
-  align-self: start;
-  margin-top: 5%;
-  border: none;
+  align-self: top;
 }
 
 /* Style for the login form container */
@@ -107,13 +106,14 @@ p {
 form {
   width: 100%;
 }
-.App-FormName {
+.App-FormName h4 {
   font-family: 'Londrina Shadow';
-  font-size: 8vh;
+  font-size: 6vh;
   letter-spacing: 0.15em;
   color: #1E1E1E;
   padding-bottom: 1.5vh;
-  margin-top: 10%;
+  margin: 0px;
+  margin-top: 15%;
 }
 /* Style for the query section */
 .App-Query {

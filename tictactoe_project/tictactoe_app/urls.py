@@ -10,7 +10,7 @@ urlpatterns = [
     path('login/', login_user, name='login_user'),
     path('logout/', logout_user, name='logout_user'),
     path('register/', register_user, name='register_user'),
-    path('verify_email/', verify_email, name='verify_email'),
+    path('verifyemail/', verifyemail, name='verify_email'),
     path('users/', get_users, name='get_users'),
     
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),

@@ -17,8 +17,8 @@ root.render(
         <Route path="/login" element={<Login />} />
         <Route path="/new_game" element={<Playboard />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/verify_email" element={<VerifyEmail />} />
-        <Route path="/verify_email/:username" element={<VerifyEmail />} />
+        <Route path="/verifyemail" element={<VerifyEmail />} />
+        <Route path="/verifyemail/:username" element={<VerifyEmail />} />
       </Routes>
     </Router>
   </React.StrictMode>

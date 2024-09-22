@@ -30,6 +30,7 @@ function Signup() {
     const [age, setAge] = useState('');
     const [fullname, setFullname] = useState('');
     const [error, setError] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     // Handle input changes and validate in real-time
@@ -123,6 +124,7 @@ function Signup() {
     };
 
     const handleSignUpClick = async (event) => {
+        setIsLoading(true);
         event.preventDefault();
         setError({}); // Reset errors before validation
 
@@ -160,7 +162,7 @@ function Signup() {
 
                 if (response.ok) {
                     if (data.status === 'success') {
-                        navigate(`/verify_email/${username}`);
+                        navigate(data.redirect_url);
                     }
                 } else {
                     console.log(data.errors)
@@ -173,6 +175,8 @@ function Signup() {
             } catch (error) {
                 console.error('Error:', error);
                 setError(prev => ({ ...prev, submit: 'An error occurred during signup. Please try again.' }));
+            } finally {
+                setIsLoading(false);
             }
         }
     };
@@ -180,14 +184,14 @@ function Signup() {
     return (
         <div className="App">
             <header className="App-header">
-                <img src={board} className="App-board" alt="board" />
-                <img src={ruler} className="App-ruler" alt="ruler" />
-                <img src={pencil} className="App-pencil" alt="pencil" />
+                <img src={board} className="App-board" draggable="false" />
+                <img src={ruler} className="App-ruler" draggable="false" />
+                <img src={pencil} className="App-pencil" draggable="false" />
 
                 <div className="App-container">
                     <div className="App-SignupForm">
                         <div className="App-FormName">
-                            <p>sign up</p>
+                            <h4>sign up</h4>
                         </div>
                         <form>
                             <div className="Signup-Query">
@@ -318,8 +322,8 @@ function Signup() {
                                         <p>already have an account?</p>
                                     </div>
                                 </a>
-                                <button className="App-Button" onClick={handleSignUpClick}>
-                                    sign up
+                                <button className="App-Button" onClick={handleSignUpClick} disabled={isLoading}>
+                                    {isLoading ? 'loading...' : 'sign up'}
                                 </button>
                             </div>
                         </form>
