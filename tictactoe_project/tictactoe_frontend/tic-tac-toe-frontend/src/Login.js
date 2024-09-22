@@ -5,80 +5,80 @@ import ruler from './assets/ruler.png';
 import pencil from './assets/pencil.png';
 import { BrowserRouter as Router, Route, Routes, useNavigate, Link } from 'react-router-dom';
 
-function getCookie(name) {
-  let cookieValue = null;
+function get_cookie(name) {
+  let cookie_value = null;
   if (document.cookie && document.cookie !== '') {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
       const cookie = cookies[i].trim();
       if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        cookie_value = decodeURIComponent(cookie.substring(name.length + 1));
         break;
       }
     }
   }
-  return cookieValue;
+  return cookie_value;
 }
 
-function App() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState({});
+function Login() {
+  const [username, set_username] = useState('');
+  const [password, set_password] = useState('');
+  const [error, set_error] = useState({});
   const navigate = useNavigate();
 
   // Handle input changes and validate in real-time
-  const handleChange = (setter, validateFn) => (event) => {
+  const handle_change = (setter, validate_fn) => (event) => {
     setter(event.target.value);
-    if (validateFn) validateFn(event.target.value);
+    if (validate_fn) validate_fn(event.target.value);
   };
 
   // Validate username (5-15 characters, allows letters, numbers, '_', '-', and '.')
-  const isValidUsername = (value) => {
-    const usernamePattern = /^[A-Za-z0-9_.-]{4,15}$/;
-    if (!usernamePattern.test(value)) {
-        setError(prev => ({ ...prev, username: 'Username must be 5-15 characters long and can only contain letters, numbers, (_), (-), and (.).' }));
+  const is_valid_username = (value) => {
+    const username_pattern = /^[A-Za-z0-9_.-]{5,15}$/;
+    if (!username_pattern.test(value)) {
+        set_error(prev => ({ ...prev, username: 'Username must be 5-15 characters long and can only contain letters, numbers, (_), (-), and (.).' }));
         return false;
     } else if (value === '') {
         return true
     }
-    setError(prev => ({ ...prev, username: '' }));
+    set_error(prev => ({ ...prev, username: '' }));
     return true;
   };
 
   // Password strength check
-  const isValidPassword = (value) => {
-    const passwordPattern = /^(?=.*[A-Z])(?=.*\d).{6,25}$/;
-    if (!passwordPattern.test(value)) {
-        setError(prev => ({ ...prev, password: 'Password must be 7-25 characters long, with at least one uppercase letter and one number.' }));
+  const is_valid_password = (value) => {
+    const password_pattern = /^(?=.*[A-Z])(?=.*\d).{7,25}$/;
+    if (!password_pattern.test(value)) {
+        set_error(prev => ({ ...prev, password: 'Password must be 7-25 characters long, with at least one uppercase letter and one number.' }));
         return false;
     } else if (value === '') {
         return true
     }
-    setError(prev => ({ ...prev, password: '' }));
+    set_error(prev => ({ ...prev, password: '' }));
     return true;
   };
 
   // Function to handle login click event
-  const handleLoginClick = async (event) => {
+  const handle_login_click = async (event) => {
     event.preventDefault();
-    setError({}); // Reset errors before validation
+    set_error({}); // Reset errors before validation
     if (
-      isValidUsername(username) &&
-      isValidPassword(password)
+      is_valid_username(username) &&
+      is_valid_password(password)
     ) {
       try {
-        const formData = new URLSearchParams();
-        formData.append('username', username);
-        formData.append('password', password);
+        const form_data = new URLSearchParams();
+        form_data.append('username', username);
+        form_data.append('password', password);
 
         const response = await fetch('http://localhost:8000/login/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': get_cookie('csrftoken'),
           },
           credentials: 'include',
-          body: formData.toString(),
+          body: form_data.toString(),
         });
 
         const data = await response.json();
@@ -86,7 +86,7 @@ function App() {
           if (data.status === 'success') {
             navigate(data.redirect_url);
           } else if (data.status === 'error') {
-            setError(data.errors);
+            set_error(data.errors);
             setTimeout(() => {
               navigate(data.redirect_url);
             }, 6000);
@@ -94,9 +94,9 @@ function App() {
         } else {
           console.log(data.errors)
           if (data.errors) {
-            setError(data.errors);
+            set_error(data.errors);
           } else {
-            setError({ submit: data.message });
+            set_error({ submit: data.message });
           }
         }
       } catch (error) {
@@ -125,12 +125,11 @@ function App() {
                   <input
                     type="text"
                     value={username}
-                    onChange={handleChange(setUsername)}
+                    onChange={handle_change(set_username)}
                     placeholder=""
                     style={{}}
                   />
                 </div>
-                {/* {error.username && <p className='Form-Error'>{error.username}</p>} */}
               </div>
               <div className='App-Query'>
                 <div className='App-NormalText'>
@@ -140,19 +139,18 @@ function App() {
                   <input
                     type="password"
                     value={password}
-                    onChange={handleChange(setPassword)}
+                    onChange={handle_change(set_password)}
                     placeholder=""
                     style={{}}
                   />
                 </div>
-                {/* {error.password && <p className='Form-Error'>{error.password}</p>} */}
               </div>
               {error.username && <p className='Form-Error'>{error.username}</p>}
               {error.password && <p className='Form-Error'>{error.password}</p>}
               {error.submit && <p className='Form-Error'>{error.submit}</p>}
               <div className='App-LoginSignup'>
                 <div className='App-or'>
-                  <button className="App-Button" onClick={handleLoginClick}> 
+                  <button className="App-Button" onClick={handle_login_click}> 
                   log in
                   </button>
                   <p className="App-Or-text">or</p>
@@ -169,4 +167,4 @@ function App() {
   );
 }
 
-export default App;
+export default Login;
