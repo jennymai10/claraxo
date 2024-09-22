@@ -63,11 +63,8 @@ def register_user(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            # Save user temporarily without committing to add verification details
-            user = form.save(commit=False)
-            # Generate a random 6-digit verification code
+            user = form.save()
             user.verification_code = random.randint(100000, 999999)
-            # Mark the user as inactive until email is verified
             user.is_active = False
             user.save()
             send_mail(
@@ -78,11 +75,21 @@ def register_user(request):
                 fail_silently=False,
             )
             # Redirect to the email verification page
-            return redirect('http://localhost:8000/verify_email/')
+            return JsonResponse({
+                        'status': 'success',
+                        'message': 'Successfully created an account. Proceeding to Email Verification.',
+                        'redirect_url': '/verify_email/'
+                    }, status=200)
+        else:
+            errors = {field: error[0] for field, error in form.errors.items()}
+            print(errors)
+            return JsonResponse({
+                    'status': 'error',
+                    'message': "Form validation failed.",
+                    'errors': errors
+                }, status=400)
     else:
-        # Display the empty registration form for a GET request
         form = UserRegistrationForm()
-
     return render(request, 'tictactoe_app/register.html', {'form': form})
 
 
@@ -187,25 +194,21 @@ def login_user(request):
                     # If the user's email is not verified, display an error message
                     return JsonResponse({
                         'status': 'error',
-                        'message': 'Please verify your email before logging in.',
+                        'message': 'Email has not been verify.',
+                        'errors': {'submit' : 'Email has not been verify. You will be redirected to verify your email in 5s.'},
                         'redirect_url': '/verify_email/'
-                    }, status=403)
+                    }, status=200)
             else:
                 # If the credentials are invalid, add an error to the form
                 return JsonResponse({
                     'status': 'error',
-                    'message': 'Invalid username or password.',
-                    'redirect_url': '/login/'
+                    'message': 'Incorrect username or password.',
+                    'errors': {'submit' : 'Incorrect username or password.'},
                 }, status=401)
     else:
         # Display the empty login form for a GET request
         form = LoginForm()
         return render(request, 'tictactoe_app/login.html', {'form': form})
-        # return JsonResponse({
-        #         'status': 'error',
-        #         'message': 'Empty form.',
-        #         'redirect_url': '/login/'
-        #     }, status=400)
 
 @login_required
 def logout_user(request):

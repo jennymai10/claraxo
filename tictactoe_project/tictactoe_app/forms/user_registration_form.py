@@ -58,17 +58,17 @@ class UserRegistrationForm(forms.ModelForm):
             if password != password2:
                 raise forms.ValidationError("Passwords do not match.")
             
-            # # Check for password length (7-25 characters)
-            # if len(password) < 7 or len(password) > 25:
-            #     raise forms.ValidationError("Password must be between 7 and 25 characters long.")
+            # Check for password length (7-25 characters)
+            if len(password) < 7 or len(password) > 25:
+                raise forms.ValidationError("Password must be between 7 and 25 characters long.")
 
-            # # Check for at least one number
-            # if not re.search(r'\d', password):
-            #     raise forms.ValidationError("Password must contain at least one number.")
+            # Check for at least one number
+            if not re.search(r'\d', password):
+                raise forms.ValidationError("Password must contain at least one number.")
 
-            # # Check for at least one uppercase letter
-            # if not re.search(r'[A-Z]', password):
-            #     raise forms.ValidationError("Password must contain at least one uppercase letter.")
+            # Check for at least one uppercase letter
+            if not re.search(r'[A-Z]', password):
+                raise forms.ValidationError("Password must contain at least one uppercase letter.")
 
         return password2
 
@@ -119,7 +119,7 @@ class UserRegistrationForm(forms.ModelForm):
             forms.ValidationError: If age is less than or equal to 0.
         """
         age = self.cleaned_data.get('age')
-        if age <= 0:
+        if age <= 0 or age > 120:
             raise forms.ValidationError("Invalid age.")
         return age
 
@@ -148,5 +148,5 @@ class UserRegistrationForm(forms.ModelForm):
             user.api_key_secret_name = secret_name
 
         if commit:
-            user.save()  # Save the instance to the database
+            user.save()
         return user
