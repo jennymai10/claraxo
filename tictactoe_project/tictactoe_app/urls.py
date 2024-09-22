@@ -4,9 +4,7 @@ from .views.view_game import *
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('', login_user, name='login_user'),
-    # path('get-csrf-token/', get_csrf_token, name='get_csrf_token'),
-    
+    path('', login_user, name='login_user'),    
     path('login/', login_user, name='login_user'),
     path('logout/', logout_user, name='logout_user'),
     path('register/', register_user, name='register_user'),
