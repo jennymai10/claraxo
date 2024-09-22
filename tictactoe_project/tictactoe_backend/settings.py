@@ -156,10 +156,12 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',  # Your React frontend URL
+    'http://localhost:3000',
 ]
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/new_game/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+CSRF_COOKIE_HTTPONLY = False
