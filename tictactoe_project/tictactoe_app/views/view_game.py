@@ -5,12 +5,21 @@ from django.http import JsonResponse
 import json
 from .game_utils import check_win, initialize_board, generate_ai_move, game_end_handler
 import google.generativeai as genai
-import random, os
-from dotenv import load_dotenv
+from google.cloud import secretmanager
+import os
+from ..models import TicTacToeUser
 
-load_dotenv()
-genai.configure(api_key=os.environ["API_KEY"])
-model = genai.GenerativeModel("gemini-1.5-flash")
+# genai.configure(api_key=os.environ["API_KEY"])
+
+def get_secret(secret_name):
+    """
+    Retrieve secret value from Google Cloud Secret Manager.
+    """
+    client = secretmanager.SecretManagerServiceClient()
+    project_id = 'c-lara'
+    name = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
+    response = client.access_secret_version(name=name)
+    return response.payload.data.decode('UTF-8')
 
 @login_required
 def game_history(request):
@@ -63,6 +72,12 @@ def make_move(request):
         if result:
             return result
 
+        # Retrieve the API key from the logged-in user's profile
+        api_key = get_secret(f"api-key-{request.user.api_key_secret_id}")
+        print(api_key)
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-1.5-flash")
+
         # AI Move
         unoccupied = [key for key, value in board.items() if value == '']
         ai_move = generate_ai_move(board, unoccupied, model)
@@ -79,7 +94,7 @@ def make_move(request):
 
         # Save board state
         request.session['board'] = board
-        request.session.modified = True  # Mark session as modified to ensure it is saved
+        request.session.modified = True
         game.save()
         return JsonResponse({'status': 'success', 'ai_move': ai_move})
 

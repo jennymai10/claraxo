@@ -2,84 +2,11 @@ import random
 from django.db import models
 from django.core.validators import MinLengthValidator, EmailValidator, MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.contrib.auth.hashers import make_password
+from google.cloud import secretmanager
+from google.api_core.exceptions import AlreadyExists, PermissionDenied, NotFound
 
-class TicTacToeUserManager(BaseUserManager):
-    """
-    Custom manager for the TicTacToeUser model.
-
-    Provides helper methods to create users with specific fields. This manager
-    simplifies user creation by enforcing required fields and setting up
-    verification codes and password hashing.
-    """
-
-    def create_user(self, username, password=None, email=None, account_type=None, profile_name=None, age=None, api_key=None, **extra_fields):
-        """
-        Creates and returns a new user with the given fields. This method ensures
-        that required fields like username, password, email, account_type, profile_name, 
-        and age are provided. It also generates a random verification code for 
-        email verification and hashes the password.
-
-        Args:
-            username (str): The username of the user (required).
-            password (str): The password of the user (required, hashed internally).
-            email (str): The email address of the user (required).
-            account_type (int): The type of user (Player=1, Research=2).
-            profile_name (str): The display name for the user's profile.
-            age (int): The user's age (must be provided).
-            api_key (str): Optional API key for the user (hashed internally).
-
-        Returns:
-            TicTacToeUser: A new user instance.
-
-        Raises:
-            ValueError: If any of the required fields are missing.
-        """
-        if not username:
-            raise ValueError("The Username field is required.")
-        if not password:
-            raise ValueError("The Password field is required.")
-        if not email:
-            raise ValueError("The Email field is required.")
-        if not account_type:
-            raise ValueError("The Account Type field is required.")
-        if not profile_name:
-            raise ValueError("The Profile Name field is required.")
-        if age is None:
-            raise ValueError("The Age field is required.")
-
-        # Create user instance but do not commit to the database yet
-        user = self.model(
-            username=username,
-            email=self.normalize_email(email),
-            account_type=account_type,
-            profile_name=profile_name,
-            age=age,
-            # Generate a random 6-digit verification code for email verification
-            verification_code=random.randint(100000, 999999),
-            **extra_fields
-        )
-        # Hash the password
-        user.set_password(password)
-        if api_key:
-            # Hash the API key if provided
-            user.set_api_key(api_key)
-        # Save the user instance to the database
-        user.save()
-        return user
-
-    def create_superuser(self, username, password=None, email=None, account_type=None, profile_name=None, age=None, api_key=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_active', True)
-
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
-
-        return self.create_user(username, password, email, account_type, profile_name, age, api_key, **extra_fields)
-
+from datetime import timedelta, datetime, timezone
+import uuid
 
 class TicTacToeUser(AbstractBaseUser, PermissionsMixin):
     """
@@ -143,13 +70,18 @@ class TicTacToeUser(AbstractBaseUser, PermissionsMixin):
         help_text="The type of user account: Player or Research.",
         default=1
     )
-
-    # A hashed API key for external integrations, if required
-    api_key = models.CharField(
-        max_length=128,
+    
+    api_key_secret_id = models.UUIDField(
+        default=uuid.uuid4(),
+        editable=False,
+        unique=True,
+        null=True,
+        help_text="A unique identifier for the user's API key secret."
+    )
+    api_key_expiry_date = models.DateTimeField(
         blank=True,
-        help_text="A securely hashed API key for the user.",
-        default=''
+        null=True,
+        help_text="The expiration date of the API key."
     )
 
     # Is the account active? (Email verified or not)
@@ -161,7 +93,7 @@ class TicTacToeUser(AbstractBaseUser, PermissionsMixin):
     verification_code = models.IntegerField(blank=True, null=True)
 
     # Use the custom manager to handle user creation
-    objects = TicTacToeUserManager()
+    objects = BaseUserManager()
 
     # Define the unique identifier for authentication (username in this case)
     USERNAME_FIELD = 'username'
@@ -174,35 +106,58 @@ class TicTacToeUser(AbstractBaseUser, PermissionsMixin):
         Returns the string representation of the user, which is the username.
         """
         return self.username
-
-    def set_api_key(self, raw_api_key):
+    
+    def store_api_key_in_secret_manager(self, api_key, secret_id, update_secret=False):
         """
-        Hashes and securely stores the API key for the user, similar to password hashing.
-
+        Store the API key in Google Cloud Secret Manager and return the secret name.
+        If an old secret name is provided, it will be deleted first.
+        
         Args:
-            raw_api_key (str): The plain-text API key that needs to be hashed.
-        """
-        self.api_key = make_password(raw_api_key)
-
-    def check_api_key(self, raw_api_key):
-        """
-        Validates whether the provided API key matches the stored, hashed API key.
-
-        Args:
-            raw_api_key (str): The plain-text API key to be checked.
-
+            api_key (str): The new API key to store.
+            secret_id (str): The new secret ID for the API key.
+            old_secret_name (str): The name of the old secret to delete (optional).
+        
         Returns:
-            bool: True if the API key matches the stored hash, False otherwise.
+            str: The name of the new secret.
         """
-        return self.api_key == make_password(raw_api_key)
+        client = secretmanager.SecretManagerServiceClient()
+        project_id = 'c-lara'
+        parent = f"projects/{project_id}"
 
-    def has_perm(self, perm, obj=None):
-        "Does the user have a specific permission?"
-        # Simplest possible answer: Yes, always
-        return True
+        try:
+            # Delete old secret if provided
+            if update_secret:
+                try:
+                    secret_name = f"projects/{project_id}/secrets/api-key-{secret_id}"
+                    old_secret = client.delete_secret(request={"name": secret_name})
+                except Exception as e:
+                    print(f"Failed to delete old secret: {str(e)}")
 
-    def has_module_perms(self, app_label):
-        "Does the user have permissions to view the app `app_label`?"
-        # Simplest possible answer: Yes, always
-        return True
+            # Create a new secret for the updated API key
+            secret = client.create_secret(
+                request={
+                    "parent": parent,
+                    "secret_id": f"api-key-{secret_id}",
+                    "secret": {"replication": {"automatic": {}}},
+                }
+            )
+            # Calculate the expiration date (180 days from now)
+            expiration_date = datetime.now(timezone.utc) + timedelta(days=90)
 
+            # Add a version with the new API key data and set the expiration
+            version = client.add_secret_version(
+                request={
+                    "parent": secret.name,
+                    "payload": {"data": api_key.encode("UTF-8")},
+                }
+            )
+            self.api_key_expiry_date = expiration_date
+            self.save()
+
+            # Simulating expiration: store expiration timestamp in metadata (not enforced by Google Cloud)
+            print(f"Created new secret: {version.name}, expires on {expiration_date}")
+            return secret.name
+        except Exception as e:
+            # Handle the exception appropriately
+            print(f"Failed to store API key in Secret Manager: {str(e)}")
+            raise

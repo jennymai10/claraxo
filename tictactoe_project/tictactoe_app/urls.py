@@ -5,7 +5,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', login_user, name='login_user'),
-    path('get-csrf-token/', get_csrf_token, name='get_csrf_token'),
+    # path('get-csrf-token/', get_csrf_token, name='get_csrf_token'),
     
     path('login/', login_user, name='login_user'),
     path('logout/', logout_user, name='logout_user'),
@@ -23,4 +23,5 @@ urlpatterns = [
     path('new_game/', reset_game, name='reset_game'),
     path('tictactoe_result/', tictactoe_result, name='tictactoe_result'),
     path('history/', game_history, name='game_history'),
+    path('settings/', update_profile, name='update_profile'),
 ]

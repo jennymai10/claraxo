@@ -1,5 +1,3 @@
-# game_utils.py
-
 import random
 from django.http import JsonResponse
 
@@ -73,7 +71,7 @@ def game_end_handler(board, game, winner, request):
         request.session['winner'] = winner
         return JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
-    # Check for a draw
+
     if '' not in board.values():
         game.winner = 'Draw'
         game.completed = True

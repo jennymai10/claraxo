@@ -1,19 +1,45 @@
 from django.shortcuts import render, redirect
-from ..forms import UserRegistrationForm, LoginForm
+from ..forms import UserRegistrationForm, LoginForm, UserProfileForm
 from ..models import TicTacToeUser
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.conf import settings
 import random
-
+from google.cloud import secretmanager
 from django.http import JsonResponse
-
 from django.middleware.csrf import get_token
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
+from datetime import datetime, timedelta, timezone
 
 def get_csrf_token(request):
     csrf_token = get_token(request)
     return JsonResponse({'csrfToken': csrf_token})
+
+@login_required
+def update_profile(request):
+    """
+    Handle profile updates, including username, email, age, profile name, API key, and password.
+    If the email is changed, the user must verify it again.
+    """
+    user = request.user
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            # Update the session with the new password if changed
+            if form.cleaned_data.get('new_password'):
+                update_session_auth_hash(request, user)
+            # Show success message
+            messages.success(request, 'Your profile has been updated successfully.')
+            return redirect('update_profile')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = UserProfileForm(instance=user)
+
+    return render(request, 'tictactoe_app/update_profile.html', {'form': form})
 
 def register_user(request):
     """
@@ -44,7 +70,13 @@ def register_user(request):
             # Mark the user as inactive until email is verified
             user.is_active = False
             user.save()
-
+            send_mail(
+                'C-Lara | Email Verification',
+                f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
+                settings.EMAIL_HOST_USER,
+                [user.email],
+                fail_silently=False,
+            )
             # Redirect to the email verification page
             return redirect('http://localhost:8000/verify_email/')
     else:
@@ -70,13 +102,6 @@ def verify_email(request):
         HttpResponse: The rendered email verification template with or without an error message.
         HttpResponseRedirect: Redirect to the login page after successful verification and activation.
     """
-    send_mail(
-                'Email Verification',
-                f'Your verification code is {user.verification_code}',
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
     if request.method == 'POST':
         username = request.POST['username']
         code = request.POST['code']
@@ -143,6 +168,13 @@ def login_user(request):
             # Authenticate the user with the provided credentials
             user = authenticate(request, username=username, password=password)
             if user is not None:
+                # Check if the API key is expiring soon (less than 14 days)
+                if user.api_key_expiry_date:
+                    current_time = datetime.now(timezone.utc)  # Timezone-aware UTC datetime
+                    days_remaining = (user.api_key_expiry_date - current_time).days
+                    if days_remaining <= 7:
+                        # Send warning email about API key expiration
+                        send_warning_email(user, days_remaining)
                 # Check if the user's email is verified (is_active is True)
                 if user.is_active:
                     # Log in the user
@@ -184,3 +216,32 @@ def logout_user(request):
     """
     logout(request)
     return redirect('/login/')
+
+def send_warning_email(user, days_remaining):
+    """
+    Sends a warning email to the user if their API key is expiring soon.
+
+    Args:
+        user (TicTacToeUser): The user whose API key is expiring.
+        days_remaining (int): Number of days left before the API key expires.
+    """
+    subject = 'C-Lara | Your API Key is Expiring Soon'
+    message = f"""
+    Hello {user.profile_name},
+
+    This is a reminder that your API key will expire in {days_remaining} day(s).
+
+    Please take necessary action to renew your API key before it expires.
+
+    Best regards,
+    C-Lara TicTacToe Team
+    """
+    
+    # Sending the email
+    send_mail(
+        subject,
+        message,
+        settings.EMAIL_HOST_USER,
+        [user.email],
+        fail_silently=False,
+    )

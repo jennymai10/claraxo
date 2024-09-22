@@ -12,11 +12,9 @@ class UserRegistrationForm(forms.ModelForm):
     security and also checks for username, account type, and age validation.
     """
 
-    password2 = forms.CharField(
-        label='Re-type Password',
-        widget=forms.PasswordInput(),
-        help_text="Enter the same password for verification."
-    )
+    password2 = forms.CharField(label='Re-type Password', widget=forms.PasswordInput())
+    api_key = forms.CharField(widget=forms.PasswordInput(), required=False, help_text='Optional API key for external integrations.')
+
 
     class Meta:
         model = TicTacToeUser
@@ -60,17 +58,17 @@ class UserRegistrationForm(forms.ModelForm):
             if password != password2:
                 raise forms.ValidationError("Passwords do not match.")
             
-            # Check for password length (7-25 characters)
-            if len(password) < 7 or len(password) > 25:
-                raise forms.ValidationError("Password must be between 7 and 25 characters long.")
+            # # Check for password length (7-25 characters)
+            # if len(password) < 7 or len(password) > 25:
+            #     raise forms.ValidationError("Password must be between 7 and 25 characters long.")
 
-            # Check for at least one number
-            if not re.search(r'\d', password):
-                raise forms.ValidationError("Password must contain at least one number.")
+            # # Check for at least one number
+            # if not re.search(r'\d', password):
+            #     raise forms.ValidationError("Password must contain at least one number.")
 
-            # Check for at least one uppercase letter
-            if not re.search(r'[A-Z]', password):
-                raise forms.ValidationError("Password must contain at least one uppercase letter.")
+            # # Check for at least one uppercase letter
+            # if not re.search(r'[A-Z]', password):
+            #     raise forms.ValidationError("Password must contain at least one uppercase letter.")
 
         return password2
 
@@ -144,7 +142,10 @@ class UserRegistrationForm(forms.ModelForm):
         user.set_password(self.cleaned_data['password'])
 
         # Hash the API key securely before saving (if provided)
-        user.set_api_key(self.cleaned_data['api_key'])
+        if 'api_key' in self.cleaned_data and self.cleaned_data['api_key']:
+            # Store the API key using the secret manager and link to the user model
+            secret_name = user.store_api_key_in_secret_manager(self.cleaned_data['api_key'], str(user.api_key_secret_id))
+            user.api_key_secret_name = secret_name
 
         if commit:
             user.save()  # Save the instance to the database

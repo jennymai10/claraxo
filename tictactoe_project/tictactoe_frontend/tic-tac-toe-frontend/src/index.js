@@ -14,7 +14,7 @@ root.render(
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/playboard" element={<Playboard />} />
+        <Route path="/new_game" element={<Playboard />} />
         <Route path="/signup" element={<Signup />} />
       </Routes>
     </Router>
