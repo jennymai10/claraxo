@@ -4,12 +4,33 @@ from ..models.user_model import TicTacToeUser
 
 class UserRegistrationForm(forms.ModelForm):
     """
-    Form for creating and updating TicTacToeUser instances.
+    UserRegistrationForm is a Django form class used to create and update TicTacToeUser instances.
+    It is based on the TicTacToeUser model and provides fields for user registration and profile
+    updates, including username, password, email, account type, profile name, age, and an optional
+    API key for external integrations.
 
-    This form is based on the TicTacToeUser model and provides fields for username,
-    password, password confirmation (password2), email, account_type, profile_name,
-    age, and api_key. It includes custom validation for passwords to ensure strong 
-    security and also checks for username, account type, and age validation.
+    This form includes custom validation methods for:
+    - Passwords: Ensuring strong password security.
+    - Username: Validating username length.
+    - Account type: Ensuring correct account type selection.
+    - Age: Validating a realistic age range.
+
+    Attributes:
+        password2 (CharField): An additional password field for confirming the user's password.
+        api_key (CharField): An optional field for providing an API key for external services.
+
+    Meta:
+        model (TicTacToeUser): Specifies the model that this form is associated with.
+        fields (list): Specifies the fields to include in the form.
+        widgets (dict): Custom widgets for the form fields to control their rendering.
+        help_texts (dict): Help text for each form field to guide the user.
+
+    Methods:
+        clean_password2(): Validates that both password fields match and meet security criteria.
+        clean_username(): Validates that the username is between 5 and 15 characters long.
+        clean_account_type(): Ensures the account type is either 1 (Player) or 2 (Research).
+        clean_age(): Validates that the user's age is within a realistic range.
+        save(commit=True): Hashes the password and API key securely before saving the user instance.
     """
 
     password2 = forms.CharField(label='Re-type Password', widget=forms.PasswordInput())
@@ -36,19 +57,19 @@ class UserRegistrationForm(forms.ModelForm):
 
     def clean_password2(self):
         """
-        Custom validation method for passwords.
+        Custom validation for the password confirmation field.
 
-        This method validates that both password and password2 match and checks that the password
-        meets the following security requirements:
+        This method checks that both the 'password' and 'password2' fields match.
+        It also validates that the password meets the following security requirements:
         - Length between 7 and 25 characters.
         - Contains at least one number.
         - Contains at least one uppercase letter.
 
         Returns:
-            str: The cleaned password2 value if the validation passes.
+            str: The cleaned 'password2' value if all validations pass.
 
         Raises:
-            forms.ValidationError: If passwords do not match or if password does not meet the requirements.
+            forms.ValidationError: If the passwords do not match or do not meet security requirements.
         """
         password = self.cleaned_data.get('password')
         password2 = self.cleaned_data.get('password2')
@@ -74,12 +95,13 @@ class UserRegistrationForm(forms.ModelForm):
 
     def clean_username(self):
         """
-        Custom validation method for the username.
+        Custom validation for the username field.
 
         This method ensures that the username length is between 5 and 15 characters.
+        It also checks if the username is unique within the application.
 
         Returns:
-            str: The cleaned username value.
+            str: The cleaned 'username' value if it meets the length requirements.
 
         Raises:
             forms.ValidationError: If the username is not between 5 and 15 characters.
@@ -91,12 +113,13 @@ class UserRegistrationForm(forms.ModelForm):
 
     def clean_account_type(self):
         """
-        Custom validation method for the account type.
+        Custom validation for the account type field.
 
         Ensures that the account type is either 1 (Player) or 2 (Research).
+        If the input does not match these values, a validation error is raised.
 
         Returns:
-            int: The cleaned account_type value.
+            int: The cleaned 'account_type' value if it is valid.
 
         Raises:
             forms.ValidationError: If the account type is not 1 or 2.
@@ -108,15 +131,16 @@ class UserRegistrationForm(forms.ModelForm):
 
     def clean_age(self):
         """
-        Custom validation method for age.
+        Custom validation for the age field.
 
-        Ensures that the age is a positive integer. You can customize it further to add minimum age restrictions.
+        Ensures that the age is a positive integer between 13 and 120.
+        This is to ensure that the user is of a realistic and acceptable age.
 
         Returns:
-            int: The cleaned age value.
+            int: The cleaned 'age' value if it is valid.
 
         Raises:
-            forms.ValidationError: If age is less than or equal to 0.
+            forms.ValidationError: If the age is less than 13 or greater than 120.
         """
         age = self.cleaned_data.get('age')
         if age <= 0 or age > 120:
@@ -125,13 +149,14 @@ class UserRegistrationForm(forms.ModelForm):
 
     def save(self, commit=True):
         """
-        Override the save method to securely hash the password and API key before saving the user instance.
+        Overrides the default save method to hash the password and API key before saving.
 
-        This method hashes both the password and API key using the built-in methods provided by Django's
-        AbstractBaseUser model.
+        This method securely hashes the password using the set_password method provided
+        by Django's AbstractBaseUser model. It also stores the API key using a secret
+        manager if provided.
 
         Args:
-            commit (bool): Whether to commit the user instance to the database. Defaults to True.
+            commit (bool): Indicates whether to commit the changes to the database. Defaults to True.
 
         Returns:
             TicTacToeUser: The saved user instance with hashed password and API key.
