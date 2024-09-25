@@ -11,13 +11,41 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
+from rest_framework.decorators import api_view
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get CSRF Token",
+    responses={200: openapi.Response('CSRF Token', openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+        'csrfToken': openapi.Schema(type=openapi.TYPE_STRING)
+    }))}
+)
+@api_view(['GET'])
 def get_csrf_token(request):
     csrf_token = get_token(request)
-    return JsonResponse({'csrfToken': csrf_token})
-
+    return JsonResponse({'csrfToken': csrf_token}, 200)
+@swagger_auto_schema(
+    method='post',
+    operation_description="Update the profile of a logged-in user",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'email': openapi.Schema(type=openapi.TYPE_STRING),
+            'age': openapi.Schema(type=openapi.TYPE_INTEGER),
+            'new_password': openapi.Schema(type=openapi.TYPE_STRING),
+        }
+    ),
+    responses={
+        200: openapi.Response('Success'),
+        400: 'Bad Request'
+    }
+)
 @login_required
+@api_view(['POST'])
 def update_profile(request):
     """
     Handle profile updates, including username, email, age, profile name, API key, and password.
@@ -41,6 +69,31 @@ def update_profile(request):
 
     return render(request, 'tictactoe_app/update_profile.html', {'form': form})
 
+@swagger_auto_schema(
+    method='post',
+    operation_description="Register a new user",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'password': openapi.Schema(type=openapi.TYPE_STRING),
+            'email': openapi.Schema(type=openapi.TYPE_STRING),
+        },
+        required=['username', 'password', 'email']
+    ),
+    responses={
+        200: openapi.Response('User registered successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'status': openapi.Schema(type=openapi.TYPE_STRING),
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'redirect_url': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        400: 'Form validation failed',
+    }
+)
+@api_view(['POST'])
 def register_user(request):
     """
     Handle the user registration process.
@@ -94,6 +147,34 @@ def register_user(request):
     return render(request, 'tictactoe_app/register.html', {'form': form})
 
 
+@swagger_auto_schema(
+    method='post',
+    operation_description="Verify the user's email with a 6-digit verification code",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'verification_code': openapi.Schema(type=openapi.TYPE_STRING)
+        }
+    ),
+    responses={
+        200: openapi.Response('Email verified successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'status': openapi.Schema(type=openapi.TYPE_STRING),
+                'redirect_url': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        401: openapi.Response('Invalid verification code', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'status': openapi.Schema(type=openapi.TYPE_STRING),
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+    }
+)
+@api_view(['POST'])
 def verifyemail(request):
     """
     Handle email verification for new users.
@@ -138,7 +219,25 @@ def verifyemail(request):
     return render(request, 'tictactoe_app/verifyemail.html')
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get a list of all registered users (authenticated users only)",
+    responses={
+        200: openapi.Response('List of users', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'username': openapi.Schema(type=openapi.TYPE_STRING),
+                    'email': openapi.Schema(type=openapi.TYPE_STRING),
+                }
+            )
+        )),
+    }
+)
 @login_required
+@api_view(['GET'])
 def get_users(request):
     """
     Display all registered users.
@@ -159,6 +258,34 @@ def get_users(request):
     return render(request, 'tictactoe_app/users.html', {'users': users})
 
 
+@swagger_auto_schema(
+    method='post',
+    operation_description="Authenticate a user with their username and password",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'password': openapi.Schema(type=openapi.TYPE_STRING),
+        }
+    ),
+    responses={
+        200: openapi.Response('Login successful', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'status': openapi.Schema(type=openapi.TYPE_STRING),
+                'redirect_url': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        401: openapi.Response('Login failed', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'status': openapi.Schema(type=openapi.TYPE_STRING),
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+    }
+)
+@api_view(['POST'])
 def login_user(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -212,7 +339,13 @@ def login_user(request):
         form = LoginForm()
         return render(request, 'tictactoe_app/login.html', {'form': form})
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Log out the authenticated user and redirect to the login page",
+    responses={302: 'Redirect to login'}
+)
 @login_required
+@api_view(['GET'])
 def logout_user(request):
     """
     Handle user logout.
