@@ -36,7 +36,7 @@ test_game:
 	python3 ../test_game.py
 
 venv:
-	source ../venv/bin/activate
+	source venv/bin/activate
 
 clean:
 	rm /Users/jennymai/Desktop/it_proj/clara_tictactoe/tictactoe_project/db.sqlite3

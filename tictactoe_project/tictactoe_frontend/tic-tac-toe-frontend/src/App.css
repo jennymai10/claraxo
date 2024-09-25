@@ -1,38 +1,268 @@
+/* Importing fonts from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Londrina+Shadow&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
+
+/* Center text alignment in .App */
+#root {
+  width: 100%;
+  height: 100%;
+  
+}
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+  width: 100vw;
+  height: 100vh;
   min-height: 100vh;
+  overflow-y: scroll;
+}
+
+/* Style for the board, positioned at the bottom of the screen with rotation */
+.App-board {
+  position: absolute; 
+  width: 60vw;
+  height: auto;
+  left: 0; 
+  top: 10vh;
+  mix-blend-mode: luminosity;
+  opacity: 0.5;
+  transform: rotate(-106.95);
+  background-clip: content-box;
+}
+
+p {
+  margin: 0px;
+}
+
+/* Fixed header with full viewport size and background color */
+.App-header {
+  position: relative; 
+  top: 0; 
+  left: 0; 
+  width: 100vw; 
+  height: 100vh; 
+  background: #DFD8CB;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+/* Style for pencil graphic */
+.App-pencil {
+  position: absolute;
+  width: 30%;
+  height: auto;
+  right: 5%;
+  top: -5%;
+  background: #DFD8CB;
+  transform: rotate(5deg);
+  z-index: 0; 
+}
+
+/* Style for ruler graphic */
+.App-ruler {
+  position: absolute;
+  width: 20%;
+  height: auto;
+  right: 0%; 
+  top: -5%;
+  background-color: rgba(0, 0, 0, 0);
+  transform: rotate(5deg);
+  z-index: 1; 
+}
+
+.App-container {
   display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+/* Styling for the main text */
+.App-Title {
+  width: 20%;
+  height: auto;
+  font-family: 'Londrina Shadow';
+  font-size: 13vh;
+  font-weight: 600;
+  line-height: 20vh;
+  letter-spacing: 0.25em;
+  color: #1E1E1E;
+  align-self: top;
+}
+
+/* Style for the login form container */
+.App-LoginForm {
+  width: 25%;
+  display: flex;
+  align-self: flex-end;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 7vh;
+}
+
+form {
+  width: 100%;
+}
+.App-FormName h4 {
+  font-family: 'Londrina Shadow';
+  font-size: 6vh;
+  letter-spacing: 0.15em;
+  color: #1E1E1E;
+  padding-bottom: 1.5vh;
+  margin: 0px;
+  margin-top: 15%;
+}
+/* Style for the query section */
+.App-Query {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.Signup-Query {
+  position: relative;
+  margin-top: 15px;
+}
+
+.App-Panel {
+  position: relative;
+  margin-top: 10%;
+}
+
+/* Style for the password input rectangle */
+.App-Rectangle {
+  box-sizing: border-box;
+  position: relative;
+  align-items: center; 
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background: rgba(214, 205, 188, 0.86);
+  border: 2px solid #301313;
+  border-radius: 2vw;
 }
 
-.App-link {
-  color: #61dafb;
+.App-Rectangle input {
+  background: transparent;
+  border: none;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.7vw;
+  width: 90%;
+  padding-top: 1%;
+  padding-bottom: 1%;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Style for the password text */
+.App-NormalText {
+  text-align: start;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.7vw;
+  color: #301313;
+}
+
+.App-NormalText p {
+  margin: 0px;
+}
+
+.App-LoginSignup {
+  position: relative;
+  min-width: 30%;
+  margin-bottom: 10px;
+}
+
+.App-or {
+  position: relative;
+  align-items: center; 
+  justify-content: center;
+  font-family: 'Gaegu';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.7vw;
+  line-height: 3vw;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  letter-spacing: -0.06em;
+  color: #301313;
+  padding-top: 1vw;
+}
+
+.App-Or-text {
+  margin-left: 7%;
+  margin-right: 7%;
+}
+
+.App-Button {
+  min-height: 30px;
+  height: 6vh;
+  width: 11vw;
+  border: 2px solid #301313;
+  border-radius: 2vw;
+  background-color: #D6CDBCDB;
+  color: black; 
+  font-size: 1.7vw;
+  font-family: 'Gaegu';
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.1s ease, background-color 0.1s ease;
+  white-space: nowrap;
+}
+
+.App-Button:hover {
+  background-color: #301313;
+  color: #D6CDBCDB;
+}
+
+.App-Button:active {
+  transform: scale(0.9);
+  color: white
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+
+.App-SignupForm {
+  position: relative;
+  align-self: flex-start;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 7vh;
+  margin-top: 4vh;
+  width: 23vw;
+}
+
+.Signup-AccountTypeSelect {
+  background: transparent;
+  border: none;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.7vw;
+  width: 90%;
+  padding-top: 1%;
+  padding-bottom: 1%;
+}
+
+.Form-Error {
+  font-family: 'Gaegu';
+  line-height: 85%;
+  text-align: left;
+  font-size: 1.4vw;
+  color: #ab1212;
+  margin-top: 2%;
+}
+
+.Signup-GoLoginText {
+  text-align: center;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.7vw;
+  color: #301313;
+  padding-bottom: 1vh;
 }

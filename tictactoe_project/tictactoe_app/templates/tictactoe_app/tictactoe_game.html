@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+        }
+
+        .grid-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            border: 5px solid #00ae51;
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+        }
+
+        .grid-item.disabled {
+            pointer-events: none;
+            border: 5px solid #d2d2d2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic Tac Toe</h1>
+
+    <div class="grid-container">
+        <!-- Loop through the grid cells and display the current board state -->
+        {% for cell, value in board_list %}
+        <div class="grid-item" id="cell{{ cell }}" onclick="makeMove('{{ cell }}')">
+            {{ value }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <br>
+
+    <!-- Button to reset the game -->
+    <button onclick="resetGame()">Reset Game</button>
+
+    <script>
+        function makeMove(cell) {
+            const cellElement = document.getElementById('cell' + cell);
+            if (cellElement.innerText === '') {
+                cellElement.innerText = 'X'; // Mark user's move as 'X'
+
+                // Disable the board until the AI responds
+                disableBoard();
+
+                // Send the move to the server to get AI's response
+                fetch('/make_move/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        'move': cell
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // If there's a redirect URL, navigate to the result page
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                            return;
+                        }
+
+                        // Update the AI's move on the board
+                        const aiMove = data.ai_move;
+                        document.getElementById('cell' + aiMove).innerText = 'O';
+
+                        // Re-enable the board after the AI move
+                        enableBoard();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Re-enable the board if there is an error
+                    enableBoard();
+                });
+            }
+        }
+
+        // Disable the board by adding a 'disabled' class to all cells
+        function disableBoard() {
+            const cells = document.querySelectorAll('.grid-item');
+            cells.forEach(cell => {
+                cell.classList.add('disabled'); // Disable clicks and reduce opacity
+            });
+        }
+
+        // Enable the board by removing the 'disabled' class from all cells
+        function enableBoard() {
+            const cells = document.querySelectorAll('.grid-item');
+            cells.forEach(cell => {
+                cell.classList.remove('disabled'); // Re-enable clicks
+            });
+        }
+
+        function resetGame() {
+            fetch('/new_game/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

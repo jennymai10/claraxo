@@ -25,14 +25,13 @@ SECRET_KEY = 'django-insecure-2aio4@tf(i32gpb%z-c27o0-d2p$%v&1+(u8f8n37dt^qb(oe8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
 INSTALLED_APPS = [
     'tictactoe_app',
     'rest_framework',
+    'corsheaders',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +42,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -145,5 +146,22 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'clara.tictactoe@gmail.com'
-EMAIL_HOST_PASSWORD = 'rmxu xitt uvdo skbo'  # The app-specific password
-DEFAULT_FROM_EMAIL = 'clovermaitbg@gmail.com'
+EMAIL_HOST_PASSWORD = 'coxh ynsl eaef funt'
+DEFAULT_FROM_EMAIL = 'clara.tictactoe@gmail.com'
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/new_game/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+CSRF_COOKIE_HTTPONLY = False
