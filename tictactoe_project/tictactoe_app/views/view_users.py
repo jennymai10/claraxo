@@ -25,8 +25,22 @@ from drf_yasg import openapi
 )
 @api_view(['GET'])
 def get_csrf_token(request):
-    csrf_token = get_token(request)
+    """
+    Retrieve a CSRF token.
+
+    This view generates a CSRF token that can be used for making secure POST requests.
+    This is particularly useful when building frontend applications that need to interact
+    with Django APIs.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        JsonResponse: A JSON response containing the CSRF token.
+    """
+    csrf_token = get_token(request)  # Generate a CSRF token for the current session
     return JsonResponse({'csrfToken': csrf_token}, 200)
+
 @swagger_auto_schema(
     method='post',
     operation_description="Update the profile of a logged-in user",
@@ -48,24 +62,34 @@ def get_csrf_token(request):
 @api_view(['POST'])
 def update_profile(request):
     """
-    Handle profile updates, including username, email, age, profile name, API key, and password.
-    If the email is changed, the user must verify it again.
+    Handle profile updates for logged-in users.
+
+    This view allows a logged-in user to update their profile information, including username,
+    email, age, profile name, API key, and password. If the email is changed, the user must
+    verify it again before the account becomes active.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: Renders the profile update page with a form.
+        HttpResponseRedirect: Redirects to the same page with a success message after updating.
     """
-    user = request.user
+    user = request.user  # Get the current logged-in user
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=user)
+        form = UserProfileForm(request.POST, instance=user)  # Bind form with user data
         if form.is_valid():
-            form.save()
+            form.save()  # Save the updated user profile
             # Update the session with the new password if changed
             if form.cleaned_data.get('new_password'):
-                update_session_auth_hash(request, user)
+                update_session_auth_hash(request, user)  # Update session with the new password
             # Show success message
             messages.success(request, 'Your profile has been updated successfully.')
             return redirect('update_profile')
         else:
             messages.error(request, 'Please correct the error below.')
     else:
-        form = UserProfileForm(instance=user)
+        form = UserProfileForm(instance=user)  # Display the form with the current user data
 
     return render(request, 'tictactoe_app/update_profile.html', {'form': form})
 
@@ -96,29 +120,24 @@ def update_profile(request):
 @api_view(['POST'])
 def register_user(request):
     """
-    Handle the user registration process.
+    Handle user registration process.
 
-    This view renders a registration form where a new user can input their details. 
-    If the request method is POST, the form is validated, and if valid:
-    - A new user instance is created with the form data.
-    - A random 6-digit verification code is generated.
-    - The user's 'is_active' field is set to False, so the user cannot log in until email verification.
-    - An email with the verification code is sent to the user's email address.
-    On successful registration, the user is redirected to the email verification page.
+    This view allows new users to register by providing their username, password, and email.
+    Once the form is validated and the user is created, a verification email is sent to the
+    provided email address. The user cannot log in until they verify their email.
 
     Args:
         request (HttpRequest): The HTTP request object.
 
     Returns:
-        HttpResponse: The rendered registration template with the form.
-        HttpResponseRedirect: Redirect to the email verification page if the form is valid.
+        JsonResponse: A JSON response indicating success or failure of registration.
     """
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            user.verification_code = random.randint(100000, 999999)
-            user.is_active = False
+            user.verification_code = random.randint(100000, 999999)  # Generate a random 6-digit verification code
+            user.is_active = False  # Set user as inactive until email is verified
             user.save()
             send_mail(
                 'C-Lara | Email Verification',
@@ -135,6 +154,7 @@ def register_user(request):
                         'redirect_url': redirect_url
                     }, status=200)
         else:
+            # Handle form validation errors
             errors = {field: error[0] for field, error in form.errors.items()}
             print(errors)
             return JsonResponse({
@@ -143,7 +163,7 @@ def register_user(request):
                     'errors': errors
                 }, status=400)
     else:
-        form = UserRegistrationForm()
+        form = UserRegistrationForm()   # Display an empty registration form
     return render(request, 'tictactoe_app/register.html', {'form': form})
 
 
@@ -179,17 +199,15 @@ def verifyemail(request):
     """
     Handle email verification for new users.
 
-    This view allows the user to input their username and the 6-digit verification code
-    they received via email. If the code matches the one generated during registration,
-    the user's account is activated, and they are logged in. Otherwise, an error message
-    is displayed.
+    This view allows users to verify their email address by providing their username and
+    the 6-digit verification code sent to their email. If the code matches, the user's
+    account is activated, and they are automatically logged in.
 
     Args:
         request (HttpRequest): The HTTP request object.
 
     Returns:
-        HttpResponse: The rendered email verification template with or without an error message.
-        HttpResponseRedirect: Redirect to the login page after successful verification and activation.
+        JsonResponse: A JSON response indicating success or failure of the verification.
     """
     if request.method == 'POST':
         username = request.POST['username']
@@ -198,11 +216,11 @@ def verifyemail(request):
             # Retrieve the user by their username and verification code
             user = TicTacToeUser.objects.get(username=username, verification_code=code)
             # Activate the user and clear the verification code
-            user.is_active = True
-            user.verification_code = None
+            user.is_active = True  # Activate the user account
+            user.verification_code = None  # Clear the verification code
             user.save()
             # Automatically log in the user after verification
-            login(request, user)
+            login(request, user)  # Log the user in
             # Redirect to the login page
             return JsonResponse({
                     'status': 'success',
@@ -242,17 +260,16 @@ def get_users(request):
     """
     Display all registered users.
 
-    This view retrieves all TicTacToeUser instances from the database and displays
-    them on the users page. It is only accessible to logged-in users due to the 
-    @login_required decorator.
+    This view retrieves and displays all registered users. It is accessible only to
+    authenticated users due to the @login_required decorator.
 
     Args:
         request (HttpRequest): The HTTP request object.
 
     Returns:
-        HttpResponse: The rendered template with the list of registered users.
+        HttpResponse: Renders the users page with the list of registered users.
     """
-    # Query all registered users from the TicTacToeUser model
+    # Retrieve all users from the database
     users = TicTacToeUser.objects.all()
     # Render the users template and pass the users data to the template
     return render(request, 'tictactoe_app/users.html', {'users': users})
@@ -287,8 +304,21 @@ def get_users(request):
 )
 @api_view(['POST'])
 def login_user(request):
+    """
+    Handle user login.
+
+    This view processes user login by validating the credentials provided in the login form.
+    If the credentials are correct and the user's email is verified, they are logged in.
+    If the API key associated with the user is expiring soon, a warning email is sent to the user.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        JsonResponse: A JSON response indicating success or failure of the login attempt, along with a redirect URL.
+    """
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = LoginForm(request.POST)  # Bind the form with the POST data
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
@@ -299,10 +329,10 @@ def login_user(request):
             if user is not None:
                 # Check if the API key is expiring soon (less than 7 days)
                 if user.api_key_expiry_date:
-                    current_time = datetime.now(timezone.utc)  # Timezone-aware UTC datetime
+                    current_time = datetime.now(timezone.utc)  # Get the current time in UTC
                     days_remaining = (user.api_key_expiry_date - current_time).days
                     if days_remaining <= 7:
-                        # Send warning email about API key expiration
+                        # Send a warning email to the user about the API key expiration
                         send_warning_email(user, days_remaining)
                 
                 # Check if the user's email is verified (is_active is True)
@@ -320,6 +350,14 @@ def login_user(request):
                     
                     # If the user's email is not verified
                     if not user_object.is_active:
+                        send_mail(
+                            'C-Lara | Email Verification',
+                            f'Hi {user_object.profile_name}! Your verification code is {user_object.verification_code}',
+                            settings.EMAIL_HOST_USER,
+                            [user_object.email],
+                            fail_silently=False,
+                        )
+                        # If email is not verified, redirect to the email verification page
                         redirect_url = '/verifyemail/' + user_object.username
                         return JsonResponse({
                             'status': 'error',
@@ -328,14 +366,14 @@ def login_user(request):
                             'redirect_url': redirect_url,
                         }, status=401)
                 except TicTacToeUser.DoesNotExist:
-                    # If the user does not exist
+                    # If the username does not exist in the database
                     return JsonResponse({
                         'status': 'error',
                         'message': 'Incorrect username or password.',
                         'errors': {'submit': 'Incorrect username or password.'},
                     }, status=401)
     else:
-        # Display the empty login form for a GET request
+        # For a GET request, render an empty login form
         form = LoginForm()
         return render(request, 'tictactoe_app/login.html', {'form': form})
 
@@ -350,19 +388,33 @@ def logout_user(request):
     """
     Handle user logout.
 
-    This view logs out the user and redirects them to the login page.
+    This view logs out the current user and redirects them to the login page.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponseRedirect: Redirects the user to the login page after logging out.
     """
-    logout(request)
-    return redirect('/login/')
+    logout(request)  # Log out the current user
+    return redirect('/login/')  # Redirect to the login page
 
 def send_warning_email(user, days_remaining):
     """
-    Sends a warning email to the user if their API key is expiring soon.
+    Send a warning email to the user if their API key is expiring soon.
+
+    This function sends an email notification to the user if their API key is set to expire
+    within the next 7 days, reminding them to renew their key.
 
     Args:
         user (TicTacToeUser): The user whose API key is expiring.
         days_remaining (int): Number of days left before the API key expires.
+
+    Returns:
+        None
     """
+
+    # Email subject and message content
     subject = 'C-Lara | Your API Key is Expiring Soon'
     message = f"""
     Hello {user.profile_name},
@@ -375,11 +427,11 @@ def send_warning_email(user, days_remaining):
     C-Lara TicTacToe Team
     """
     
-    # Sending the email
+    # Send the email to the user's email address
     send_mail(
         subject,
         message,
-        settings.EMAIL_HOST_USER,
-        [user.email],
-        fail_silently=False,
+        settings.EMAIL_HOST_USER,  # Sender email address from settings
+        [user.email],  # Recipient's email address
+        fail_silently=False,  # Raise exceptions if the email fails to send
     )

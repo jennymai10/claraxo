@@ -9,10 +9,25 @@ import random
 
 class UserProfileForm(forms.ModelForm):
     """
-    Form for updating user profile information, including username, email, age, profile name,
-    API key, and password. The form ensures email verification for updated email and validates
-    old password when changing the password.
-    """
+        UserProfileForm is a Django form class for updating user profile information,
+        including fields such as username, email, profile name, age, and optional fields
+        for changing the password and API key. It handles validation for email changes and
+        old password verification when updating the password.
+
+        Attributes:
+            old_password (CharField): Optional field for inputting the old password, used when changing the password.
+            new_password (CharField): Optional field for inputting the new password, used to update the user's password.
+            api_key (CharField): Optional field for updating the user's API key in the secret manager.
+
+        Meta:
+            model (TicTacToeUser): Specifies the model that this form is associated with.
+            fields (list): Specifies the fields to include in the form.
+
+        Methods:
+            clean_old_password(): Validates the old password if provided.
+            clean_email(): Handles email change verification and sends a verification code.
+            save(commit=True): Saves the form data, updates password and API key if provided, and commits changes to the database.
+        """
     old_password = forms.CharField(required=False, widget=forms.PasswordInput(), help_text="Enter old password to change your password.")
     new_password = forms.CharField(required=False, widget=forms.PasswordInput(), help_text="Enter new password if you want to change it.")
     api_key = forms.CharField(required=False, widget=forms.PasswordInput(), help_text="Update your API key.")
@@ -23,7 +38,17 @@ class UserProfileForm(forms.ModelForm):
 
     def clean_old_password(self):
         """
-        Ensure the user provides the correct old password if they are changing their password.
+        Validates the old password provided by the user.
+
+        If the user has entered an old password, this method checks if it is correct
+        by authenticating the user with the current username and old password. If the
+        authentication fails, it raises a ValidationError.
+
+        Returns:
+            str: The cleaned old_password data.
+
+        Raises:
+            forms.ValidationError: If the old password is incorrect.
         """
         old_password = self.cleaned_data.get('old_password')
         if old_password:
@@ -34,7 +59,14 @@ class UserProfileForm(forms.ModelForm):
 
     def clean_email(self):
         """
-        If the email is changed, mark the user as inactive and generate a new verification code.
+        Validates the email field and handles email change verification.
+
+        If the email is changed, this method sets the user as inactive and generates
+        a new verification code. It then sends an email with the new verification code
+        to the updated email address.
+
+        Returns:
+            str: The cleaned email data.
         """
         email = self.cleaned_data.get('email')
         if self.instance.email != email:
@@ -53,7 +85,17 @@ class UserProfileForm(forms.ModelForm):
 
     def save(self, commit=True):
         """
-        Handle API key update using Google Cloud Secret Manager and other profile changes.
+        Saves the form data, including updating the password and API key if provided.
+
+        If a new password is provided, this method sets it for the user. It also updates
+        the API key in Google Cloud Secret Manager if a new key is provided and differs
+        from the current one. After making all changes, it saves the user instance.
+
+        Args:
+            commit (bool): Indicates whether to commit the changes to the database. Default is True.
+
+        Returns:
+            TicTacToeUser: The saved user instance.
         """
         user = super().save(commit=False)
         
