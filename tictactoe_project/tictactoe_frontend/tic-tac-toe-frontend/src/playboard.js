@@ -97,6 +97,7 @@ const TicTacToe = () => {
 
     return (
         <div>
+            <h1>IN-PROGRESS</h1>
             <img className='TicBoard' src={TicBoard}></img>
             <img src={board} className="Bboard" alt="board" />
             <img src={ruler} className="Ruler" alt="ruler" />

@@ -23,6 +23,7 @@ function get_cookie(name) {
 function Login() {
   const [username, set_username] = useState('');
   const [password, set_password] = useState('');
+  const [is_loading, set_is_loading] = useState(false);
   const [error, set_error] = useState({});
   const navigate = useNavigate();
 
@@ -49,7 +50,7 @@ function Login() {
   const is_valid_password = (value) => {
     const password_pattern = /^(?=.*[A-Z])(?=.*\d).{7,25}$/;
     if (!password_pattern.test(value)) {
-        set_error(prev => ({ ...prev, password: 'Password must be 7-25 characters long, with at least one uppercase letter and one number.' }));
+        set_error(prev => ({ ...prev, password: 'Password must be 7-25 characters, with at least 1 uppercase letter and 1 number.' }));
         return false;
     } else if (value === '') {
         return true
@@ -60,6 +61,7 @@ function Login() {
 
   // Function to handle login click event
   const handle_login_click = async (event) => {
+    set_is_loading(true);
     event.preventDefault();
     set_error({}); // Reset errors before validation
     if (
@@ -85,22 +87,25 @@ function Login() {
         if (response.ok) {
           if (data.status === 'success') {
             navigate(data.redirect_url);
-          } else if (data.status === 'error') {
-            set_error(data.errors);
-            setTimeout(() => {
-              navigate(data.redirect_url);
-            }, 6000);
           }
         } else {
           console.log(data.errors)
-          if (data.errors) {
+          if (data.errors && data.redirect_url) {
             set_error(data.errors);
+            setTimeout(() => {
+              navigate(data.redirect_url);
+            }, 3000);
+          } else if (data.errors) {
+            set_error(data.errors);
+            
           } else {
             set_error({ submit: data.message });
           }
         }
       } catch (error) {
         console.error('Error:', error);
+      } finally {
+        set_is_loading(false);
       }
     }
   };
@@ -150,8 +155,8 @@ function Login() {
               {error.submit && <p className='Form-Error'>{error.submit}</p>}
               <div className='App-LoginSignup'>
                 <div className='App-or'>
-                  <button className="App-Button" onClick={handle_login_click}> 
-                  log in
+                  <button className="App-Button" onClick={handle_login_click} disabled={is_loading}> 
+                    {is_loading ? 'loading...' : 'log in'}
                   </button>
                   <p className="App-Or-text">or</p>
                   <button className="App-Button" onClick={() => navigate('/signup')}> 

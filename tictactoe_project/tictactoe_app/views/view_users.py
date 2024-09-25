@@ -160,37 +160,24 @@ def get_users(request):
 
 
 def login_user(request):
-    """
-    Handle user login.
-
-    This view processes the login form, where a user can input their username and password.
-    If the credentials are valid, the user is logged in and redirected to the users page.
-    If the user's account is not activated (i.e., email not verified), they are prompted
-    to verify their email first. If the credentials are invalid, an error message is displayed.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponse: The rendered login template with the form and optional error messages.
-        HttpResponseRedirect: Redirect to the users page after successful login.
-    """
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            print(username, password)
+            
             # Authenticate the user with the provided credentials
             user = authenticate(request, username=username, password=password)
+            
             if user is not None:
-                # Check if the API key is expiring soon (less than 14 days)
+                # Check if the API key is expiring soon (less than 7 days)
                 if user.api_key_expiry_date:
                     current_time = datetime.now(timezone.utc)  # Timezone-aware UTC datetime
                     days_remaining = (user.api_key_expiry_date - current_time).days
                     if days_remaining <= 7:
                         # Send warning email about API key expiration
                         send_warning_email(user, days_remaining)
+                
                 # Check if the user's email is verified (is_active is True)
                 if user.is_active:
                     # Log in the user
@@ -199,22 +186,27 @@ def login_user(request):
                         'status': 'success',
                         'redirect_url': '/new_game/'
                     })
-                else:
-                    redirect_url = '/verifyemail/' + user.username
-                    # If the user's email is not verified, display an error message
+            else:
+                # Handle when authentication fails (incorrect username or password)
+                try:
+                    user_object = TicTacToeUser.objects.get(username=username)
+                    
+                    # If the user's email is not verified
+                    if not user_object.is_active:
+                        redirect_url = '/verifyemail/' + user_object.username
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': 'Email has not been verified.',
+                            'errors': {'submit': 'Email has not been verified. You will be redirected to verify your email in 5s.'},
+                            'redirect_url': redirect_url,
+                        }, status=401)
+                except TicTacToeUser.DoesNotExist:
+                    # If the user does not exist
                     return JsonResponse({
                         'status': 'error',
-                        'message': 'Email has not been verify.',
-                        'errors': {'submit' : 'Email has not been verify. You will be redirected to verify your email in 5s.'},
-                        'redirect_url': redirect_url,
-                    }, status=200)
-            else:
-                # If the credentials are invalid, add an error to the form
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Incorrect username or password.',
-                    'errors': {'submit' : 'Incorrect username or password.'},
-                }, status=401)
+                        'message': 'Incorrect username or password.',
+                        'errors': {'submit': 'Incorrect username or password.'},
+                    }, status=401)
     else:
         # Display the empty login form for a GET request
         form = LoginForm()
