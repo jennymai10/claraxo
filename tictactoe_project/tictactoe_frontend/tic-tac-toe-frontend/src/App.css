@@ -153,6 +153,11 @@ form {
   padding-bottom: 1%;
 }
 
+.App-Rectangle input:focus { 
+  border : none;
+  outline: none;
+}
+
 /* Style for the password text */
 .App-NormalText {
   text-align: start;
@@ -247,6 +252,8 @@ input:-webkit-autofill:active {
   width: 90%;
   padding-top: 1%;
   padding-bottom: 1%;
+  border: none;
+  outline: none;
 }
 
 .Form-Error {

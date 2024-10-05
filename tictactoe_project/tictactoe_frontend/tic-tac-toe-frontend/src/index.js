@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import Login from './Login';
 import Playboard from './playboard';
-import Signup from './Signup';
+import Signup from './signup';
 import VerifyEmail from './VerifyEmail';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
