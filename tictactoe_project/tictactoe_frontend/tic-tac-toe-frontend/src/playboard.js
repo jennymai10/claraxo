@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
+import './app.css';
 import TicBoard from './assets/TicBoard.png'
 import ruler from './assets/ruler.png';
 import pencil from './assets/pencil.png';

@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import Login from './Login';
+import Login from './login';
 import Playboard from './playboard';
 import Signup from './signup';
-import VerifyEmail from './VerifyEmail';
+import VerifyEmail from './verify_email';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

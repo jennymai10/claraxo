@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import board from './assets/board.png';
-import './App.css';
+import './app.css';
 import ruler from './assets/ruler.png';
 import pencil from './assets/pencil.png';
 import { useNavigate } from 'react-router-dom';

@@ -74,5 +74,3 @@ whitenoise==6.7.0
 fairscale
 fire
 chardet
-selenium==4.25.0
-drf-yasg==1.21.7
