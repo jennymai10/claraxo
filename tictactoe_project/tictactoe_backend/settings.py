@@ -9,7 +9,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'fallback-secret-key')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-2aio4@tf(i32gpb%z-c27o0-d2p$%v&1+(u8f8n>')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -136,19 +136,3 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://35.238.92.0',
 ]
-
-# Login and redirect settings
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/new_game/'
-LOGOUT_REDIRECT_URL = '/login/'
-
-# CSRF and security settings for HTTP only
-CSRF_COOKIE_HTTPONLY = False
-SECURE_SSL_REDIRECT = False  # Disable HTTPS redirection
-SESSION_COOKIE_SECURE = False  # Disable secure session cookies for HTTP
-CSRF_COOKIE_SECURE = False  # Disable secure CSRF cookies for HTTP
-SECURE_HSTS_SECONDS = 0  # Disable HSTS (since you're using HTTP)
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
-SECURE_BROWSER_XSS_FILTER = True
-X_FRAME_OPTIONS = 'DENY'
