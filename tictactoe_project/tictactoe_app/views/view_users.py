@@ -134,10 +134,14 @@ def register_user(request):
     """
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
+        print("show form")
         if form.is_valid():
+            print("form is valid")
             user = form.save()
+            print("user saved")
             user.verification_code = random.randint(100000, 999999)  # Generate a random 6-digit verification code
             user.is_active = False  # Set user as inactive until email is verified
+            print("user verification code")
             user.save()
             send_mail(
                 'C-Lara | Email Verification',
@@ -146,14 +150,17 @@ def register_user(request):
                 [user.email],
                 fail_silently=False,
             )
+            print("email sent")
             # Redirect to the email verification page
             redirect_url = '/verifyemail/' + user.username
+            print("redirect url, 200")
             return JsonResponse({
                         'status': 'success',
                         'message': 'Successfully created an account. Proceeding to Email Verification.',
                         'redirect_url': redirect_url
                     }, status=200)
         else:
+            print("form is invalid, 400")
             # Handle form validation errors
             errors = {field: error[0] for field, error in form.errors.items()}
             print(errors)
@@ -163,7 +170,9 @@ def register_user(request):
                     'errors': errors
                 }, status=400)
     else:
+        print("not POST request")
         form = UserRegistrationForm()   # Display an empty registration form
+    print("not POST request either")
     return render(request, 'tictactoe_app/register.html', {'form': form})
 
 
