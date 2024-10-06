@@ -5,7 +5,6 @@ import ruler from './assets/ruler.png';
 import pencil from './assets/pencil.png';
 import { useNavigate } from 'react-router-dom';
 
-EXTERNAL_IP = 'http://35.238.92.0:8000'
 
 function get_cookie(name) {
     let cookie_value = null;
@@ -143,7 +142,7 @@ function Signup() {
                 form_data.append('api_key', api_key);
                 form_data.append('profile_name', fullname);
 
-                const response = await fetch(`${EXTERNAL_IP}/register/`, {
+                const response = await fetch("http://35.238.92.0:8000/register/", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

@@ -5,7 +5,6 @@ import ruler from './assets/ruler.png';
 import pencil from './assets/pencil.png';
 import { BrowserRouter as Router, Route, Routes, useNavigate, Link } from 'react-router-dom';
 
-EXTERNAL_IP = 'http://35.238.92.0:8000'
 
 function get_cookie(name) {
   let cookie_value = null;
@@ -75,7 +74,7 @@ function Login() {
         form_data.append('username', username);
         form_data.append('password', password);
 
-        const response = await fetch(`${EXTERNAL_IP}/login/`, {
+        const response = await fetch("http://35.238.92.0:8000/login/", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

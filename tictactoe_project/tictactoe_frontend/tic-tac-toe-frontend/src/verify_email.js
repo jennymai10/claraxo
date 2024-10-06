@@ -5,8 +5,6 @@ import ruler from './assets/ruler.png';
 import pencil from './assets/pencil.png';
 import { useNavigate, useParams } from 'react-router-dom';
 
-EXTERNAL_IP = 'http://35.238.92.0:8000'
-
 /**
  * Retrieves the value of a specific cookie by its name.
  * 
@@ -88,7 +86,7 @@ function VerifyEmail() {
                 form_data.append('verification_code', verification_code);
 
                 // Send a POST request to the email verification API endpoint.
-                const response = await fetch(f`${EXTERNAL_IP}/verifyemail/`, {
+                const response = await fetch("http://35.238.92.0:8000/verifyemail/", {
                     method: 'POST', // HTTP method to use for the request.
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded', // Content type for form data submission.
