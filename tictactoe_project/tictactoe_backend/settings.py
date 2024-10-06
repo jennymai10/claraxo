@@ -1,5 +1,9 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,11 +89,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -141,12 +142,12 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/new_game/'
 LOGOUT_REDIRECT_URL = '/login/'
 
-# CSRF and security settings
+# CSRF and security settings for HTTP only
 CSRF_COOKIE_HTTPONLY = False
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = 0
+SECURE_SSL_REDIRECT = False  # Disable HTTPS redirection
+SESSION_COOKIE_SECURE = False  # Disable secure session cookies for HTTP
+CSRF_COOKIE_SECURE = False  # Disable secure CSRF cookies for HTTP
+SECURE_HSTS_SECONDS = 0  # Disable HSTS (since you're using HTTP)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
 SECURE_BROWSER_XSS_FILTER = True
