@@ -38,13 +38,13 @@ function VerifyEmail() {
     const [error, set_error] = useState({}); // State to store error messages for the form.
     const navigate = useNavigate(); // React Router's hook for programmatic navigation.
 
-        /**
-     * Higher-order function that handles input changes and optionally validates the input.
-     * 
-     * @param {Function} setter - State setter function for updating the input value.
-     * @param {Function} [validate_fn] - Optional validation function to validate input in real-time.
-     * @returns {Function} - Returns an event handler function for input change.
-     */
+    /**
+ * Higher-order function that handles input changes and optionally validates the input.
+ * 
+ * @param {Function} setter - State setter function for updating the input value.
+ * @param {Function} [validate_fn] - Optional validation function to validate input in real-time.
+ * @returns {Function} - Returns an event handler function for input change.
+ */
     const handle_change = (setter, validate_fn) => (event) => {
         setter(event.target.value);
         if (validate_fn) validate_fn(event.target.value);
@@ -66,13 +66,13 @@ function VerifyEmail() {
         return true;
     };
 
-        /**
-     * Handles the verify button click event.
-     * Validates the verification code and sends a verification request to the server.
-     * 
-     * @param {Event} event - The click event triggered by the verify button.
-     * @returns {void}
-     */
+    /**
+ * Handles the verify button click event.
+ * Validates the verification code and sends a verification request to the server.
+ * 
+ * @param {Event} event - The click event triggered by the verify button.
+ * @returns {void}
+ */
     const handle_verify_click = async (event) => {
         event.preventDefault(); // Prevent the default form submission behavior.
         set_error({}); // Clear any previous error messages.
@@ -80,13 +80,13 @@ function VerifyEmail() {
         // Validate the verification code input before making the verification request.
         if (is_valid_verification_code(verification_code)) {
             try {
-                 // Prepare the form data for sending in the API request.
+                // Prepare the form data for sending in the API request.
                 const form_data = new URLSearchParams();
                 form_data.append('username', username);
                 form_data.append('verification_code', verification_code);
 
                 // Send a POST request to the email verification API endpoint.
-                const response = await fetch("http://35.238.92.0:8000/verifyemail/", {
+                const response = await fetch(`${process.env.BACKEND_URL}/verifyemail/`, {
                     method: 'POST', // HTTP method to use for the request.
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded', // Content type for form data submission.
@@ -144,7 +144,7 @@ function VerifyEmail() {
                                         type="text"
                                         value={username}
                                         placeholder=""
-                                        onChange={(e) => set_username(e.target.value)} 
+                                        onChange={(e) => set_username(e.target.value)}
                                     />
                                 </div>
                             </div>

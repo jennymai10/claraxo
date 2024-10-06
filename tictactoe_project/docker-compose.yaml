@@ -1,0 +1,40 @@
+version: "2.4"
+services:
+  frontend:
+    build:
+      context: ./tictactoe_frontend/tic-tac-toe-frontend
+      dockerfile: Dockerfile
+    image: tictactoe/frontend:latest
+    scale: 1
+    restart: always
+    environment:
+      BACKEND_URL: http://backend:8000
+    ports:
+      - "80:3000"
+    networks:
+      - internal-webnet
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+  backend:
+    build: .
+    image: tictactoe/backend:latest
+    scale: 1
+    restart: always
+    ports:
+      - "8080:8000"
+    networks:
+      - internal-webnet
+    env_file:
+      - .env
+    environment:
+      ANY_ADDITION_ENV_VAR: "CAN BE ADDED HERE"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+networks:
+  internal-webnet:

@@ -9,14 +9,14 @@ import { useNavigate } from 'react-router-dom';
 function get_cookie(name) {
     let cookie_value = null;
     if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookie_value = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookie_value = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
-      }
     }
     return cookie_value;
 }
@@ -59,7 +59,7 @@ function Signup() {
         } else if (value === '') {
             return true;
         }
-        set_error(prev => ({ ...prev, email: ''}));
+        set_error(prev => ({ ...prev, email: '' }));
         return true;
     };
 
@@ -142,7 +142,7 @@ function Signup() {
                 form_data.append('api_key', api_key);
                 form_data.append('profile_name', fullname);
 
-                const response = await fetch("http://35.238.92.0:8000/register/", {
+                const response = await fetch(`${process.env.BACKEND_URL}/register/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

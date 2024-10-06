@@ -38,10 +38,10 @@ function Login() {
   const is_valid_username = (value) => {
     const username_pattern = /^[A-Za-z0-9_.-]{5,15}$/;
     if (!username_pattern.test(value)) {
-        set_error(prev => ({ ...prev, username: 'Username must be 5-15 characters long and can only contain letters, numbers, (_), (-), and (.).' }));
-        return false;
+      set_error(prev => ({ ...prev, username: 'Username must be 5-15 characters long and can only contain letters, numbers, (_), (-), and (.).' }));
+      return false;
     } else if (value === '') {
-        return true
+      return true
     }
     set_error(prev => ({ ...prev, username: '' }));
     return true;
@@ -51,10 +51,10 @@ function Login() {
   const is_valid_password = (value) => {
     const password_pattern = /^(?=.*[A-Z])(?=.*\d).{7,25}$/;
     if (!password_pattern.test(value)) {
-        set_error(prev => ({ ...prev, password: 'Password must be 7-25 characters, with at least 1 uppercase letter and 1 number.' }));
-        return false;
+      set_error(prev => ({ ...prev, password: 'Password must be 7-25 characters, with at least 1 uppercase letter and 1 number.' }));
+      return false;
     } else if (value === '') {
-        return true
+      return true
     }
     set_error(prev => ({ ...prev, password: '' }));
     return true;
@@ -74,7 +74,7 @@ function Login() {
         form_data.append('username', username);
         form_data.append('password', password);
 
-        const response = await fetch("http://35.238.92.0:8000/login/", {
+        const response = await fetch(`${process.env.BACKEND_URL}/login/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -98,7 +98,7 @@ function Login() {
             }, 3000);
           } else if (data.errors) {
             set_error(data.errors);
-            
+
           } else {
             set_error({ submit: data.message });
           }
@@ -156,12 +156,12 @@ function Login() {
               {error.submit && <p className='Form-Error'>{error.submit}</p>}
               <div className='App-LoginSignup'>
                 <div className='App-or'>
-                  <button className="App-Button" onClick={handle_login_click} disabled={is_loading}> 
+                  <button className="App-Button" onClick={handle_login_click} disabled={is_loading}>
                     {is_loading ? 'loading...' : 'log in'}
                   </button>
                   <p className="App-Or-text">or</p>
-                  <button className="App-Button" onClick={() => navigate('/signup')}> 
-                  sign up
+                  <button className="App-Button" onClick={() => navigate('/signup')}>
+                    sign up
                   </button>
                 </div>
               </div>
