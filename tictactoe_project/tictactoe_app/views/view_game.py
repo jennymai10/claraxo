@@ -140,69 +140,98 @@ def tictactoe_result(request):
 @api_view(['POST'])
 def make_move(request):
     """
-        Handle the player's move and respond with AI's move.
-
-        This view processes the player's move, updates the game state, and checks for a win or draw condition.
-        It then uses an AI model to generate the next move for the AI player, updates the board, and returns
-        the AI's move in the response.
-
-        Args:
-            request (HttpRequest): The HTTP request object containing the player's move.
-
-        Returns:
-            JsonResponse: A JSON response with the AI's move and the status of the game.
+    Handle the player's move and respond with AI's move.
+    This view processes the player's move, updates the game state, checks for a win or draw, 
+    and generates the next move for the AI player.
     """
     if request.method == 'POST':
-        board = request.session.get('board', initialize_board())  # Retrieve or initialize the game board
-        data = json.loads(request.body) # Parse the JSON request body
-        move = data.get('move')  # Get the player's move from the request
+        try:
+            print(request.POST)
+            # Retrieve or initialize the game board
+            board = request.session.get('board', initialize_board())
+            if not board:
+                board = initialize_board()
+            move = request.POST.get('move')  # Get the player's move from the request
+            print(board)
+            # Load or create the game object based on the session ID
+            if not request.session.get('game_id'):
+                game = Game.objects.create(player=request.user)  # Create a new game if not found
+                request.session['game_id'] = game.game_id
+            else:
+                game = Game.objects.get(game_id=request.session['game_id'])
+            print(game)
+            # Validate the move: Check if the selected move is valid (the cell is empty)
+            if board[move] != '':
+                return JsonResponse({'status': 'error', 'message': 'Invalid move'}, status=400)
 
-        # Load or create the game object based on the session ID
-        if not request.session.get('game_id'):
-            game = Game.objects.create(player=request.user)  # Create a new game if not found
-            request.session['game_id'] = game.game_id
-        else:
-            game = Game.objects.get(game_id=request.session['game_id'])
+            # Player's move
+            turn_number = GameLog.objects.filter(game=game).count() + 1  # Calculate the turn number
+            board[move] = 'X'  # Place the player's move on the board
+            GameLog.objects.create(game=game, turn_number=turn_number, player='X', cell=move)  # Log the move
+            game.save()
+            print(board)
+            # Check if the player wins\
+            winner = check_win(board)
+            if winner == 'X':
+                result = game_end_handler(board, game, winner, request)
+                request.session['board'] = None
+                request.session['game_id'] = None
+                return JsonResponse({'status': 'success', 'message': 'Player X wins', 'winner': 'X'})
 
-        # Process player's move
-        turn_number = GameLog.objects.filter(game=game).count() + 1  # Calculate the turn number
-        board[move] = 'X'  # Place the player's move on the board
-        GameLog.objects.create(game=game, turn_number=turn_number, player='X', cell=move)  # Log the move
-        game.save()  # Save the game state
+            # Check for a draw (if all squares are filled and no winner)
+            unoccupied = [key for key, value in board.items() if value == '']
+            if not unoccupied:
+                request.session['board'] = None
+                request.session['game_id'] = None
+                return JsonResponse({'status': 'draw', 'message': 'The game is a draw.'})
 
-        # Check if the player wins
-        winner = check_win(board)
-        result = game_end_handler(board, game, winner, request)
-        if result:
-            return result  # Return the result if the game ends
+            # Retrieve the API key for the AI model
+            api_key = get_secret(f"api-key-{request.user.api_key_secret_id}")
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")  # Initialize the AI model
 
-        # Retrieve the API key for the AI model from the user's profile
-        api_key = get_secret(f"api-key-{request.user.api_key_secret_id}")
-        print(api_key)  # Print the API key for debugging (not recommended in production)
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")  # Initialize the AI model
+            # Generate AI's move
+            ai_move, error_code = generate_ai_move(board, unoccupied, model)  # Generate the AI's move
+            board[ai_move] = 'O'  # Place the AI's move on the board
 
-        # AI Move
-        unoccupied = [key for key, value in board.items() if value == '']  # Get list of unoccupied squares
-        ai_move = generate_ai_move(board, unoccupied, model)  # Generate the AI's move
-        board[ai_move] = 'O'  # Place the AI's move on the board
+            # Log the AI's move
+            turn_number += 1
+            GameLog.objects.create(game=game, turn_number=turn_number, player='O', cell=ai_move)
 
-        turn_number += 1
-        GameLog.objects.create(game=game, turn_number=turn_number, player='O', cell=ai_move)  # Log the AI's move
+            # Check if the AI wins
+            winner = check_win(board)
+            if winner == 'O':
+                # result = game_end_handler(board, game, winner, request)
+                request.session['board'] = None
+                request.session['game_id'] = None
+                return JsonResponse({'status': 'success', 'message': 'AI wins', 'ai_move': ai_move, 'winner': 'O'}) ## ADD error_code check here
 
-        # Check if the AI wins
-        winner = check_win(board)
-        result = game_end_handler(board, game, winner, request)
-        if result:
-            return result  # Return the result if the game ends
+            # Check again for a draw after AI's move
+            unoccupied = [key for key, value in board.items() if value == '']
+            if not unoccupied:
+                request.session['board'] = None
+                request.session['game_id'] = None
+                return JsonResponse({'status': 'draw', 'message': 'The game is a draw.'}) ## ADD error_code check here
 
-        # Save the updated board state in the session
-        request.session['board'] = board
-        request.session.modified = True
-        game.save()
-        return JsonResponse({'status': 'success', 'ai_move': ai_move})  # Respond with the AI's move
+            # Save the updated board state in the session
+            request.session['board'] = board
+            # request.session.modified = True  # Mark session as modified
+            game.save()
+            if error_code == 1:
+                return JsonResponse({
+                    'status': 'success',
+                    'ai_move': ai_move,
+                    'errors': {'all': 'Invalid API key. A random move was generated.'},
+                }, status=200)
 
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})  # Handle invalid request methods
+            # Return AI move in the response
+            return JsonResponse({'status': 'success', 'ai_move': ai_move}) ## ADD error_code check here
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
 
 @swagger_auto_schema(
     method='get',

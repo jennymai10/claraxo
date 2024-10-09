@@ -61,37 +61,64 @@ def get_csrf_token(request):
 @login_required
 @api_view(['POST'])
 def update_profile(request):
-    """
-    Handle profile updates for logged-in users.
-
-    This view allows a logged-in user to update their profile information, including username,
-    email, age, profile name, API key, and password. If the email is changed, the user must
-    verify it again before the account becomes active.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponse: Renders the profile update page with a form.
-        HttpResponseRedirect: Redirects to the same page with a success message after updating.
-    """
+    print(request.data)
     user = request.user  # Get the current logged-in user
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=user)  # Bind form with user data
-        if form.is_valid():
-            form.save()  # Save the updated user profile
-            # Update the session with the new password if changed
-            if form.cleaned_data.get('new_password'):
-                update_session_auth_hash(request, user)  # Update session with the new password
-            # Show success message
-            messages.success(request, 'Your profile has been updated successfully.')
-            return redirect('update_profile')
-        else:
-            messages.error(request, 'Please correct the error below.')
-    else:
-        form = UserProfileForm(instance=user)  # Display the form with the current user data
+    data = request.data  # Assuming POST data comes in as JSON or form data
 
-    return render(request, 'tictactoe_app/update_profile.html', {'form': form})
+    try:
+        # Update username
+        if 'username' in data:
+            user.username = data['username']
+            user.save()
+
+        # Update email
+        if 'email' in data and user.email != data['email']:
+            user.email = data['email']
+            user.verification_code = random.randint(100000, 999999)
+            user.is_active = False  # Mark user inactive until email is verified
+            user.save()  # Save the email change first
+            # Here you should trigger the email verification process
+            send_mail(
+                'C-Lara | Email Verification',
+                f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
+                settings.EMAIL_HOST_USER,
+                [user.email],
+                fail_silently=False,
+            )
+
+        # Update full name (profile name)
+        if 'fullname' in data:
+            user.profile_name = data['fullname']
+            user.save()
+        
+        if 'account_type' in data:
+            user.account_type = int(data['account_type'])
+            user.save()
+
+        # Update age
+        if 'age' in data:
+            user.age = int(data['age'])
+            user.save()
+
+        # Update API key
+        if 'api_key' in data and data['api_key'] != 'PLACEHOLDER':
+            user.store_api_key_in_secret_manager(data['api_key'], user.api_key_secret_id, True)
+            user.save()
+
+        # Update password
+        if 'password' in data and data['password'] != 'PLACEHOLDER':
+            user.set_password(data['password'])  # Update the password securely
+            user.save()
+            update_session_auth_hash(request, user)  # Update session so the user stays logged in
+
+        # Save the user and profile changes
+        user.save()
+        print("Profile updated successfully.")
+        # Return success response
+        return JsonResponse({'status': 'success', 'message': 'Account updated successfully.'}, status=200)
+    except Exception as e:
+        # Return error message in case something goes wrong
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 @swagger_auto_schema(
     method='post',
@@ -134,14 +161,10 @@ def register_user(request):
     """
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
-        print("show form")
         if form.is_valid():
-            print("form is valid")
             user = form.save()
-            print("user saved")
             user.verification_code = random.randint(100000, 999999)  # Generate a random 6-digit verification code
             user.is_active = False  # Set user as inactive until email is verified
-            print("user verification code")
             user.save()
             send_mail(
                 'C-Lara | Email Verification',
@@ -150,17 +173,14 @@ def register_user(request):
                 [user.email],
                 fail_silently=False,
             )
-            print("email sent")
             # Redirect to the email verification page
             redirect_url = '/verifyemail/' + user.username
-            print("redirect url, 200")
             return JsonResponse({
                         'status': 'success',
                         'message': 'Successfully created an account. Proceeding to Email Verification.',
                         'redirect_url': redirect_url
                     }, status=200)
         else:
-            print("form is invalid, 400")
             # Handle form validation errors
             errors = {field: error[0] for field, error in form.errors.items()}
             print(errors)
@@ -169,11 +189,11 @@ def register_user(request):
                     'message': "Form validation failed.",
                     'errors': errors
                 }, status=400)
-    else:
-        print("not POST request")
-        form = UserRegistrationForm()   # Display an empty registration form
-    print("not POST request either")
-    return render(request, 'tictactoe_app/register.html', {'form': form})
+    return JsonResponse({
+                    'status': 'error',
+                    'message': "Not a POST request.",
+                    'errors': errors
+                }, status=400)
 
 
 @swagger_auto_schema(
@@ -263,9 +283,10 @@ def verifyemail(request):
         )),
     }
 )
+
 @login_required
 @api_view(['GET'])
-def get_users(request):
+def get_user(request):
     """
     Display all registered users.
 
@@ -278,10 +299,22 @@ def get_users(request):
     Returns:
         HttpResponse: Renders the users page with the list of registered users.
     """
-    # Retrieve all users from the database
-    users = TicTacToeUser.objects.all()
-    # Render the users template and pass the users data to the template
-    return render(request, 'tictactoe_app/users.html', {'users': users})
+    user = request.user  # Get the current authenticated user
+    try:
+        ttt_user = TicTacToeUser.objects.get(username=user.username)
+        # Prepare the data to send to the frontend
+        user_data = {
+            'username': ttt_user.username,
+            'account_type': ttt_user.account_type,
+            'email': ttt_user.email,
+            'api_key': "PLACEHOLDER",
+            'password': "PLACEHOLDER",
+            'age': ttt_user.age,
+            'full_name': ttt_user.profile_name,
+        }
+        return JsonResponse(user_data, status=200)
+    except TicTacToeUser.DoesNotExist:
+        return JsonResponse({'error': 'User does not exist'}, status=404)
 
 
 @swagger_auto_schema(
@@ -356,7 +389,6 @@ def login_user(request):
                 # Handle when authentication fails (incorrect username or password)
                 try:
                     user_object = TicTacToeUser.objects.get(username=username)
-                    
                     # If the user's email is not verified
                     if not user_object.is_active:
                         send_mail(
@@ -391,8 +423,7 @@ def login_user(request):
     operation_description="Log out the authenticated user and redirect to the login page",
     responses={302: 'Redirect to login'}
 )
-@login_required
-@api_view(['GET'])
+@api_view(['POST', 'GET'])
 def logout_user(request):
     """
     Handle user logout.
@@ -406,7 +437,10 @@ def logout_user(request):
         HttpResponseRedirect: Redirects the user to the login page after logging out.
     """
     logout(request)  # Log out the current user
-    return redirect('/login/')  # Redirect to the login page
+    return JsonResponse({
+                        'status': 'success',
+                        'message': 'Successfully logged out!',
+                    }, status=200)
 
 def send_warning_email(user, days_remaining):
     """

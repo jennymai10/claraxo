@@ -73,25 +73,28 @@ def generate_ai_move(board, unoccupied, model):
     Unoccupied squares: [{', '.join(unoccupied)}]
     You are playing as O. Your chosen move should be one of the unoccupied squares above. In your response, return exactly one string from {unoccupied}, representing your chosen move.
     """
-    
-    ai_move = ''
-    attempts = 0
-    max_attempts = 5 # Maximum number of attempts to get a valid move from the model
+    try:
+        ai_move = ''
+        attempts = 0
+        max_attempts = 5 # Maximum number of attempts to get a valid move from the model
 
-    # Try to get a valid move from the AI model up to the maximum number of attempts
-    while ai_move not in unoccupied and attempts < max_attempts:
-        try:
-            response = model.generate_content(prompt)  # Generate content using the AI model
-            ai_move = response.text.strip()  # Extract the move from the model's response
-        except ValueError:
-            ai_move = ''  # Fallback in case of invalid response
-        attempts += 1
+        # Try to get a valid move from the AI model up to the maximum number of attempts
+        while ai_move not in unoccupied and attempts < max_attempts:
+            try:
+                response = model.generate_content(prompt)  # Generate content using the AI model
+                ai_move = response.text.strip()  # Extract the move from the model's response
+            except ValueError:
+                ai_move = ''  # Fallback in case of invalid response
+            attempts += 1
 
-    # If no valid move was generated, fall back to a random move
-    if ai_move not in unoccupied:
-        ai_move = random.choice(unoccupied)
-    
-    return ai_move
+        # If no valid move was generated, fall back to a random move
+        if ai_move not in unoccupied:
+            return random.choice(unoccupied), 1  # Return a random move and a flag indicating fallback
+        else:
+            return ai_move, 0
+    except Exception as e:
+        print(f"Error generating AI move: {e}")
+        return random.choice(unoccupied), 1
 
 def game_end_handler(board, game, winner, request):
     """
@@ -117,7 +120,7 @@ def game_end_handler(board, game, winner, request):
         game.completed = True  # Mark the game as completed
         game.save()  # Save the updated game state to the database
         request.session['winner'] = winner  # Store the winner in the session
-        return JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
+        return winner #JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
     # If the board is full and there is no winner, it's a draw
     if '' not in board.values():
@@ -125,7 +128,7 @@ def game_end_handler(board, game, winner, request):
         game.completed = True  # Mark the game as completed
         game.save()  # Save the updated game state to the database
         request.session['winner'] = 'Draw'  # Store the draw result in the session
-        return JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
+        return "Draw" # JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
     # If the game is not over, return None
     return None

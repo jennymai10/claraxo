@@ -9,13 +9,13 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-2aio4@tf(i32gpb%z-c27o0-d2p$%v&1+(u8f8n>')
+SECRET_KEY = 'django-insecure-2aio4@tf(i32gpb%z-c27o0-d2p$%v&1+(u8f8n>'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Since you don't have a domain yet, we use the external IP
-ALLOWED_HOSTS = ['35.238.92.0']
+ALLOWED_HOSTS = ['35.238.92.0', 'localhost']
 
 # Application definition
 INSTALLED_APPS = [
@@ -119,14 +119,15 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'clara.tictactoe@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'coxh ynsl eaef funt')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'clara.tictactoe@gmail.com')
+EMAIL_HOST_USER = 'clara.tictactoe@gmail.com'
+EMAIL_HOST_PASSWORD = 'coxh ynsl eaef funt'
+DEFAULT_FROM_EMAIL = 'clara.tictactoe@gmail.com'
 
 # CORS settings for the frontend
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'http://localhost',
     'http://35.238.92.0:3000',
 ]
 
@@ -134,5 +135,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
+    'http://localhost',
     'http://35.238.92.0:3000',
 ]
