@@ -76,3 +76,4 @@ fire
 chardet
 google-cloud-secret-manager
 google-generativeai
+drf_yasg
