@@ -9,19 +9,20 @@ import { useNavigate } from 'react-router-dom';
 function get_cookie(name) {
     let cookie_value = null;
     if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookie_value = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookie_value = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
-      }
     }
     return cookie_value;
 }
 
 function Signup() {
+    const api_url = process.env.REACT_APP_API_URL;
     const [username, set_username] = useState('');
     const [account_type, set_account_type] = useState('');
     const [email, set_email] = useState('');
@@ -59,7 +60,7 @@ function Signup() {
         } else if (value === '') {
             return true;
         }
-        set_error(prev => ({ ...prev, email: ''}));
+        set_error(prev => ({ ...prev, email: '' }));
         return true;
     };
 
@@ -118,8 +119,8 @@ function Signup() {
     };
 
     const handle_signup_click = async (event) => {
-        set_is_loading(true);
         event.preventDefault();
+        set_is_loading(true);
         set_error({});
 
         if (
@@ -142,7 +143,7 @@ function Signup() {
                 form_data.append('api_key', api_key);
                 form_data.append('profile_name', fullname);
 
-                const response = await fetch("http://35.238.92.0:8000/register/", {
+                const response = await fetch(`${api_url}/register/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -151,7 +152,8 @@ function Signup() {
                     credentials: 'include',
                     body: form_data.toString(),
                 });
-
+                
+                
                 const data = await response.json();
 
                 if (response.ok) {

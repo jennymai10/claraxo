@@ -27,6 +27,7 @@
   opacity: 0.5;
   transform: rotate(-106.95);
   background-clip: content-box;
+  z-index: 0;
 }
 
 p {
@@ -54,7 +55,7 @@ p {
   top: -5%;
   background: #DFD8CB;
   transform: rotate(5deg);
-  z-index: 0; 
+  z-index: 0;
 }
 
 /* Style for ruler graphic */
@@ -85,7 +86,7 @@ p {
   width: 20%;
   height: auto;
   font-family: 'Londrina Shadow';
-  font-size: 13vh;
+  font-size: 6.5rem;
   font-weight: 600;
   line-height: 20vh;
   letter-spacing: 0.25em;
@@ -108,7 +109,7 @@ form {
 }
 .App-FormName h4 {
   font-family: 'Londrina Shadow';
-  font-size: 6vh;
+  font-size: 3rem;
   letter-spacing: 0.15em;
   color: #1E1E1E;
   padding-bottom: 1.5vh;
@@ -147,7 +148,7 @@ form {
   border: none;
   font-family: 'Gaegu';
   font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   width: 90%;
   padding-top: 1%;
   padding-bottom: 1%;
@@ -163,7 +164,7 @@ form {
   text-align: start;
   font-family: 'Gaegu';
   font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   color: #301313;
 }
 
@@ -184,7 +185,7 @@ form {
   font-family: 'Gaegu';
   font-style: normal;
   font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   line-height: 3vw;
   display: flex;
   align-items: center;
@@ -201,28 +202,31 @@ form {
 
 .App-Button {
   min-height: 30px;
-  height: 6vh;
-  width: 11vw;
+  height: 3rem;
+  width: 11rem;
   border: 2px solid #301313;
-  border-radius: 2vw;
+  border-radius: 2rem;
   background-color: #D6CDBCDB;
   color: black; 
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   font-family: 'Gaegu';
   cursor: pointer;
   text-align: center;
   transition: color 0.1s ease, background-color 0.1s ease;
   white-space: nowrap;
+  z-index: 5;
 }
 
 .App-Button:hover {
   background-color: #301313;
-  color: #D6CDBCDB;
+  color: #f4efe6db;
+  z-index: 5;
 }
 
 .App-Button:active {
   transform: scale(0.9);
-  color: white
+  color: white;
+  z-index: 5;
 }
 
 input:-webkit-autofill,
@@ -248,7 +252,7 @@ input:-webkit-autofill:active {
   border: none;
   font-family: 'Gaegu';
   font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   width: 90%;
   padding-top: 1%;
   padding-bottom: 1%;
@@ -260,7 +264,7 @@ input:-webkit-autofill:active {
   font-family: 'Gaegu';
   line-height: 85%;
   text-align: left;
-  font-size: 1.4vw;
+  font-size: 1.1rem;
   color: #ab1212;
   margin-top: 2%;
 }
@@ -269,7 +273,206 @@ input:-webkit-autofill:active {
   text-align: center;
   font-family: 'Gaegu';
   font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   color: #301313;
   padding-bottom: 1vh;
+}
+
+/* Styling for the Tic-Tac-Toe board */
+.Playboard {
+  align-items: center;
+  margin: 8vh;
+  z-index: 2;
+}
+
+/* Style for each row */
+.row {
+  display: flex;
+  justify-content: center;
+  z-index: 2;
+}
+
+.Playboard-NormalText {
+  text-align: center;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: #301313;
+  z-index: 2;
+}
+
+/* Style for each square button */
+.square {
+  width: 15vh;
+  height: 15vh;
+  background-color: #DFD8CB;
+  border: 0;
+  font-size: 4rem;
+  font-family: 'Gaegu', sans-serif;
+  color: #301313;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  z-index: 2;
+}
+
+.square:disabled {
+  background-color: #DFD8CB;
+  cursor: not-allowed;
+}
+
+/* Hover and active state for the game buttons */
+.square:hover:not(:disabled) {
+  background-color: #f2ebde;
+}
+
+.square#a3 {
+  border-right: 4px solid rgba(48, 19, 19, 0.3);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
+}
+
+.square#a2 {
+  border-right: 4px solid rgba(48, 19, 19, 0.3);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
+  border-top: 4px solid rgba(48, 19, 19, 0.3);
+}
+
+.square#a1 {
+  border-right: 4px solid rgba(48, 19, 19, 0.3);
+  border-top: 4px solid rgba(48, 19, 19, 0.3);
+}
+
+.square#b3 {
+  border-right: 4px solid rgba(48, 19, 19, 0.3);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
+  border-left: 4px solid rgba(48, 19, 19, 0.3);
+}
+
+.square#b2 {
+  border-right: 4px solid rgba(48, 19, 19, 0.3);
+  border-left: 4px solid rgba(48, 19, 19, 0.3);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
+  border-top: 4px solid rgba(48, 19, 19, 0.3);
+}
+
+.square#b1 {
+  border-left: 4px solid rgba(48, 19, 19, 0.3);
+  border-right: 4px solid rgba(48, 19, 19, 0.3);
+  border-top: 4px solid rgba(48, 19, 19, 0.3);
+}
+
+.square#c3 {
+  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
+  border-left: 4px solid rgba(48, 19, 19, 0.3);
+}
+
+.square#c2 {
+  border-left: 4px solid rgba(48, 19, 19, 0.3);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
+  border-top: 4px solid rgba(48, 19, 19, 0.3);
+}
+
+.square#c1 {
+  border-left: 4px solid rgba(48, 19, 19, 0.3);
+  border-top: 4px solid rgba(48, 19, 19, 0.3);
+}
+
+.Playboard-container {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center;     /* Center vertically */
+  flex-wrap: wrap;
+  width: 100%;
+  height: 100%;
+  overflow-y: hidden;
+}
+
+/* Default hidden state for the side-tab */
+.side-tab {
+  position: fixed;
+  top: 0;
+  right: -40rem; /* Hidden by default */
+  width: 20rem;  /* Default width for desktop */
+  height: 100vh; /* Full screen height */
+  background: rgba(213, 201, 180, 0.561);
+  transition: right 0.4s ease; /* Smooth sliding effect */
+  z-index: 1000;
+  border: 2px solid rgb(35, 18, 18); /* Slight border for definition */
+  border-radius: 3rem 0 0 3rem; /* Rounded corners */
+  padding-top: 1.6rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: 3rem;
+}
+
+/* When side-tab is active (open) */
+.side-tab.active {
+  right: 0; /* Slide in to show the side-tab */
+}
+
+/* Styling for the toggle icon */
+.Icon {
+  position: absolute;
+  margin-top: 1rem;
+  margin-right: 1rem;
+  width: 1.5rem;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease; /* Hover scaling effect */
+  z-index: 1001;
+}
+
+.Icon:hover {
+  transform: scale(1.1); /* Slight hover zoom effect */
+}
+
+/* Account type text style */
+.account-type {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.edit-container {
+  display: flex;  /* Use flexbox to align elements */
+  justify-content: space-between;  /* Space between text and icon */
+  align-items: center;  /* Vertically align the items */
+  width: 100%;  /* Make sure the container spans the full width */
+  margin-top: 3vh; /* Add some space below the container */
+}
+
+.edit-icon {
+  cursor: pointer;  /* Change the cursor to indicate it's clickable */
+  width: 1.4rem;
+  padding-bottom: 0.3rem;
+}
+
+.Small-Button {
+  height: 1.6rem;
+  width: 4.5rem;
+  border: 1px solid #301313;
+  border-radius: 1rem;
+  background-color: #D6CDBCDB;
+  color: rgb(0, 0, 0); 
+  font-size: 1.1rem;
+  font-family: 'Gaegu';
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.1s ease, background-color 0.1s ease;
+  white-space: nowrap;
+  margin: 1rem 0.3rem 0rem 0.3rem;
+  z-index: 5;
+}
+
+.Small-Button:hover {
+  background-color: #301313;
+  color: #f4efe6db;
+  z-index: 5;
+}
+
+.Small-Button:active {
+  transform: scale(0.9);
+  color: white;
+  z-index: 5;
 }
