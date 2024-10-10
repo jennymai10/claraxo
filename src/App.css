@@ -915,3 +915,52 @@ button {
   font-size: 0.6em;
   line-height: 1;
 }
+
+.logout-btn {
+/* Logout button */
+
+position: absolute;
+width: 182.26px;
+height: 43.08px;
+left: 61.74px;
+top: 869px;
+background-color: #DFD8CB;
+color: black;
+font-family: 'Gaegu';
+}
+
+.logout-btn:hover {
+  background-color: #696262; 
+}
+
+.vector {
+
+  position: relative;
+  left: 12.5%;
+  top: -2%;
+  bottom: 12.5%;
+  background: #DFD8CB;
+
+}
+
+.sidetab-text{
+
+  position: relative;
+  width: 107px;
+  height: 30px;
+  left:28.5%;
+  top: 0%;
+
+  font-family: 'Gaegu';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 30px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+
+  color: #000000;
+
+
+}

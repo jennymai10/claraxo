@@ -9,7 +9,7 @@ import random, os
 from dotenv import load_dotenv
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-
+from ..models import TicTacToeUser
 
 load_dotenv()
 genai.configure(api_key=os.environ["API_KEY"])
@@ -21,9 +21,12 @@ def game_history(request):
     """
     Display the list of completed games for the logged-in user.
     """
-    user = request.user
+
+    username = request.POST.get('username')
+    user = TicTacToeUser.objects.get(username=username)
     completed_games = Game.objects.filter(player=user, completed=True)
-    return render(request, 'tictactoe_app/game_history.html', {'games': completed_games})
+    completed_games_list = list(completed_games.values())
+    return  JsonResponse({'games': completed_games_list},status = 200)
 
 @login_required
 @csrf_exempt
@@ -110,3 +113,16 @@ def reset_game(request):
     request.session['board'] = board
     request.session.pop('game_id', None)
     return redirect('tictactoe_game')
+
+@csrf_exempt
+def get_game_moves(request):
+    """
+    API endpoint to get all the moves for a specific game.
+    """
+    data = json.loads(request.body)
+    game_id = data.get('game_id')
+    game = Game.objects.get(game_id=game_id)
+    
+    moves = game.get_moves()
+
+    return JsonResponse({'moves': moves})

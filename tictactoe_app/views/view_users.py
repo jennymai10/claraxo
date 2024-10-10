@@ -179,12 +179,24 @@ def login_user(request):
 @login_required
 def logout_user(request):
     """
-    Handle user logout.
-
-    This view logs out the user and redirects them to the login page.
+    Handle user logout and return a JSON response indicating success.
     """
-    logout(request)
-    return redirect('/login/')
+    try:
+        
+        logout(request)
+        
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'User logged out successfully.'
+        }, status=200)
+    
+    except Exception as e:
+        
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
 
 def get_user_type(request):
     if request.method == 'POST':

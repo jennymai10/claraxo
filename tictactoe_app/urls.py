@@ -24,4 +24,5 @@ urlpatterns = [
     path('tictactoe_result/', tictactoe_result, name='tictactoe_result'),
     path('history/', game_history, name='game_history'),
     path('get_user_type/',get_user_type,name='get_user_type/'),
+    path('get_moves/',get_game_moves,name='get_moves/'),
 ]
