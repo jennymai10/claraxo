@@ -327,54 +327,54 @@ input:-webkit-autofill:active {
 }
 
 .square#a3 {
-  border-right: 4px solid rgba(48, 19, 19, 0.3);
-  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
 }
 
 .square#a2 {
-  border-right: 4px solid rgba(48, 19, 19, 0.3);
-  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
-  border-top: 4px solid rgba(48, 19, 19, 0.3);
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
 }
 
 .square#a1 {
-  border-right: 4px solid rgba(48, 19, 19, 0.3);
-  border-top: 4px solid rgba(48, 19, 19, 0.3);
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
 }
 
 .square#b3 {
-  border-right: 4px solid rgba(48, 19, 19, 0.3);
-  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
-  border-left: 4px solid rgba(48, 19, 19, 0.3);
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
 }
 
 .square#b2 {
-  border-right: 4px solid rgba(48, 19, 19, 0.3);
-  border-left: 4px solid rgba(48, 19, 19, 0.3);
-  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
-  border-top: 4px solid rgba(48, 19, 19, 0.3);
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
 }
 
 .square#b1 {
-  border-left: 4px solid rgba(48, 19, 19, 0.3);
-  border-right: 4px solid rgba(48, 19, 19, 0.3);
-  border-top: 4px solid rgba(48, 19, 19, 0.3);
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
 }
 
 .square#c3 {
-  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
-  border-left: 4px solid rgba(48, 19, 19, 0.3);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
 }
 
 .square#c2 {
-  border-left: 4px solid rgba(48, 19, 19, 0.3);
-  border-bottom: 4px solid rgba(48, 19, 19, 0.3);
-  border-top: 4px solid rgba(48, 19, 19, 0.3);
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
 }
 
 .square#c1 {
-  border-left: 4px solid rgba(48, 19, 19, 0.3);
-  border-top: 4px solid rgba(48, 19, 19, 0.3);
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
 }
 
 .Playboard-container {
