@@ -99,7 +99,7 @@ def update_profile(request):
         if 'age' in data:
             user.age = int(data['age'])
             user.save()
-
+ 
         # Update API key
         if 'api_key' in data and data['api_key'] != 'PLACEHOLDER':
             user.store_api_key_in_secret_manager(data['api_key'], user.api_key_secret_id, True)
@@ -478,3 +478,45 @@ def send_warning_email(user, days_remaining):
         [user.email],  # Recipient's email address
         fail_silently=False,  # Raise exceptions if the email fails to send
     )
+
+@api_view(['POST'])
+def verifyemail_resend(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        try:
+            # Retrieve the user by their username and verification code
+            user = TicTacToeUser.objects.get(username=username)
+            if user is None:
+                errors = {'submit': 'Username is invalid. Please sign up for an account.'}
+                return JsonResponse({
+                    'status': 'error',
+                    'message': "Username is invalid.",
+                    'errors': errors
+                }, status=401)
+            # Activate the user and clear the verification code
+            user.is_active = False  # Activate the user account
+            user.verification_code = random.randint(100000, 999999)  # Clear the verification code
+            user.save()
+            send_mail(
+                    'C-Lara | Email Verification',
+                    f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
+                    settings.EMAIL_HOST_USER,
+                    [user.email],
+                    fail_silently=False,
+                )
+            return JsonResponse({
+                    'status': 'success',
+                    'redirect_url': "/verifyemail/",
+                }, status=200)
+        except TicTacToeUser.DoesNotExist:
+            errors = {'submit': 'Username is invalid. Please sign up for an account.'}
+            return JsonResponse({
+                    'status': 'error',
+                    'message': "Username is invalid.",
+                    'errors': errors,
+                }, status=401)
+    return JsonResponse({
+                        'status': 'error',
+                        'message': "Invalid GET Request.",
+                        'errors': errors,
+                    }, status=500)

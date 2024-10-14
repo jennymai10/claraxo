@@ -147,7 +147,6 @@ form {
   background: transparent;
   border: none;
   font-family: 'Gaegu';
-  font-weight: 400;
   font-size: 1.5rem;
   width: 90%;
   padding-top: 1%;
@@ -395,7 +394,7 @@ input:-webkit-autofill:active {
   right: -40rem; /* Hidden by default */
   width: 20rem;  /* Default width for desktop */
   height: 100vh; /* Full screen height */
-  background: rgba(213, 201, 180, 0.561);
+  background: rgba(233, 218, 194, 0.95);
   transition: right 0.4s ease; /* Smooth sliding effect */
   z-index: 1000;
   border: 2px solid rgb(35, 18, 18); /* Slight border for definition */
@@ -475,4 +474,79 @@ input:-webkit-autofill:active {
   transform: scale(0.9);
   color: white;
   z-index: 5;
+}
+
+
+/* Game History Styling */
+.GameHistory {
+  margin: 2rem auto;
+  padding: 2rem;
+  max-width: 80vw;
+  background-color: #f4efe6;
+  border: 2px solid #301313;
+  border-radius: 1rem;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: #301313;
+}
+
+/* Styling for the game table */
+.game-table, .moves-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 1.2rem;
+}
+
+/* Header style for both tables */
+.game-table th, .moves-table th {
+  background-color: #301313;
+  color: #f4efe6;
+  padding: 0.75rem;
+  text-align: center;
+  border-bottom: 2px solid #301313;
+}
+
+/* Row and column styling for game and moves tables */
+.game-table td, .moves-table td {
+  padding: 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid #d6cdbc;
+  color: #301313;
+}
+
+/* Alternating row color for better readability */
+.game-table tbody tr:nth-child(even), 
+.moves-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.game-table tbody tr:nth-child(odd),
+.moves-table tbody tr:nth-child(odd) {
+  background-color: #f4efe6;
+}
+
+/* Hover effect on table rows */
+.game-table tbody tr:hover,
+.moves-table tbody tr:hover {
+  background-color: #d6cdbc;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .GameHistory {
+    padding: 1rem;
+    max-width: 95vw;
+  }
+
+  .game-table, .moves-table {
+    font-size: 1rem;
+  }
+
+  .App-Button, .Small-Button {
+    width: 8rem;
+    height: 2.5rem;
+    font-size: 1rem;
+  }
 }

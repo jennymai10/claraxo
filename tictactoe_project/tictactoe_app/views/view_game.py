@@ -55,21 +55,32 @@ def get_secret(secret_name):
 @login_required
 @api_view(['GET'])
 def game_history(request):
-    """
-    Display the list of completed games for the logged-in user.
-
-    This view retrieves and displays the game history of the currently logged-in user.
-    It queries for games that the user has completed and renders them in the game history page.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponse: Renders the game history page with the list of completed games.
-    """
     user = request.user  # Get the currently logged-in user
-    completed_games = Game.objects.filter(player=user, completed=True)  # Get the list of completed games
-    return render(request, 'tictactoe_app/game_history.html', {'games': completed_games})
+    completed_games = Game.objects.filter(player_id=user.id).values(
+        'game_id', 'date', 'completed', 'winner'
+    )  # Get relevant fields of completed games
+
+    games_list = list(completed_games)  # Convert QuerySet to list of dicts
+
+    return JsonResponse({'games': games_list}, status=200)
+
+
+@login_required
+@api_view(['POST'])
+def game_moves(request):
+    game_id = request.data.get('game_id')
+    
+    if not game_id:
+        return JsonResponse({'error': 'Game ID is required.'}, status=400)
+    
+    # Fetch moves for the given game_id
+    game_moves = GameLog.objects.filter(game_id=game_id).values(
+        'turn_number', 'player', 'cell', 'timestamp'
+    ).order_by('turn_number')  # Ensure the moves are ordered by turn number
+
+    moves_list = list(game_moves)  # Convert QuerySet to list of dicts
+
+    return JsonResponse({'moves': moves_list}, status=200)
 
 @swagger_auto_schema(
     method='get',

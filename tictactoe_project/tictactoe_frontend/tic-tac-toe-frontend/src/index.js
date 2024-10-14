@@ -6,6 +6,7 @@ import Playboard from './playboard';
 import Signup from './signup';
 import Settings from './settings';
 import VerifyEmail from './verify_email';
+import GameHistory from './game_history';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -20,7 +21,7 @@ root.render(
         <Route path="/signup" element={<Signup />} />
         <Route path="/verifyemail" element={<VerifyEmail />} />
         <Route path="/verifyemail/:username" element={<VerifyEmail />} />
-        <Route path="/history" element={<VerifyEmail />} />
+        <Route path="/history" element={<GameHistory />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
