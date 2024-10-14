@@ -26,11 +26,12 @@ const SideTab = ({ user }) => {
   const api_url = process.env.REACT_APP_API_URL;
   const [isOpen, setIsOpen] = useState(false);
   const [accountType, setAccountType] = useState('');
+  const [username, setUsername] = useState('');
   const csrfToken = getCookie('csrftoken');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isOpen && !accountType) {
+    if (isOpen && accountType==='' && username==='') {
       // Fetch the account type when the side-tab opens
       fetchAccountType();
     }
@@ -38,25 +39,28 @@ const SideTab = ({ user }) => {
 
   const fetchAccountType = async () => {
     try {
-      const response = await fetch('http://localhost:8080/get_user_type/', {
-        method: 'POST',
+      const response = await fetch(`${api_url}/get_user/`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'X-CSRFToken': csrfToken,
         },
-        body: new URLSearchParams({ username: user }).toString(),
         credentials: 'include',
       });
-      const data = await response.json();
-      if (data.status === 'success') {
-        setAccountType(data.account_type === 1 ? 'Player' : 'Researcher');
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data); // Debugging step: Check the structure of the returned data
+        setAccountType(data.account_type === 2 ? 'researcher' : 'player');
+        setUsername(data.username);
       } else {
-        console.error('Error:', data.message);
+        console.error('Error fetching user data:', response.statusText);
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
+  
 
   const handleLogout = async () => {
     try {
@@ -83,9 +87,11 @@ const SideTab = ({ user }) => {
     setIsOpen(!isOpen);
   };
 
-  const handleNewGame = () => {
+  const handleNewGame = async () => {
     navigate('/new_game');
+    window.location.reload(); 
   };
+
 
   const handleHistory = () => {
     navigate('/history');
@@ -113,8 +119,10 @@ const SideTab = ({ user }) => {
             </div>
             <div className="App-NormalText" style={{textAlign: 'left', marginTop: '5vh', marginBottom: '10vh'}}>
               <p style={{textAlign: 'center'}}>
-                Welcome!
-                {/* <span className="account-type">{accountType}</span> */}
+                welcome, {username}!
+              </p>
+              <p style={{textAlign: 'center'}}>
+                - {accountType} -
               </p>
               <div style={{marginTop: '10vh', marginBottom: '5vh', marginLeft: '2rem', cursor: 'pointer'}} onClick={handleNewGame}>
                 <p><img

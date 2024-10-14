@@ -23,72 +23,117 @@ function getCookie(name) {
 const TicTacToe = () => {
     const api_url = process.env.REACT_APP_API_URL;
     const [isO, setisO] = useState(false);  // Track current player
-    const [x_location, setxlocation] = useState([]); 
-    const [o_location, setolocation] = useState([]); 
+    const [x_location, setxlocation] = useState([]);  // Track X's moves
+    const [o_location, setolocation] = useState([]);  // Track O's moves
     const [winner, setWinner] = useState('Game not start');
     const [winmove, setwinmove] = useState([]);
     const [error, set_error] = useState({});
     const [isWaitingForAI, setIsWaitingForAI] = useState(false);  // Track if waiting for AI
+    const [logs, setLogs] = useState([]);  // Log entries for terminal
+    const [isResearcher, setIsResearcher] = useState(false);  // Track if the user is a researcher
+
+    useEffect(() => {
+        handleStart();  // Automatically start a new game on mount
+        fetchUser();  // Fetch user data to check if they are a researcher
+    }, []);
+
+    // Function to add logs to the terminal
+    const addLog = (message) => {
+        setLogs((prevLogs) => [...prevLogs, message]);
+    };
+
+    // Fetch user data to check if they are a researcher
+    const fetchUser = async () => {
+        try {
+            const response = await fetch(`${api_url}/get_user/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                credentials: 'include',
+            });
+
+            const data = await response.json();
+            if (response.ok && data.account_type === 2) {
+                setIsResearcher(true);  // User is a researcher
+            } else {
+                setIsResearcher(false);  // User is not a researcher
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
 
     const handleClick = async (event) => {
-        if (winner !== 'Game not start' || isWaitingForAI) return; // Prevent clicks if the game is over or waiting for AI
+        if (winner !== 'Game not start' || isWaitingForAI) return;
 
         const id = event.target.id;
 
-        // Check if the clicked square is valid and proceed
-        if (!isO) {  // X's turn
-            // Update UI with player's move (X)
+        addLog(`[INFO] Player clicked square ${id}`);
+
+        if (!isO) {
             event.target.textContent = 'X';
-            setxlocation(prev => [...prev, id]); // Store the move in the state
+            setxlocation(prev => [...prev, id]);  // Store the move in the state
             event.target.disabled = true;
 
-            // Disable all buttons while waiting for the AI move
             setIsWaitingForAI(true);
             disableAllButtons();
 
             const move_data = new URLSearchParams();
             move_data.append('move', id);
 
-            // Send the move to the backend for processing
+            addLog(`[INFO] Sending player's move to AI...`);
+
             try {
                 const response = await fetch(`${api_url}/make_move/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': getCookie('csrftoken'),  // CSRF token handling
+                        'X-CSRFToken': getCookie('csrftoken'),
                     },
                     credentials: 'include',
                     body: move_data.toString(),
                 });
 
                 const data = await response.json();
+
                 if (data.status === 'success') {
                     if (data.errors) {
                         set_error(data.errors);
                     }
-                    // AI's move (O) from the backend
-                    const aiMove = data.ai_move;
 
-                    // Find the corresponding button for the AI's move and update it
+                    const aiMove = data.ai_move;
+                    addLog(`[INFO] AI's move: ${aiMove}`);
+                    
+                    // Log the prompt and AI response for research purposes
+                    if (data.prompt_log) {
+                        addLog(`[PROMPT] ${data.prompt_log}`);
+                    }
+                    if (data.ai_response_log) {
+                        addLog(`[RESPONSE] ${data.ai_response_log}`);
+                    }
+
                     const aiButton = document.getElementById(aiMove);
                     if (aiButton) {
                         aiButton.textContent = 'O';
                         aiButton.disabled = true;
-                        setolocation(prev => [...prev, aiMove]);  // Store AI's move in the state
+                        setolocation(prev => [...prev, aiMove]);
                     }
 
-                    // Enable buttons after AI move is processed
                     enableAllButtons();
-                    setIsWaitingForAI(false);  // Reset waiting flag
+                    setIsWaitingForAI(false);
 
                 } else {
-                    console.error('Error:', data.message);  // Handle error if any
-                    setIsWaitingForAI(false);  // Reset if an error occurs
+                    console.error('Error:', data.message);
+                    addLog(`[ERROR] ${data.message}`);
+                    setIsWaitingForAI(false);
                     enableAllButtons();
                 }
             } catch (error) {
-                console.error('Error:', error);  // Catch and log any errors during the API request
-                setIsWaitingForAI(false);  // Reset waiting flag on error
+                console.error('Error:', error);
+                addLog(`[ERROR] ${error.message}`);
+                setIsWaitingForAI(false);
                 enableAllButtons();
             }
         }
@@ -116,31 +161,32 @@ const TicTacToe = () => {
     useEffect(() => {
         if (checkWinner(x_location)) {
             setWinner('X');
+            addLog("[INFO] Player X wins!");
         } else if (checkWinner(o_location)) {
             setWinner('O');
+            addLog("[INFO] AI O wins!");
         }
     }, [x_location, o_location]);
 
+    // Highlight winning move
     useEffect(() => {
-        // Highlight winning move
         if (winner !== 'Game not start') {
             highlightWinningMove();
         }
     }, [winner]);
 
-    // Check if there is a winner
     const checkWinner = (locations) => {
         const winPatterns = [
-            ['a1', 'a2', 'a3'], 
-            ['b1', 'b2', 'b3'], 
-            ['c1', 'c2', 'c3'], 
-            ['a1', 'b1', 'c1'], 
-            ['a2', 'b2', 'c2'], 
-            ['a3', 'b3', 'c3'], 
-            ['a1', 'b2', 'c3'], 
-            ['a3', 'b2', 'c1']  
+            ['a1', 'a2', 'a3'],
+            ['b1', 'b2', 'b3'],
+            ['c1', 'c2', 'c3'],
+            ['a1', 'b1', 'c1'],
+            ['a2', 'b2', 'c2'],
+            ['a3', 'b3', 'c3'],
+            ['a1', 'b2', 'c3'],
+            ['a3', 'b2', 'c1']
         ];
-    
+
         for (let pattern of winPatterns) {
             if (pattern.every(pos => locations.includes(pos))) {
                 setwinmove(pattern);
@@ -150,7 +196,6 @@ const TicTacToe = () => {
         return false;
     };
 
-    // Highlight winning move
     const highlightWinningMove = () => {
         const winbuttons = document.querySelectorAll('.square');
         winbuttons.forEach(button => {
@@ -160,19 +205,43 @@ const TicTacToe = () => {
         });
     };
 
-    // Reset game state
-    const handleStart = () => {
-        setisO(false);  // Player starts as X
-        setxlocation([]);
-        setolocation([]);
-        setWinner('Game not start');
-        setwinmove([]);
-        const buttons = document.querySelectorAll('.square');
-        buttons.forEach(button => {
-            button.textContent = '';
-            button.disabled = false;
-            button.style.backgroundColor = '';
-        });
+    const handleStart = async () => {
+        try {
+            const response = await fetch(`${api_url}/new_game/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                credentials: 'include',
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setisO(false);  // Player starts as X
+                setxlocation([]);
+                setolocation([]);
+                setLogs([]);
+                setWinner('Game not start');
+                setwinmove([]);
+                addLog("[INFO] Game started");
+
+                // Reset the board UI
+                const buttons = document.querySelectorAll('.square');
+                buttons.forEach(button => {
+                    button.textContent = '';
+                    button.disabled = false;
+                    button.style.backgroundColor = '';
+                });
+            } else {
+                console.error('Error resetting game:', data.message);
+                addLog(`[ERROR] ${data.message}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            addLog(`[ERROR] ${error.message}`);
+        }
     };
 
     // Determine the status message to display
@@ -187,16 +256,16 @@ const TicTacToe = () => {
         <div className="App">
             <header className="App-header">
                 <SideTab user="username" />
-                <img src={board} className="App-board" draggable="false" />
-                <img src={ruler} className="App-ruler" draggable="false" />
-                <img src={pencil} className="App-pencil" draggable="false" />
+                <img src={board} className="App-board" draggable="false" alt="Board" />
+                <img src={ruler} className="App-ruler" draggable="false" alt="Ruler" />
+                <img src={pencil} className="App-pencil" draggable="false" alt="Pencil" />
                 <div className='Playboard-container'>
                     <div>
-                        <div className='Playboard-NormalText' text-align='center'> 
+                        <div className='Playboard-NormalText' style={{ textAlign: 'center' }}>
                             <p>{getStatusMessage()}</p>  {/* Status message based on game state */}
                         </div>
                         <div className="Playboard">
-                            {error.all && <p className='Form-Error' style={{marginBottom: '1rem'}}>{error.all}</p>}
+                            {error.all && <p className='Form-Error' style={{ marginBottom: '1rem' }}>{error.all}</p>}
                             <div className="row">
                                 <button className="square" id="a3" onClick={handleClick}></button>
                                 <button className="square" id="b3" onClick={handleClick}></button>
@@ -213,8 +282,19 @@ const TicTacToe = () => {
                                 <button className="square" id="c1" onClick={handleClick}></button>
                             </div>
                         </div>
-                        <button className="App-Button" onClick={handleStart}>restart game</button>
+                        <button className="App-Button" onClick={handleStart}>restart</button>
                     </div>
+                    {/* Logging panel, visible only for researchers */}
+                    {isResearcher && (
+                        <div className="logging-panel">
+                            <h3>Terminal</h3>
+                            <div className="log-entries">
+                                {logs.map((log, index) => (
+                                    <div key={index} className="log-entry">{log}</div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </header>
         </div>

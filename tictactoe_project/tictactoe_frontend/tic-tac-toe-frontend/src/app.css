@@ -550,3 +550,50 @@ input:-webkit-autofill:active {
     font-size: 1rem;
   }
 }
+
+/* Logging panel container */
+.logging-panel {
+  width: 50vw;
+  background-color: #ebe2ce;
+  color: #301313;
+  border: 2px solid #301313;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  margin-left: 4rem;
+  margin-right: 4rem;
+  font-family: 'Courier New', Courier;
+  font-weight: 600;
+  text-align: left;
+  z-index: 5;
+}
+
+/* Title for the logging panel */
+.logging-panel h3 {
+  color: #301313;
+  margin-left: 1.5rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+/* Log entries section inside the panel */
+.log-entries {
+  height: 55vh;
+  background-color: #ebe2ce;
+  border: 2px solid #301313;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-y: scroll;
+}
+
+/* Individual log entry */
+.log-entry {
+  margin: 5px 0;
+  padding: 2px 0;
+  color: #301313;
+  font-family: 'Courier New';
+  font-size: 0.9rem;
+  line-height: 1.2rem;
+  white-space: pre-wrap;
+}

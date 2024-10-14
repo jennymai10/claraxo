@@ -312,6 +312,7 @@ def get_user(request):
             'age': ttt_user.age,
             'full_name': ttt_user.profile_name,
         }
+        print(user_data)
         return JsonResponse(user_data, status=200)
     except TicTacToeUser.DoesNotExist:
         return JsonResponse({'error': 'User does not exist'}, status=404)

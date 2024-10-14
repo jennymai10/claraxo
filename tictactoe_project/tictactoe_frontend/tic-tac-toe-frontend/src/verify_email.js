@@ -100,7 +100,7 @@ function VerifyEmail() {
                 body: form_data.toString(),
             });
 
-            const data = await response.json();
+            // const data = await response.json();
             if (response.ok) {
                 set_resend_message('Verification email resent successfully!');
             } else {

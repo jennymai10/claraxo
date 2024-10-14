@@ -65,36 +65,213 @@ def generate_ai_move(board, unoccupied, model):
     Returns:
         str: The chosen move for the AI, represented by a board position (e.g., 'a3').
     """
+    # Calculate heuristic scores for all available moves
+    move_scores = evaluate_all_moves(board, unoccupied)
+    # Create a string representation of the move scores to pass into the prompt
+    move_scores_str = ', '.join([f"{move}: {score}" for move, score in move_scores.items()])
+    print(f"Move scores: {move_scores}")
     # Create a prompt for the AI model describing the current board state and unoccupied squares
     prompt = f"""
-    Given the current Tic-Tac-Toe board state, where the squares occupied by X and O, and the unoccupied squares, are given using chess algebraic notation:
+    ### Board Layout:
+    The Tic-Tac-Toe board is indexed using a chess-like notation where:
+    - 'a' refers to the left column, 'b' refers to the middle column, and 'c' refers to the right column.
+    - '3' refers to the top row, '2' refers to the middle row, and '1' refers to the bottom row.
+    The board is laid out as follows:
+    a3 | b3 | c3
+    a2 | b2 | c2
+    a1 | b1 | c1
+    ### Winning Combinations:
+    To win the game, you need to place three 'O's in one of the following patterns:
+    1. Horizontal wins: ['a1', 'a2', 'a3'], ['b1', 'b2', 'b3'], ['c1', 'c2', 'c3']
+    2. Vertical wins: ['a1', 'b1', 'c1'], ['a2', 'b2', 'c2'], ['a3', 'b3', 'c3']
+    3. Diagonal wins: ['a1', 'b2', 'c3'], ['a3', 'b2', 'c1']
+    ### Decision Strategy:
+    1. **Immediate Win**: If you can win in this move, choose the move that completes one of the winning combinations listed above.
+    2. **Block the Opponent**: If 'X' can win on their next move, block them by placing your 'O' in the square that prevents them from completing a winning combination.
+    3. **Strategic Setup for Future Wins**: 
+    - If neither you nor 'X' can win immediately, focus on setting yourself up for a future win by positioning your 'O' in a strong spot (especially the center 'b2' or corners 'a3', 'a1', 'c3', 'c1').
+    - Think about creating two potential winning lines at once, which forces 'X' to block only one, giving you the advantage on your next turn.
+    4. **Avoid Bad Moves**: Avoid moves that give 'X' an opportunity to create a fork or win on their next turn. Focus on disrupting their plans while advancing your strategy.
+    You are playing Tic-Tac-Toe as 'O'. Your goal is to win the game. Here is the current state of the board:
     Squares occupied by X: [{', '.join([key for key, value in board.items() if value == 'X'])}]
     Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
     Unoccupied squares: [{', '.join(unoccupied)}]
-    You are playing as O. Your chosen move should be one of the unoccupied squares above. In your response, return exactly one string from {unoccupied}, representing your chosen move.
+    ### Heuristic Scores for Available Moves: {move_scores_str}
+    Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
+    Your response should be exactly one valid move string from the list of available squares: {unoccupied}, representing your chosen move.
     """
     try:
-        ai_move = ''
+        max_retries = 5  # Allow a maximum of 5 retries
         attempts = 0
-        max_attempts = 5 # Maximum number of attempts to get a valid move from the model
 
-        # Try to get a valid move from the AI model up to the maximum number of attempts
-        while ai_move not in unoccupied and attempts < max_attempts:
+        while attempts < max_retries:
             try:
-                response = model.generate_content(prompt)  # Generate content using the AI model
+                # Send a single request to the model with the pre-calculated heuristic scores and strategy advice
+                response = model.generate_content(prompt)
                 ai_move = response.text.strip()  # Extract the move from the model's response
-            except ValueError:
-                ai_move = ''  # Fallback in case of invalid response
-            attempts += 1
 
-        # If no valid move was generated, fall back to a random move
-        if ai_move not in unoccupied:
-            return random.choice(unoccupied), 1  # Return a random move and a flag indicating fallback
-        else:
-            return ai_move, 0
+                # If the AI returns a valid move, return it
+                if ai_move in unoccupied:
+                    print(f"AI chose move '{ai_move}' with heuristic score {move_scores[ai_move]}.")
+                    return ai_move, 0
+
+                # Increment the number of attempts if the move is invalid
+                attempts += 1
+                print(f"Attempt {attempts}: Invalid move '{ai_move}'. Retrying...")
+
+            except Exception as e:
+                print(f"Error generating AI move on attempt {attempts + 1}: {e}")
+                attempts += 1
+
+        # If max retries are exceeded, fallback to a random move
+        print(f"Max retries exceeded. Choosing a random move.")
+        return random.choice(unoccupied), 1
+
     except Exception as e:
         print(f"Error generating AI move: {e}")
         return random.choice(unoccupied), 1
+
+def generate_ai_move_with_logging(board, unoccupied, model):
+    """
+    Generate the AI move with logging of the prompt and response for monitoring purposes.
+
+    Args:
+        board (dict): The current state of the Tic-Tac-Toe board.
+        unoccupied (list): A list of unoccupied squares on the board.
+        model (object): The external AI model used to generate the move.
+
+    Returns:
+        str: The chosen move for the AI, represented by a board position (e.g., 'a3').
+        str: The prompt log for the researcher.
+        str: The AI response log for the researcher.
+    """
+    # Calculate heuristic scores for all available moves
+    move_scores = evaluate_all_moves(board, unoccupied)
+    # Create a string representation of the move scores to pass into the prompt
+    move_scores_str = ', '.join([f"{move}: {score}" for move, score in move_scores.items()])
+    print(f"Move scores: {move_scores}")
+    # Generate the prompt as before
+    prompt = f"""
+    ### Board Layout:
+    The Tic-Tac-Toe board is indexed using a chess-like notation where:
+    - 'a' refers to the left column, 'b' refers to the middle column, and 'c' refers to the right column.
+    - '3' refers to the top row, '2' refers to the middle row, and '1' refers to the bottom row.
+    The board is laid out as follows:
+    a3 | b3 | c3
+    a2 | b2 | c2
+    a1 | b1 | c1
+    ### Winning Combinations:
+    To win the game, you need to place three 'O's in one of the following patterns:
+    1. Horizontal wins: ['a1', 'a2', 'a3'], ['b1', 'b2', 'b3'], ['c1', 'c2', 'c3']
+    2. Vertical wins: ['a1', 'b1', 'c1'], ['a2', 'b2', 'c2'], ['a3', 'b3', 'c3']
+    3. Diagonal wins: ['a1', 'b2', 'c3'], ['a3', 'b2', 'c1']
+    ### Decision Strategy:
+    1. **Immediate Win**: If you can win in this move, choose the move that completes one of the winning combinations listed above.
+    2. **Block the Opponent**: If 'X' can win on their next move, block them by placing your 'O' in the square that prevents them from completing a winning combination.
+    3. **Strategic Setup for Future Wins**: 
+    - If neither you nor 'X' can win immediately, focus on setting yourself up for a future win by positioning your 'O' in a strong spot (especially the center 'b2' or corners 'a3', 'a1', 'c3', 'c1').
+    - Think about creating two potential winning lines at once, which forces 'X' to block only one, giving you the advantage on your next turn.
+    4. **Avoid Bad Moves**: Avoid moves that give 'X' an opportunity to create a fork or win on their next turn. Focus on disrupting their plans while advancing your strategy.
+    You are playing Tic-Tac-Toe as 'O'. Your goal is to win the game. Here is the current state of the board:
+    Squares occupied by X: [{', '.join([key for key, value in board.items() if value == 'X'])}]
+    Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
+    Unoccupied squares: [{', '.join(unoccupied)}]
+    ### Heuristic Scores for Available Moves: {move_scores_str}
+    Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
+    Your response should be exactly one valid move string from the list of available squares: {unoccupied}, representing your chosen move.
+    """
+    try:
+        # Log the prompt sent to Gemini
+        prompt_log = prompt
+
+        # Send the prompt to the AI and capture the response
+        response = model.generate_content(prompt)
+        ai_move = response.text.strip()
+
+        # Log the response from Gemini
+        ai_response_log = response.text
+
+        # Validate the AI's move
+        if ai_move in unoccupied:
+            return ai_move, 0, prompt_log, ai_response_log  # Return valid move and logs
+
+        # Fall back if AI gives an invalid move
+        return random.choice(unoccupied), 1, prompt_log, ai_response_log
+
+    except Exception as e:
+        print(f"Error generating AI move: {e}")
+        return random.choice(unoccupied), 1, prompt_log, "Error: Failed to get a response from AI"
+
+
+def evaluate_move(board, move, is_ai_turn=True):
+    """
+    Heuristic function to evaluate a move.
+    
+    Args:
+        board (dict): The current board state.
+        move (str): The move being evaluated (e.g., 'a3').
+        is_ai_turn (bool): True if evaluating for AI (O), False if for player (X).
+    
+    Returns:
+        int: The heuristic score of the move.
+    """
+    score = 0
+    
+    # Create a copy of the board with the move applied
+    board_copy = board.copy()
+    board_copy[move] = 'O' if is_ai_turn else 'X'  # Assume 'O' is AI, 'X' is the player
+    
+    # Define winning patterns
+    win_patterns = [
+        ['a1', 'a2', 'a3'], 
+        ['b1', 'b2', 'b3'], 
+        ['c1', 'c2', 'c3'], 
+        ['a1', 'b1', 'c1'], 
+        ['a2', 'b2', 'c2'], 
+        ['a3', 'b3', 'c3'], 
+        ['a1', 'b2', 'c3'], 
+        ['a3', 'b2', 'c1']  
+    ]
+    
+    # Check if the move results in a win
+    for pattern in win_patterns:
+        if all(board_copy[square] == ('O' if is_ai_turn else 'X') for square in pattern):
+            score += 100  # High score for winning move
+    
+    # Check if the move blocks the opponent from winning
+    if is_ai_turn:  # AI's turn (we want to block 'X' from winning)
+        for pattern in win_patterns:
+            # Check if 'X' has two out of three in a winning pattern, and the move would block them
+            x_count = sum(1 for square in pattern if board[square] == 'X')
+            empty_count = sum(1 for square in pattern if board[square] == '')
+            if x_count == 2 and empty_count == 1 and move in pattern:
+                score += 50  # High score for blocking player's winning move
+    
+    # Additional heuristic: prioritize center and corners
+    if move == 'b2':
+        score += 10  # Center is a good strategic position
+    elif move in ['a3', 'c3', 'a1', 'c1']:
+        score += 5  # Corners are also valuable positions
+    
+    return score
+
+def evaluate_all_moves(board, unoccupied):
+    """
+    Evaluate heuristic scores for all possible moves for the AI.
+    
+    Args:
+        board (dict): The current board state.
+        unoccupied (list): A list of unoccupied squares on the board.
+    
+    Returns:
+        dict: A dictionary where keys are unoccupied squares and values are their heuristic scores.
+    """
+    move_scores = {}
+    for move in unoccupied:
+        # Evaluate the move using the heuristic function
+        score = evaluate_move(board, move)
+        move_scores[move] = score
+    return move_scores
 
 def game_end_handler(board, game, winner, request):
     """
@@ -123,7 +300,7 @@ def game_end_handler(board, game, winner, request):
         return winner #JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
     # If the board is full and there is no winner, it's a draw
-    if '' not in board.values():
+    if '' not in board.values() or winner == None:
         game.winner = 'Draw'  # Set the winner as 'Draw'
         game.completed = True  # Mark the game as completed
         game.save()  # Save the updated game state to the database
