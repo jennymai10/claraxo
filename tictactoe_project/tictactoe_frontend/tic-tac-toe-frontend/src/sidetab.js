@@ -108,7 +108,8 @@ const SideTab = ({ user }) => {
         src={isOpen ? icon2 : icon}
         alt="Toggle SideTab"
         className="Icon"
-      style={{ position: 'absolute', top: '1rem', right: '0.6rem'}}
+        style={{ position: 'absolute', top: '1rem', right: '0.6rem'}}
+        draggable="false"
         onClick={toggleSideTab}
       />
       <div className={`side-tab ${isOpen ? 'active' : ''}`}>
@@ -126,6 +127,7 @@ const SideTab = ({ user }) => {
               </p>
               <div style={{marginTop: '10vh', marginBottom: '5vh', marginLeft: '2rem', cursor: 'pointer'}} onClick={handleNewGame}>
                 <p><img
+                  draggable="false"
                   src={newgame_icon}
                   style={{ marginRight: '0.75rem', width: '1.25rem', height: 'auto' }}
                 />
@@ -134,12 +136,14 @@ const SideTab = ({ user }) => {
               <div style={{marginBottom: '5vh', marginLeft: '2rem', cursor: 'pointer'}} onClick={handleHistory}>
                 <p><img
                   src={gamehistory_icon}
+                  draggable="false"
                   style={{ marginRight: '0.75rem', width: '1.25rem', height: 'auto' }}
                 />game history</p>
               </div>
               <div style={{marginBottom: '5vh', marginLeft: '2rem', cursor: 'pointer'}} onClick={handleSettings}>
                 <p><img
                   src={settings_icon}
+                  draggable="false"
                   style={{ marginRight: '0.75rem', width: '1.25rem', height: 'auto' }}
                 />settings</p>
               </div>

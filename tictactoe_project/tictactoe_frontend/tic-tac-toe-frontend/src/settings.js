@@ -90,6 +90,7 @@ function Settings() {
     };
 
     const handle_cancel = () => {
+        set_error({});
         set_password('PLACEHOLDER');
         set_api_key('PLACEHOLDER');
         set_is_editing('');
@@ -170,7 +171,13 @@ function Settings() {
         return true;
     };
 
-    const is_field_locked = (field) => is_editing !== field;
+    const is_field_locked = (field) => {
+        if (is_editing === 'password' && (field === 'password' || field === 'password2')) {
+            return false;  // Both 'password' and 'password2' should be unlocked if 'password' is being edited
+        }
+        return is_editing !== field;
+    };
+    
 
     return (
         <div className="App">
@@ -299,7 +306,7 @@ function Settings() {
                                         <div className="App-Rectangle" style={{ marginTop: '1rem' }}>
                                             <input
                                                 type="password"
-                                                value={''}
+                                                value={password2}
                                                 placeholder="re-enter new password"
                                                 onChange={handle_change(set_password2, validate_passwords)}
                                             />

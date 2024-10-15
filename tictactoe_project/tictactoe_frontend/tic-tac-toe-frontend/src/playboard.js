@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './app.css';
 import ruler from './assets/ruler.png';
 import pencil from './assets/pencil.png';
@@ -27,15 +27,19 @@ const TicTacToe = () => {
     const [o_location, setolocation] = useState([]);  // Track O's moves
     const [winner, setWinner] = useState('Game not start');
     const [winmove, setwinmove] = useState([]);
-    const [error, set_error] = useState({});
+    const [error, setError] = useState('');
     const [isWaitingForAI, setIsWaitingForAI] = useState(false);  // Track if waiting for AI
     const [logs, setLogs] = useState([]);  // Log entries for terminal
     const [isResearcher, setIsResearcher] = useState(false);  // Track if the user is a researcher
+    const [difficulty, setDifficulty] = useState('');  // Track the AI difficulty
+    const [isDifficultySelected, setIsDifficultySelected] = useState(false); // Track if the difficulty has been selected
 
     useEffect(() => {
-        handleStart();  // Automatically start a new game on mount
-        fetchUser();  // Fetch user data to check if they are a researcher
-    }, []);
+        if (isDifficultySelected) {
+            handleStart();  // Automatically start a new game on mount
+            fetchUser();  // Fetch user data to check if they are a researcher
+        }
+    }, [isDifficultySelected]);
 
     // Function to add logs to the terminal
     const addLog = (message) => {
@@ -70,7 +74,7 @@ const TicTacToe = () => {
 
         const id = event.target.id;
 
-        addLog(`[INFO] Player clicked square ${id}`);
+        addLog(`[INFO] Player played square ${id}`);
 
         if (!isO) {
             event.target.textContent = 'X';
@@ -82,8 +86,9 @@ const TicTacToe = () => {
 
             const move_data = new URLSearchParams();
             move_data.append('move', id);
+            move_data.append('difficulty', difficulty);
 
-            addLog(`[INFO] Sending player's move to AI...`);
+            addLog(`[INFO] Sending player's move to AI with difficulty level: ${difficulty}...`);
 
             try {
                 const response = await fetch(`${api_url}/make_move/`, {
@@ -100,7 +105,12 @@ const TicTacToe = () => {
 
                 if (data.status === 'success') {
                     if (data.errors) {
-                        set_error(data.errors);
+                        addLog(`[ERROR] ${data.errors}`);
+                    }
+
+                    if (data.ai_response_log && data.ai_response_log.includes('400 API key not valid')) {
+                        setError('API key not valid. You can add a valid API key in Settings. A random move was played.');
+
                     }
 
                     const aiMove = data.ai_move;
@@ -223,6 +233,7 @@ const TicTacToe = () => {
                 setxlocation([]);
                 setolocation([]);
                 setLogs([]);
+                setError('');
                 setWinner('Game not start');
                 setwinmove([]);
                 addLog("[INFO] Game started");
@@ -244,6 +255,20 @@ const TicTacToe = () => {
         }
     };
 
+    const handleDifficultySelect = (level) => {
+        setDifficulty(level);  // Set the selected difficulty
+        setError('');
+    };
+
+    const handleStartGame = () => {
+        if (difficulty) {
+            setIsDifficultySelected(true);  // Confirm difficulty selection
+            setError('');  // Clear any previous errors
+        } else {
+            setError('Please select a difficulty level to start the game.');  // Set error message
+        }
+    };
+
     // Determine the status message to display
     const getStatusMessage = () => {
         if (winner === 'X') return "Player X wins!";
@@ -255,47 +280,84 @@ const TicTacToe = () => {
     return (
         <div className="App">
             <header className="App-header">
-                <SideTab user="username" />
-                <img src={board} className="App-board" draggable="false" alt="Board" />
-                <img src={ruler} className="App-ruler" draggable="false" alt="Ruler" />
-                <img src={pencil} className="App-pencil" draggable="false" alt="Pencil" />
-                <div className='Playboard-container'>
-                    <div>
-                        <div className='Playboard-NormalText' style={{ textAlign: 'center' }}>
-                            <p>{getStatusMessage()}</p>  {/* Status message based on game state */}
-                        </div>
-                        <div className="Playboard">
-                            {error.all && <p className='Form-Error' style={{ marginBottom: '1rem' }}>{error.all}</p>}
-                            <div className="row">
-                                <button className="square" id="a3" onClick={handleClick}></button>
-                                <button className="square" id="b3" onClick={handleClick}></button>
-                                <button className="square" id="c3" onClick={handleClick}></button>
-                            </div>
-                            <div className="row">
-                                <button className="square" id="a2" onClick={handleClick}></button>
-                                <button className="square" id="b2" onClick={handleClick}></button>
-                                <button className="square" id="c2" onClick={handleClick}></button>
-                            </div>
-                            <div className="row">
-                                <button className="square" id="a1" onClick={handleClick}></button>
-                                <button className="square" id="b1" onClick={handleClick}></button>
-                                <button className="square" id="c1" onClick={handleClick}></button>
-                            </div>
-                        </div>
-                        <button className="App-Button" onClick={handleStart}>restart</button>
-                    </div>
-                    {/* Logging panel, visible only for researchers */}
-                    {isResearcher && (
-                        <div className="logging-panel">
-                            <h3>Terminal</h3>
-                            <div className="log-entries">
-                                {logs.map((log, index) => (
-                                    <div key={index} className="log-entry">{log}</div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                <SideTab />
+                <div className='App-FormName' style={{ marginBottom: '2rem' }}>
+                    <h4>play game</h4>
                 </div>
+                {!isDifficultySelected ? (
+                    <div className="Signup-Query" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '65vh' }}>
+                    <div className="App-NormalText" style={{ marginBottom: '1rem' }}>
+                        <p>select difficulty level:</p>
+                    </div>
+                    <div className="App-Rectangle" style={{width: '10rem', textAlign: 'center' }}>
+                        <select className="Signup-AccountTypeSelect" style={{textAlign: 'center' }}onChange={(e) => handleDifficultySelect(e.target.value)}>
+                            <option value="placeholder" disabled selected>select</option>
+                            <option value="easy">easy</option>
+                            <option value="medium">medium</option>
+                            <option value="hard">hard</option>
+                        </select>
+                        
+                    </div>
+                    {/* Conditionally render error message */}
+                    {error && <div className="Form-Error">{error}</div>}
+                    <button className="App-Button" style={{marginTop: '1rem'}} onClick={handleStartGame}>start game</button>
+                </div>
+                
+                ) : (
+                    <div className="game-board">
+                        <img src={board} className="App-board" draggable="false" alt="Board" />
+                        <img src={ruler} className="App-ruler" draggable="false" alt="Ruler" />
+                        <img src={pencil} className="App-pencil" draggable="false" alt="Pencil" />
+                        <div className='Playboard-container'>
+                            <div style={{margin:0, zIndex: 3}}>
+                                {!isResearcher && error && (
+                                    <div className="Form-Error">{error}</div>
+                                )}
+                                <div className='Playboard-NormalText' style={{ textAlign: 'center' }}>
+                                    <p>{getStatusMessage()}</p>  {/* Status message based on game state */}
+                                </div>
+                                <div className="Playboard">
+                                    <div className="row">
+                                        <button className="square" id="a3" onClick={handleClick}></button>
+                                        <button className="square" id="b3" onClick={handleClick}></button>
+                                        <button className="square" id="c3" onClick={handleClick}></button>
+                                    </div>
+                                    <div className="row">
+                                        <button className="square" id="a2" onClick={handleClick}></button>
+                                        <button className="square" id="b2" onClick={handleClick}></button>
+                                        <button className="square" id="c2" onClick={handleClick}></button>
+                                    </div>
+                                    <div className="row">
+                                        <button className="square" id="a1" onClick={handleClick}></button>
+                                        <button className="square" id="b1" onClick={handleClick}></button>
+                                        <button className="square" id="c1" onClick={handleClick}></button>
+                                    </div>
+                                </div>
+                                <button 
+                                    className="App-Button" 
+                                    onClick={() => {
+                                        setDifficulty('');  // Reset difficulty
+                                        setIsDifficultySelected(false);  // Reset difficulty selection state
+                                        handleStart();  // Call the handleStart function to restart the game
+                                    }}
+                                >
+                                    restart
+                                </button>
+                            </div>
+                            {/* Logging panel, visible only for researchers */}
+                            {isResearcher && (
+                                <div className="logging-panel">
+                                    <h3>Terminal</h3>
+                                    <div className="log-entries">
+                                        {logs.map((log, index) => (
+                                            <div key={index} className="log-entry">{log}</div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </header>
         </div>
     );

@@ -120,7 +120,7 @@ const GameHistory = () => {
                                     <td>{game.winner || "no winner"}</td>
                                     <td>
                                         <button className="Small-Button" onClick={() => toggleMoves(game.game_id)}>
-                                            {visibleMoves[game.game_id] ? 'Hide' : 'Show'}
+                                            {visibleMoves[game.game_id] ? 'hide' : 'show'}
                                         </button>
                                     </td>
                                 </tr>

@@ -11,10 +11,12 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.db import IntegrityError
+from ..utils import decrypt_data
 
 @swagger_auto_schema(
     method='get',
@@ -116,6 +118,12 @@ def update_profile(request):
         print("Profile updated successfully.")
         # Return success response
         return JsonResponse({'status': 'success', 'message': 'Account updated successfully.'}, status=200)
+    except IntegrityError as e:
+        # Check if the error is related to the email field and return a user-friendly message
+        if 'tictactoe_app_tictactoeuser.email' in str(e):
+            return JsonResponse({'status': 'error', 'message': 'Email is already in use.'}, status=400)
+        elif 'tictactoe_app_tictactoeuser.username' in str(e):
+            return JsonResponse({'status': 'error', 'message': 'Username is already in use.'}, status=400)
     except Exception as e:
         # Return error message in case something goes wrong
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -160,9 +168,42 @@ def register_user(request):
         JsonResponse: A JSON response indicating success or failure of registration.
     """
     if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
+        # Parse encrypted password and API key from JSON
+        encrypted_password = json.loads(request.POST.get('password'))
+        encrypted_password2 = json.loads(request.POST.get('password2'))
+        encrypted_api_key = json.loads(request.POST.get('api_key'))
+        print(encrypted_password)
+        print(encrypted_password2)
+        print(encrypted_api_key)
+
+        # Ensure the fields contain both 'ciphertext' and 'iv'
+        if 'ciphertext' not in encrypted_password or 'iv' not in encrypted_password:
+            return JsonResponse({'status': 'error', 'message': 'Invalid encrypted password data.'}, status=400)
+        if 'ciphertext' not in encrypted_api_key or 'iv' not in encrypted_api_key:
+            return JsonResponse({'status': 'error', 'message': 'Invalid encrypted API key data.'}, status=400)
+
+        # Decrypt the password and API key
+        decrypted_password = decrypt_data(encrypted_password['ciphertext'], secret_key, encrypted_password['iv'])
+        decrypted_password2 = decrypt_data(encrypted_password2['ciphertext'], secret_key, encrypted_password2['iv'])
+        decrypted_api_key = decrypt_data(encrypted_api_key['ciphertext'], secret_key, encrypted_api_key['iv'])
+        print("Password: ",decrypted_password)
+        print(decrypted_password2)
+        print("API: ", decrypted_api_key)
+
+        if not decrypted_password or decrypted_password != decrypted_password2:
+            return JsonResponse({'status': 'error', 'message': 'Failed to decrypt data or passwords do not match.'}, status=400)
+        
+        # Make a mutable copy of request.POST and update it with the decrypted values
+        form_data = request.POST.copy()
+        form_data['password'] = decrypted_password
+        form_data['password2'] = decrypted_password2
+        form_data['api_key'] = decrypted_api_key
+
+        # Pass the updated form_data to the form for validation
+        form = UserRegistrationForm(form_data)
+
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
             user.verification_code = random.randint(100000, 999999)  # Generate a random 6-digit verification code
             user.is_active = False  # Set user as inactive until email is verified
             user.save()
@@ -312,7 +353,6 @@ def get_user(request):
             'age': ttt_user.age,
             'full_name': ttt_user.profile_name,
         }
-        print(user_data)
         return JsonResponse(user_data, status=200)
     except TicTacToeUser.DoesNotExist:
         return JsonResponse({'error': 'User does not exist'}, status=404)
@@ -372,11 +412,7 @@ def login_user(request):
             if user is not None:
                 # Check if the API key is expiring soon (less than 7 days)
                 if user.api_key_expiry_date:
-                    current_time = datetime.now(timezone.utc)  # Get the current time in UTC
-                    days_remaining = (user.api_key_expiry_date - current_time).days
-                    if days_remaining <= 7:
-                        # Send a warning email to the user about the API key expiration
-                        send_warning_email(user, days_remaining)
+                    user.api_key_expiry_date = datetime.now(timezone.utc) + timedelta(days=90)
                 
                 # Check if the user's email is verified (is_active is True)
                 if user.is_active:

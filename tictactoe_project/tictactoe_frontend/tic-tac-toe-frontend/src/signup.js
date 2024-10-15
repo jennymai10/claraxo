@@ -1,3 +1,4 @@
+import CryptoJS from 'crypto-js';
 import React, { useState } from 'react';
 import board from './assets/board.png';
 import './app.css';
@@ -21,6 +22,22 @@ function get_cookie(name) {
     return cookie_value;
 }
 
+const encryptData = (data, secretKey) => {
+    const key = CryptoJS.enc.Base64.parse(secretKey);  // Use a Base64 key
+    const iv = CryptoJS.lib.WordArray.random(16);  // Generate random 16-byte IV
+
+    const encrypted = CryptoJS.AES.encrypt(data, key, {
+        iv: iv,
+        padding: CryptoJS.pad.Pkcs7,
+        mode: CryptoJS.mode.CBC
+    });
+
+    return {
+        ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64),
+        iv: iv.toString(CryptoJS.enc.Base64)  // Send the IV along with the encrypted data
+    };
+};
+
 function Signup() {
     const api_url = process.env.REACT_APP_API_URL;
     const [username, set_username] = useState('');
@@ -34,6 +51,7 @@ function Signup() {
     const [error, set_error] = useState({});
     const [is_loading, set_is_loading] = useState(false);
     const navigate = useNavigate();
+    const secretKey = 'YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=';
 
     const handle_change = (setter, validate_fn) => (event) => {
         setter(event.target.value);
@@ -133,14 +151,15 @@ function Signup() {
             is_valid_account_type(account_type)
         ) {
             try {
+                console.log(encryptData(api_key, secretKey));  // Log encrypted API key data
                 const form_data = new URLSearchParams();
                 form_data.append('account_type', account_type);
                 form_data.append('email', email);
-                form_data.append('password', password);
-                form_data.append('password2', password2);
+                form_data.append('password', JSON.stringify(encryptData(password, secretKey)));
+                form_data.append('password2', JSON.stringify(encryptData(password2, secretKey)));
                 form_data.append('age', age);
                 form_data.append('username', username);
-                form_data.append('api_key', api_key);
+                form_data.append('api_key', JSON.stringify(encryptData(api_key, secretKey)));
                 form_data.append('profile_name', fullname);
 
                 const response = await fetch(`${api_url}/register/`, {
