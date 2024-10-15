@@ -5,12 +5,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.conf import settings
-import random
-from google.cloud import secretmanager
+import random, json
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.contrib.auth import update_session_auth_hash
-from django.contrib import messages
 from datetime import datetime, timezone, timedelta
 from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
@@ -104,14 +102,22 @@ def update_profile(request):
  
         # Update API key
         if 'api_key' in data and data['api_key'] != 'PLACEHOLDER':
-            user.store_api_key_in_secret_manager(data['api_key'], user.api_key_secret_id, True)
-            user.save()
-
+            encrypted_api_key = json.loads(request.POST.get('api_key'))
+            decrypted_api_key = decrypt_data(encrypted_api_key['ciphertext'], None, encrypted_api_key['iv'])
+            print("API Key: ", decrypted_api_key)
+            if decrypted_api_key != 'PLACEHOLDER':
+                user.store_api_key_in_secret_manager(decrypted_api_key, user.api_key_secret_id, True)
+                user.save()
+        
         # Update password
-        if 'password' in data and data['password'] != 'PLACEHOLDER':
-            user.set_password(data['password'])  # Update the password securely
-            user.save()
-            update_session_auth_hash(request, user)  # Update session so the user stays logged in
+        if 'password' in data:
+            encrypted_password = json.loads(request.POST.get('password'))
+            decrypted_password = decrypt_data(encrypted_password['ciphertext'], None, encrypted_password['iv'])
+            print("Password: ", decrypted_password)
+            if decrypted_password != 'PLACEHOLDER':
+                user.set_password(decrypted_password)  # Update the password securely
+                user.save()
+                update_session_auth_hash(request, user)  # Update session so the user stays logged in
 
         # Save the user and profile changes
         user.save()
@@ -183,9 +189,9 @@ def register_user(request):
             return JsonResponse({'status': 'error', 'message': 'Invalid encrypted API key data.'}, status=400)
 
         # Decrypt the password and API key
-        decrypted_password = decrypt_data(encrypted_password['ciphertext'], secret_key, encrypted_password['iv'])
-        decrypted_password2 = decrypt_data(encrypted_password2['ciphertext'], secret_key, encrypted_password2['iv'])
-        decrypted_api_key = decrypt_data(encrypted_api_key['ciphertext'], secret_key, encrypted_api_key['iv'])
+        decrypted_password = decrypt_data(encrypted_password['ciphertext'], None, encrypted_password['iv'])
+        decrypted_password2 = decrypt_data(encrypted_password2['ciphertext'], None, encrypted_password2['iv'])
+        decrypted_api_key = decrypt_data(encrypted_api_key['ciphertext'], None, encrypted_api_key['iv'])
         print("Password: ",decrypted_password)
         print(decrypted_password2)
         print("API: ", decrypted_api_key)
@@ -478,43 +484,6 @@ def logout_user(request):
                         'status': 'success',
                         'message': 'Successfully logged out!',
                     }, status=200)
-
-def send_warning_email(user, days_remaining):
-    """
-    Send a warning email to the user if their API key is expiring soon.
-
-    This function sends an email notification to the user if their API key is set to expire
-    within the next 7 days, reminding them to renew their key.
-
-    Args:
-        user (TicTacToeUser): The user whose API key is expiring.
-        days_remaining (int): Number of days left before the API key expires.
-
-    Returns:
-        None
-    """
-
-    # Email subject and message content
-    subject = 'C-Lara | Your API Key is Expiring Soon'
-    message = f"""
-    Hello {user.profile_name},
-
-    This is a reminder that your API key will expire in {days_remaining} day(s).
-
-    Please take necessary action to renew your API key before it expires.
-
-    Best regards,
-    C-Lara TicTacToe Team
-    """
-    
-    # Send the email to the user's email address
-    send_mail(
-        subject,
-        message,
-        settings.EMAIL_HOST_USER,  # Sender email address from settings
-        [user.email],  # Recipient's email address
-        fail_silently=False,  # Raise exceptions if the email fails to send
-    )
 
 @api_view(['POST'])
 def verifyemail_resend(request):

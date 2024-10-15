@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from ..models import Game, GameLog
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -7,7 +7,6 @@ from .game_utils import check_win, initialize_board, game_end_handler, generate_
 import google.generativeai as genai
 from google.cloud import secretmanager
 import os, random
-from ..models import TicTacToeUser
 from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi

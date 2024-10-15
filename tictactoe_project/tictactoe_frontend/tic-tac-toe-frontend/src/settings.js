@@ -6,7 +6,9 @@ import pencil from './assets/pencil.png';  // Import the pencil icon
 import edit from './assets/penciledit.png';
 import SideTab from './sidetab';
 import { useNavigate } from 'react-router-dom';
+import CryptoJS from 'crypto-js';
 
+const secretKey = 'YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=';
 function get_cookie(name) {
     let cookie_value = null;
     if (document.cookie && document.cookie !== '') {
@@ -21,6 +23,22 @@ function get_cookie(name) {
     }
     return cookie_value;
 }
+
+const encryptData = (data, secretKey) => {
+    const key = CryptoJS.enc.Base64.parse(secretKey);  // Use a Base64 key
+    const iv = CryptoJS.lib.WordArray.random(16);  // Generate random 16-byte IV
+
+    const encrypted = CryptoJS.AES.encrypt(data, key, {
+        iv: iv,
+        padding: CryptoJS.pad.Pkcs7,
+        mode: CryptoJS.mode.CBC
+    });
+
+    return {
+        ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64),
+        iv: iv.toString(CryptoJS.enc.Base64)  // Send the IV along with the encrypted data
+    };
+};
 
 function Settings() {
     const api_url = process.env.REACT_APP_API_URL;
@@ -103,7 +121,13 @@ function Settings() {
 
         try {
             const form_data = new URLSearchParams();
-            form_data.append(field, eval(field)); // Dynamically assign the field to update
+            // Encrypt sensitive fields before submission
+            if (field === 'password' || field === 'api_key') {
+                const encrypted_field = encryptData(eval(field), secretKey);  // Encrypt the data
+                form_data.append(field, JSON.stringify(encrypted_field));  // Convert to JSON and send
+            } else {
+                form_data.append(field, eval(field));  // Dynamically assign the field to update
+            }
 
             const response = await fetch(`${api_url}/update_account/`, {
                 method: 'POST',
@@ -406,7 +430,6 @@ function Settings() {
                             </div>
 
                             {error.submit && <p className='Form-Error'>{error.submit}</p>}
-                            {/* <button className='App-Button' type='submit' disabled={is_loading}>delete account</button> */}
                         </form>
                     </div>
                 </div>

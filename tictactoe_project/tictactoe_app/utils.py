@@ -30,6 +30,7 @@ secret_key = 'YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY='
 # AES-CBC Decryption function with IV
 def decrypt_data(encrypted_data, secret_key_64, iv_64):
     try:
+        secret_key_64 = 'YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY='
         # Decode the base64-encoded secret key and IV
         secret_key = base64.b64decode(secret_key_64)
         iv = base64.b64decode(iv_64)
