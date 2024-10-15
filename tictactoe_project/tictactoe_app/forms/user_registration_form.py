@@ -32,7 +32,7 @@ class UserRegistrationForm(forms.ModelForm):
         clean_age(): Validates that the user's age is within a realistic range.
         save(commit=True): Hashes the password and API key securely before saving the user instance.
     """
-
+    password = forms.CharField(label='Type Password', widget=forms.PasswordInput())
     password2 = forms.CharField(label='Re-type Password', widget=forms.PasswordInput())
     api_key = forms.CharField(widget=forms.PasswordInput(), required=False, help_text='Optional API key for external integrations.')
 

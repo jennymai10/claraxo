@@ -5,16 +5,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.conf import settings
-import random
-from google.cloud import secretmanager
+import random, json
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.contrib.auth import update_session_auth_hash
-from django.contrib import messages
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.db import IntegrityError
+from ..utils import decrypt_data
 
 @swagger_auto_schema(
     method='get',
@@ -61,37 +61,78 @@ def get_csrf_token(request):
 @login_required
 @api_view(['POST'])
 def update_profile(request):
-    """
-    Handle profile updates for logged-in users.
-
-    This view allows a logged-in user to update their profile information, including username,
-    email, age, profile name, API key, and password. If the email is changed, the user must
-    verify it again before the account becomes active.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponse: Renders the profile update page with a form.
-        HttpResponseRedirect: Redirects to the same page with a success message after updating.
-    """
+    print(request.data)
     user = request.user  # Get the current logged-in user
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=user)  # Bind form with user data
-        if form.is_valid():
-            form.save()  # Save the updated user profile
-            # Update the session with the new password if changed
-            if form.cleaned_data.get('new_password'):
-                update_session_auth_hash(request, user)  # Update session with the new password
-            # Show success message
-            messages.success(request, 'Your profile has been updated successfully.')
-            return redirect('update_profile')
-        else:
-            messages.error(request, 'Please correct the error below.')
-    else:
-        form = UserProfileForm(instance=user)  # Display the form with the current user data
+    data = request.data  # Assuming POST data comes in as JSON or form data
 
-    return render(request, 'tictactoe_app/update_profile.html', {'form': form})
+    try:
+        # Update username
+        if 'username' in data:
+            user.username = data['username']
+            user.save()
+
+        # Update email
+        if 'email' in data and user.email != data['email']:
+            user.email = data['email']
+            user.verification_code = random.randint(100000, 999999)
+            user.is_active = False  # Mark user inactive until email is verified
+            user.save()  # Save the email change first
+            # Here you should trigger the email verification process
+            send_mail(
+                'C-Lara | Email Verification',
+                f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
+                settings.EMAIL_HOST_USER,
+                [user.email],
+                fail_silently=False,
+            )
+
+        # Update full name (profile name)
+        if 'fullname' in data:
+            user.profile_name = data['fullname']
+            user.save()
+        
+        if 'account_type' in data:
+            user.account_type = int(data['account_type'])
+            user.save()
+
+        # Update age
+        if 'age' in data:
+            user.age = int(data['age'])
+            user.save()
+ 
+        # Update API key
+        if 'api_key' in data and data['api_key'] != 'PLACEHOLDER':
+            encrypted_api_key = json.loads(request.POST.get('api_key'))
+            decrypted_api_key = decrypt_data(encrypted_api_key['ciphertext'], None, encrypted_api_key['iv'])
+            print("API Key: ", decrypted_api_key)
+            if decrypted_api_key != 'PLACEHOLDER':
+                user.store_api_key_in_secret_manager(decrypted_api_key, user.api_key_secret_id, True)
+                user.save()
+        
+        # Update password
+        if 'password' in data:
+            encrypted_password = json.loads(request.POST.get('password'))
+            decrypted_password = decrypt_data(encrypted_password['ciphertext'], None, encrypted_password['iv'])
+            print("Password: ", decrypted_password)
+            if decrypted_password != 'PLACEHOLDER':
+                user.set_password(decrypted_password)  # Update the password securely
+                user.save()
+                update_session_auth_hash(request, user)  # Update session so the user stays logged in
+
+        # Save the user and profile changes
+        user.save()
+        print("Profile updated successfully.")
+        # Return success response
+        return JsonResponse({'status': 'success', 'message': 'Account updated successfully.'}, status=200)
+    except IntegrityError as e:
+        # Check if the error is related to the email field and return a user-friendly message
+        if 'tictactoe_app_tictactoeuser.email' in str(e):
+            return JsonResponse({'status': 'error', 'message': 'Email is already in use.'}, status=400)
+        elif 'tictactoe_app_tictactoeuser.username' in str(e):
+            return JsonResponse({'status': 'error', 'message': 'Username is already in use.'}, status=400)
+    except Exception as e:
+        # Return error message in case something goes wrong
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 @swagger_auto_schema(
     method='post',
@@ -133,15 +174,44 @@ def register_user(request):
         JsonResponse: A JSON response indicating success or failure of registration.
     """
     if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        print("show form")
+        # Parse encrypted password and API key from JSON
+        encrypted_password = json.loads(request.POST.get('password'))
+        encrypted_password2 = json.loads(request.POST.get('password2'))
+        encrypted_api_key = json.loads(request.POST.get('api_key'))
+        print(encrypted_password)
+        print(encrypted_password2)
+        print(encrypted_api_key)
+
+        # Ensure the fields contain both 'ciphertext' and 'iv'
+        if 'ciphertext' not in encrypted_password or 'iv' not in encrypted_password:
+            return JsonResponse({'status': 'error', 'message': 'Invalid encrypted password data.'}, status=400)
+        if 'ciphertext' not in encrypted_api_key or 'iv' not in encrypted_api_key:
+            return JsonResponse({'status': 'error', 'message': 'Invalid encrypted API key data.'}, status=400)
+
+        # Decrypt the password and API key
+        decrypted_password = decrypt_data(encrypted_password['ciphertext'], None, encrypted_password['iv'])
+        decrypted_password2 = decrypt_data(encrypted_password2['ciphertext'], None, encrypted_password2['iv'])
+        decrypted_api_key = decrypt_data(encrypted_api_key['ciphertext'], None, encrypted_api_key['iv'])
+        print("Password: ",decrypted_password)
+        print(decrypted_password2)
+        print("API: ", decrypted_api_key)
+
+        if not decrypted_password or decrypted_password != decrypted_password2:
+            return JsonResponse({'status': 'error', 'message': 'Failed to decrypt data or passwords do not match.'}, status=400)
+        
+        # Make a mutable copy of request.POST and update it with the decrypted values
+        form_data = request.POST.copy()
+        form_data['password'] = decrypted_password
+        form_data['password2'] = decrypted_password2
+        form_data['api_key'] = decrypted_api_key
+
+        # Pass the updated form_data to the form for validation
+        form = UserRegistrationForm(form_data)
+
         if form.is_valid():
-            print("form is valid")
-            user = form.save()
-            print("user saved")
+            user = form.save(commit=False)
             user.verification_code = random.randint(100000, 999999)  # Generate a random 6-digit verification code
             user.is_active = False  # Set user as inactive until email is verified
-            print("user verification code")
             user.save()
             send_mail(
                 'C-Lara | Email Verification',
@@ -150,17 +220,14 @@ def register_user(request):
                 [user.email],
                 fail_silently=False,
             )
-            print("email sent")
             # Redirect to the email verification page
             redirect_url = '/verifyemail/' + user.username
-            print("redirect url, 200")
             return JsonResponse({
                         'status': 'success',
                         'message': 'Successfully created an account. Proceeding to Email Verification.',
                         'redirect_url': redirect_url
                     }, status=200)
         else:
-            print("form is invalid, 400")
             # Handle form validation errors
             errors = {field: error[0] for field, error in form.errors.items()}
             print(errors)
@@ -169,11 +236,11 @@ def register_user(request):
                     'message': "Form validation failed.",
                     'errors': errors
                 }, status=400)
-    else:
-        print("not POST request")
-        form = UserRegistrationForm()   # Display an empty registration form
-    print("not POST request either")
-    return render(request, 'tictactoe_app/register.html', {'form': form})
+    return JsonResponse({
+                    'status': 'error',
+                    'message': "Not a POST request.",
+                    'errors': errors
+                }, status=400)
 
 
 @swagger_auto_schema(
@@ -263,9 +330,10 @@ def verifyemail(request):
         )),
     }
 )
+
 @login_required
 @api_view(['GET'])
-def get_users(request):
+def get_user(request):
     """
     Display all registered users.
 
@@ -278,10 +346,22 @@ def get_users(request):
     Returns:
         HttpResponse: Renders the users page with the list of registered users.
     """
-    # Retrieve all users from the database
-    users = TicTacToeUser.objects.all()
-    # Render the users template and pass the users data to the template
-    return render(request, 'tictactoe_app/users.html', {'users': users})
+    user = request.user  # Get the current authenticated user
+    try:
+        ttt_user = TicTacToeUser.objects.get(username=user.username)
+        # Prepare the data to send to the frontend
+        user_data = {
+            'username': ttt_user.username,
+            'account_type': ttt_user.account_type,
+            'email': ttt_user.email,
+            'api_key': "PLACEHOLDER",
+            'password': "PLACEHOLDER",
+            'age': ttt_user.age,
+            'full_name': ttt_user.profile_name,
+        }
+        return JsonResponse(user_data, status=200)
+    except TicTacToeUser.DoesNotExist:
+        return JsonResponse({'error': 'User does not exist'}, status=404)
 
 
 @swagger_auto_schema(
@@ -338,11 +418,7 @@ def login_user(request):
             if user is not None:
                 # Check if the API key is expiring soon (less than 7 days)
                 if user.api_key_expiry_date:
-                    current_time = datetime.now(timezone.utc)  # Get the current time in UTC
-                    days_remaining = (user.api_key_expiry_date - current_time).days
-                    if days_remaining <= 7:
-                        # Send a warning email to the user about the API key expiration
-                        send_warning_email(user, days_remaining)
+                    user.api_key_expiry_date = datetime.now(timezone.utc) + timedelta(days=90)
                 
                 # Check if the user's email is verified (is_active is True)
                 if user.is_active:
@@ -356,7 +432,6 @@ def login_user(request):
                 # Handle when authentication fails (incorrect username or password)
                 try:
                     user_object = TicTacToeUser.objects.get(username=username)
-                    
                     # If the user's email is not verified
                     if not user_object.is_active:
                         send_mail(
@@ -391,8 +466,7 @@ def login_user(request):
     operation_description="Log out the authenticated user and redirect to the login page",
     responses={302: 'Redirect to login'}
 )
-@login_required
-@api_view(['GET'])
+@api_view(['POST', 'GET'])
 def logout_user(request):
     """
     Handle user logout.
@@ -406,41 +480,49 @@ def logout_user(request):
         HttpResponseRedirect: Redirects the user to the login page after logging out.
     """
     logout(request)  # Log out the current user
-    return redirect('/login/')  # Redirect to the login page
+    return JsonResponse({
+                        'status': 'success',
+                        'message': 'Successfully logged out!',
+                    }, status=200)
 
-def send_warning_email(user, days_remaining):
-    """
-    Send a warning email to the user if their API key is expiring soon.
-
-    This function sends an email notification to the user if their API key is set to expire
-    within the next 7 days, reminding them to renew their key.
-
-    Args:
-        user (TicTacToeUser): The user whose API key is expiring.
-        days_remaining (int): Number of days left before the API key expires.
-
-    Returns:
-        None
-    """
-
-    # Email subject and message content
-    subject = 'C-Lara | Your API Key is Expiring Soon'
-    message = f"""
-    Hello {user.profile_name},
-
-    This is a reminder that your API key will expire in {days_remaining} day(s).
-
-    Please take necessary action to renew your API key before it expires.
-
-    Best regards,
-    C-Lara TicTacToe Team
-    """
-    
-    # Send the email to the user's email address
-    send_mail(
-        subject,
-        message,
-        settings.EMAIL_HOST_USER,  # Sender email address from settings
-        [user.email],  # Recipient's email address
-        fail_silently=False,  # Raise exceptions if the email fails to send
-    )
+@api_view(['POST'])
+def verifyemail_resend(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        try:
+            # Retrieve the user by their username and verification code
+            user = TicTacToeUser.objects.get(username=username)
+            if user is None:
+                errors = {'submit': 'Username is invalid. Please sign up for an account.'}
+                return JsonResponse({
+                    'status': 'error',
+                    'message': "Username is invalid.",
+                    'errors': errors
+                }, status=401)
+            # Activate the user and clear the verification code
+            user.is_active = False  # Activate the user account
+            user.verification_code = random.randint(100000, 999999)  # Clear the verification code
+            user.save()
+            send_mail(
+                    'C-Lara | Email Verification',
+                    f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
+                    settings.EMAIL_HOST_USER,
+                    [user.email],
+                    fail_silently=False,
+                )
+            return JsonResponse({
+                    'status': 'success',
+                    'redirect_url': "/verifyemail/",
+                }, status=200)
+        except TicTacToeUser.DoesNotExist:
+            errors = {'submit': 'Username is invalid. Please sign up for an account.'}
+            return JsonResponse({
+                    'status': 'error',
+                    'message': "Username is invalid.",
+                    'errors': errors,
+                }, status=401)
+    return JsonResponse({
+                        'status': 'error',
+                        'message': "Invalid GET Request.",
+                        'errors': errors,
+                    }, status=500)

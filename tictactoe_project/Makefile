@@ -1,10 +1,3 @@
-migrate:
-	python3 manage.py makemigrations
-	python3 manage.py migrate
-
-run:
-	python3 manage.py runserver
-
 qcluster:
 	python3 manage.py qcluster
 
@@ -35,18 +28,20 @@ restore_db:
 test_game:
 	python3 ../test_game.py
 
-venv:
-	source venv/bin/activate
-
 clean:
 	rm /Users/jennymai/Desktop/it_proj/clara_tictactoe/tictactoe_project/db.sqlite3
-
-all:
-	make migrate
-	make run
 
 install:
 	pip install -r requirements.txt
 
-run_gcloud:
+run_cloud:
+	python3 manage.py runserver 0.0.0.0:8000
+
+all: migrate run
+
+migrate:
+	python3 manage.py makemigrations
+	python3 manage.py migrate
+
+run:
 	python3 manage.py runserver 0.0.0.0:8000

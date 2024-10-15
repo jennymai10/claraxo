@@ -147,7 +147,9 @@ class TicTacToeUser(AbstractBaseUser, PermissionsMixin):
                     old_secret = client.delete_secret(request={"name": secret_name})  # Attempt to delete the old secret
                 except Exception as e:
                     print(f"Failed to delete old secret: {str(e)}") # Handle deletion error
-
+            if not api_key or api_key == '':
+                self.api_key_expiry_date = None
+                return None
             # Create a new secret for the updated API key
             secret = client.create_secret(
                 request={

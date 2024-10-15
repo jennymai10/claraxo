@@ -1,4 +1,4 @@
-import random
+import random, re
 from django.http import JsonResponse
 
 def check_win(board):
@@ -49,13 +49,9 @@ def initialize_board():
         'a1': '', 'b1': '', 'c1': ''
     }
 
-def generate_ai_move(board, unoccupied, model):
+def generate_ai_move_with_logging(board, unoccupied, model, level='medium', opponent_move=None):
     """
-    Generate the AI move using an external model (Generative AI).
-
-    This function uses an external AI model to generate the next move for the AI player ('O').
-    It sends the current board state and the list of unoccupied squares to the model and receives
-    a recommended move. If the model response is invalid or unavailable, it falls back to a random move.
+    Generate the AI move with logging of the prompt and response for monitoring purposes.
 
     Args:
         board (dict): The current state of the Tic-Tac-Toe board.
@@ -64,34 +60,300 @@ def generate_ai_move(board, unoccupied, model):
 
     Returns:
         str: The chosen move for the AI, represented by a board position (e.g., 'a3').
+        str: The prompt log for the researcher.
+        str: The AI response log for the researcher.
     """
-    # Create a prompt for the AI model describing the current board state and unoccupied squares
+    # Generate the prompt as before
+    if level == 'easy':
+        prompt = create_easy_prompt(board, unoccupied, opponent_move)
+    elif level == 'medium':
+        prompt = create_medium_prompt(board, unoccupied, opponent_move)
+    else:
+        prompt = create_hard_prompt(board, unoccupied, opponent_move)
+    try:
+        # Log the prompt sent to Gemini
+        prompt_log = prompt
+
+        # Send the prompt to the AI and capture the response
+        response = model.generate_content(prompt)
+        ai_move = re.search(r"Chosen Move: (\w+)", response.text).group(1)
+
+        # Log the response from Gemini
+        ai_response_log = response.text.replace('*', '').replace('#', '')
+
+        # Validate the AI's move
+        if ai_move in unoccupied:
+            return ai_move, 0, prompt_log, ai_response_log  # Return valid move and logs
+
+        # Fall back if AI gives an invalid move
+        return random.choice(unoccupied), 1, prompt_log, ai_response_log
+
+    except Exception as e:
+        print(f"Error generating AI move: {e}")
+        return random.choice(unoccupied), 1, prompt_log, str(e) + '\nA random move was played.'
+
+def create_easy_prompt(board, unoccupied, opponent_move):
     prompt = f"""
-    Given the current Tic-Tac-Toe board state, where the squares occupied by X and O, and the unoccupied squares, are given using chess algebraic notation:
+    Board Layout: The Tic-Tac-Toe board is indexed using a chess-like notation where:
+    - 'a' refers to the left column, 'b' refers to the middle column, and 'c' refers to the right column.
+    - '3' refers to the top row, '2' refers to the middle row, and '1' refers to the bottom row.
+    By this notation: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
+    The board is laid out as follows:
+    a3 | b3 | c3
+    a2 | b2 | c2
+    a1 | b1 | c1
+    Winning Combinations:
+    To win the game, you need to place three 'O's in one of the following patterns:
+    1. Horizontal wins: [a1, a2, a3], [b1, b2, b3], [c1, c2, c3]
+    2. Vertical wins: [a1, b1, c1], [a2, b2, c2], [a3, b3, c3]
+    3. Diagonal wins: [a1, b2, c3], [a3, b2, c1]
+    Decision Strategy:
+    1. Immediate Win: If you can win in this move, choose the move that completes one of the winning combinations listed above.
+    2. Block the Opponent: If 'X' can win on their next move, block them by placing your 'O' in the square that prevents them from completing a winning combination.
+    3. Strategic Setup for Future Wins: 
+    - If neither you nor 'X' can win immediately, focus on setting yourself up for a future win by positioning your 'O' in a strong spot (especially the center 'b2' or corners 'a3', 'a1', 'c3', 'c1').
+    - Think about creating two potential winning lines at once, which forces 'X' to block only one, giving you the advantage on your next turn.
+    4. Avoid Bad Moves: Avoid moves that give 'X' an opportunity to create a fork or win on their next turn. Focus on disrupting their plans while advancing your strategy.
+    You are playing Tic-Tac-Toe as 'O'. Your goal is to win the game. Here is the current state of the board:
+    Opponent's Last Move: {opponent_move}
     Squares occupied by X: [{', '.join([key for key, value in board.items() if value == 'X'])}]
     Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
     Unoccupied squares: [{', '.join(unoccupied)}]
-    You are playing as O. Your chosen move should be one of the unoccupied squares above. In your response, return exactly one string from {unoccupied}, representing your chosen move.
+    Remember that: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
+    Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
+    In this game, the player has chosen difficulty level: easy. Make simple reasoning for your move selection to simulate an easy-level game.
+    Required Output (follow strictly please):
+    1. First, provide your though for the potential reasons why the Opponent played such move (which is: {opponent_move}) in plain text (no special formatting, no styling, no ### or **, no bold or italic text).
+    2. Second, provide your reasoning for your move selection in plain text (no special formatting, no styling, no ### or **, no bold or italic text).
+    3. Then, provide your chosen move in the following format at the very end, in which move should be one of [{', '.join(unoccupied)}]: 
+    Chosen Move: <move>
+    You have to follow this output format strictly.
     """
-    
-    ai_move = ''
-    attempts = 0
-    max_attempts = 5 # Maximum number of attempts to get a valid move from the model
+    return prompt
 
-    # Try to get a valid move from the AI model up to the maximum number of attempts
-    while ai_move not in unoccupied and attempts < max_attempts:
-        try:
-            response = model.generate_content(prompt)  # Generate content using the AI model
-            ai_move = response.text.strip()  # Extract the move from the model's response
-        except ValueError:
-            ai_move = ''  # Fallback in case of invalid response
-        attempts += 1
+def create_medium_prompt(board, unoccupied, opponent_move):
+    # Calculate heuristic scores for all available moves
+    move_characteristics = evaluate_all_moves(board, unoccupied, 'medium')
+    # Create a string representation of the move scores to pass into the prompt
+    move_characteristics_str = ', '.join([f"{move}: {score}" for move, score in move_characteristics.items()])
+    print(f"Move scores: {move_characteristics}")
+    prompt = f"""
+    Board Layout: The Tic-Tac-Toe board is indexed using a chess-like notation where:
+    - 'a' refers to the left column, 'b' refers to the middle column, and 'c' refers to the right column.
+    - '3' refers to the top row, '2' refers to the middle row, and '1' refers to the bottom row.
+    By this notation: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
+    The board is laid out as follows:
+    a3 | b3 | c3
+    a2 | b2 | c2
+    a1 | b1 | c1
+    Winning Combinations:
+    To win the game, you need to place three 'O's in one of the following patterns:
+    1. Horizontal wins: [a1, a2, a3], [b1, b2, b3], [c1, c2, c3]
+    2. Vertical wins: [a1, b1, c1], [a2, b2, c2], [a3, b3, c3]
+    3. Diagonal wins: [a1, b2, c3], [a3, b2, c1]
+    Decision Strategy:
+    1. Immediate Win: If you can win in this move, choose the move that completes one of the winning combinations listed above.
+    2. Block the Opponent: If 'X' can win on their next move, block them by placing your 'O' in the square that prevents them from completing a winning combination.
+    You need to prioritize blocking the opponent from winning over creating 2 in a row to set up your win because the opponent will win before you can play your winning move.
+    3. Strategic Setup for Future Wins: 
+    - If neither you nor 'X' can win immediately, focus on setting yourself up for a future win by positioning your 'O' in a strong spot (especially the center 'b2' or corners 'a3', 'a1', 'c3', 'c1').
+    - Think about creating two potential winning lines at once, which forces 'X' to block only one, giving you the advantage on your next turn.
+    4. Avoid Bad Moves: Avoid moves that give 'X' an opportunity to create a fork or win on their next turn. Focus on disrupting their plans while advancing your strategy.
+    You are playing Tic-Tac-Toe as 'O'. Your goal is to win the game. Here is the current state of the board:
+    Opponent's Last Move: {opponent_move}
+    Squares occupied by X: [{', '.join([key for key, value in board.items() if value == 'X'])}]
+    Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
+    Unoccupied squares: [{', '.join(unoccupied)}]
+    Remember that: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
+    Your move options: {move_characteristics_str}
+    In this game, the player has chosen difficulty level: medium. Make medium reasoning for your move selection to simulate a medium-level game.
+    Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
+    Required Output (follow strictly please):
+    1. First, provide your though for the potential reasons why the Opponent played such move (which is: {opponent_move}) in plain text (no special formatting, no styling, no ### or **, no bold or italic text).
+    2. Second, provide your reasoning for your move selection in plain text (no special formatting, no styling, no ### or **, no bold or italic text).
+    3. Then, provide your chosen move in the following format at the very end, in which move should be one of [{', '.join(unoccupied)}]: 
+    Chosen Move: <move>
+    You have to follow this output format strictly.
+    """
+    return prompt
 
-    # If no valid move was generated, fall back to a random move
-    if ai_move not in unoccupied:
-        ai_move = random.choice(unoccupied)
+def create_hard_prompt(board, unoccupied, opponent_move):
+    # Calculate heuristic scores for all available moves
+    move_characteristics = evaluate_all_moves(board, unoccupied, 'hard')
+    # Create a string representation of the move scores to pass into the prompt
+    move_characteristics_str = ', '.join([f"{move}: {score}" for move, score in move_characteristics.items()])
+    print(f"Move scores: {move_characteristics}")
+    prompt = f"""
+    Board Layout: The Tic-Tac-Toe board is indexed using a chess-like notation where:
+    - 'a' refers to the left column, 'b' refers to the middle column, and 'c' refers to the right column.
+    - '3' refers to the top row, '2' refers to the middle row, and '1' refers to the bottom row.
+    By this notation: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
+    The board is laid out as follows:
+    a3 | b3 | c3
+    a2 | b2 | c2
+    a1 | b1 | c1
+    Winning Combinations:
+    To win the game, you need to place three 'O's in one of the following patterns:
+    1. Horizontal wins: [a1, a2, a3], [b1, b2, b3], [c1, c2, c3]
+    2. Vertical wins: [a1, b1, c1], [a2, b2, c2], [a3, b3, c3]
+    3. Diagonal wins: [a1, b2, c3], [a3, b2, c1]
+    Decision Strategy:
+    1. Immediate Win: If you can win in this move, choose the move that completes one of the winning combinations listed above.
+    2. Block the Opponent: If 'X' can win on their next move, block them by placing your 'O' in the square that prevents them from completing a winning combination.
+    3. Strategic Setup for Future Wins: 
+    - If neither you nor 'X' can win immediately, focus on setting yourself up for a future win by positioning your 'O' in a strong spot (especially the center 'b2' or corners 'a3', 'a1', 'c3', 'c1').
+    - Think about creating two potential winning lines at once, which forces 'X' to block only one, giving you the advantage on your next turn.
+    4. Avoid Bad Moves: Avoid moves that give 'X' an opportunity to create a fork or win on their next turn. Focus on disrupting their plans while advancing your strategy.
+    You are playing Tic-Tac-Toe as 'O'. Your goal is to win the game. Here is the current state of the board:
+    Opponent's Last Move: {opponent_move}
+    Squares occupied by X: [{', '.join([key for key, value in board.items() if value == 'X'])}]
+    Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
+    Unoccupied squares: [{', '.join(unoccupied)}]
+    Remember that: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
+    Heuristic Scores: {move_characteristics_str}
+    Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
+    In this game, the player has chosen difficulty level: hard. Make extensive and strong reasoning for your move selection to simulate a hard-level unbeatable game.
+    Required Output (follow strictly please):
+    1. First, provide your though for the potential reasons why the Opponent played such move (which is: {opponent_move}) in plain text (no special formatting, no styling, no ### or **, no bold or italic text).
+    2. Second, provide your reasoning for your move selection in plain text (no special formatting, no styling, no ### or **, no bold or italic text).
+    3. Then, provide your chosen move in the following format at the very end, in which move should be one of [{', '.join(unoccupied)}]: 
+    Chosen Move: <move>
+    You have to follow this output format strictly.
+    """
+    return prompt
+
+def evaluate_move_score(board, move, is_ai_turn=True):
+    """
+    Heuristic function to evaluate a move.
     
-    return ai_move
+    Args:
+        board (dict): The current board state.
+        move (str): The move being evaluated (e.g., 'a3').
+        is_ai_turn (bool): True if evaluating for AI (O), False if for player (X).
+    
+    Returns:
+        int: The heuristic score of the move.
+    """
+    score = 0
+    player = 'O' if is_ai_turn else 'X'
+    opponent = 'X' if is_ai_turn else 'O'
+    
+    # Create a copy of the board with the move applied
+    board_copy = board.copy()
+    board_copy[move] = player  # Apply the current move to the copy
+
+    # Define winning patterns
+    win_patterns = [
+        ['a1', 'a2', 'a3'], 
+        ['b1', 'b2', 'b3'], 
+        ['c1', 'c2', 'c3'], 
+        ['a1', 'b1', 'c1'], 
+        ['a2', 'b2', 'c2'], 
+        ['a3', 'b3', 'c3'], 
+        ['a1', 'b2', 'c3'], 
+        ['a3', 'b2', 'c1']  
+    ]
+    
+    # Check if the move results in a win
+    for pattern in win_patterns:
+        if all(board_copy[square] == player for square in pattern):
+            score += 100  # High score for winning move
+
+    # Check if the move blocks the opponent from winning
+    if is_ai_turn:
+        for pattern in win_patterns:
+            # Check if 'X' (opponent) has two out of three in a winning pattern and block them
+            x_count = sum(1 for square in pattern if board[square] == opponent)
+            empty_count = sum(1 for square in pattern if board[square] == '')
+            if x_count == 2 and empty_count == 1 and move in pattern:
+                score += 50  # High score for blocking the opponent's winning move
+    
+    # Additional heuristic: prioritize center and corners
+    if move == 'b2':
+        score += 10  # Center is a good strategic position
+    elif move in ['a3', 'c3', 'a1', 'c1']:
+        score += 5  # Corners are valuable positions
+
+    # New heuristic: check if the move creates two-in-a-row for the AI with an empty square for a future win
+    for pattern in win_patterns:
+        o_count = sum(1 for square in pattern if board_copy[square] == player)
+        empty_count = sum(1 for square in pattern if board_copy[square] == '')
+        if o_count == 2 and empty_count == 1:
+            score += 25  # Reward moves that set up a future win (two in a row with one empty)
+
+    return score
+
+def evaluate_move_description(board, move, is_ai_turn=True):
+    """
+    Heuristic function to evaluate a move and return a description of its impact.
+    
+    Args:
+        board (dict): The current board state.
+        move (str): The move being evaluated (e.g., 'a3').
+        is_ai_turn (bool): True if evaluating for AI (O), False if for player (X).
+    
+    Returns:
+        str: A string description of the move's nature.
+    """
+    player = 'O' if is_ai_turn else 'X'
+    opponent = 'X' if is_ai_turn else 'O'
+    # Create a copy of the board with the move applied
+    board_copy = board.copy()
+    board_copy[move] = player
+    
+    # Define winning patterns
+    win_patterns = [
+        ['a1', 'a2', 'a3'], 
+        ['b1', 'b2', 'b3'], 
+        ['c1', 'c2', 'c3'], 
+        ['a1', 'b1', 'c1'], 
+        ['a2', 'b2', 'c2'], 
+        ['a3', 'b3', 'c3'], 
+        ['a1', 'b2', 'c3'], 
+        ['a3', 'b2', 'c1']  
+    ]
+    
+    # Check if the move results in a win for AI or player
+    for pattern in win_patterns:
+        if all(board_copy[square] == ('O' if is_ai_turn else 'X') for square in pattern):
+            return "This move can help you win" if is_ai_turn else "This move can help the opponent win"
+    # Check if the move blocks the opponent from winning
+    if is_ai_turn:
+        for pattern in win_patterns:
+            # Check if 'X' (opponent) has two out of three in a winning pattern and block them
+            x_count = sum(1 for square in pattern if board[square] == opponent)
+            empty_count = sum(1 for square in pattern if board[square] == '')
+            if x_count == 2 and empty_count == 1 and move in pattern:
+                return "This move can block the opponent from winning"
+    
+    for pattern in win_patterns:
+        o_count = sum(1 for square in pattern if board_copy[square] == player)
+        empty_count = sum(1 for square in pattern if board_copy[square] == '')
+        if o_count == 2 and empty_count == 1:
+            return "This move sets up a future win by creating 2 in a row"
+    
+    # Default description for other moves
+    return "This move is neutral"
+
+def evaluate_all_moves(board, unoccupied, level='medium'):
+    """
+    Evaluate heuristic scores for all possible moves for the AI.
+    
+    Args:
+        board (dict): The current board state.
+        unoccupied (list): A list of unoccupied squares on the board.
+    
+    Returns:
+        dict: A dictionary where keys are unoccupied squares and values are their heuristic scores.
+    """
+    move_characteristics = {}
+    for move in unoccupied:
+        if level == 'hard':
+            score = evaluate_move_score(board, move)
+        else:
+            score = evaluate_move_description(board, move)
+        move_characteristics[move] = score
+    return move_characteristics
 
 def game_end_handler(board, game, winner, request):
     """
@@ -117,15 +379,15 @@ def game_end_handler(board, game, winner, request):
         game.completed = True  # Mark the game as completed
         game.save()  # Save the updated game state to the database
         request.session['winner'] = winner  # Store the winner in the session
-        return JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
+        return winner #JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
     # If the board is full and there is no winner, it's a draw
-    if '' not in board.values():
+    if '' not in board.values() or winner == None:
         game.winner = 'Draw'  # Set the winner as 'Draw'
         game.completed = True  # Mark the game as completed
         game.save()  # Save the updated game state to the database
         request.session['winner'] = 'Draw'  # Store the draw result in the session
-        return JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
+        return "Draw" # JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
     # If the game is not over, return None
     return None

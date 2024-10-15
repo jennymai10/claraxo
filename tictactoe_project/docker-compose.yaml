@@ -1,0 +1,53 @@
+version: "2.4"
+services:
+  frontend:
+    build:
+      context: ./tictactoe_frontend/tic-tac-toe-frontend
+      dockerfile: Dockerfile
+    image: tictactoe/frontend:latest
+    scale: 1
+    restart: always
+    environment:
+      BACKEND_URL: http://backend:8000
+      BACKEND_URL_2: http://localhost:8080
+      NODE_ENV: development  # Development mode for hot-reload
+    ports:
+      - "80:3000"
+    command: npm start  # Start React development server with hot-reload
+    volumes:
+      - ./tictactoe_frontend/tic-tac-toe-frontend:/app  # Mount local code for hot-reload
+      - /app/node_modules  # Ignore node_modules for mounting issues
+    networks:
+      - internal-webnet
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+  backend:
+    build: .
+    image: tictactoe/backend:latest
+    scale: 1
+    restart: always
+    ports:
+      - "8080:8000"
+    networks:
+      - internal-webnet
+    env_file:
+      - .env
+    volumes:
+      - ./:/app  # Mount local code for hot-reload
+    environment:
+      DEBUG: True  # Set Django to development mode
+      EMAIL_HOST_USER: 'clara.tictactoe@gmail.com'
+      EMAIL_HOST_PASSWORD: 'coxh ynsl eaef funt'
+      DEFAULT_FROM_EMAIL: 'clara.tictactoe@gmail.com'
+      PERSONAL_TOKEN: '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'
+    command: python3 manage.py runserver 0.0.0.0:8000  # Start Django with hot-reload
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+networks:
+  internal-webnet:

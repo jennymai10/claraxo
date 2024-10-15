@@ -27,6 +27,7 @@
   opacity: 0.5;
   transform: rotate(-106.95);
   background-clip: content-box;
+  z-index: 0;
 }
 
 p {
@@ -54,7 +55,7 @@ p {
   top: -5%;
   background: #DFD8CB;
   transform: rotate(5deg);
-  z-index: 0; 
+  z-index: 0;
 }
 
 /* Style for ruler graphic */
@@ -85,7 +86,7 @@ p {
   width: 20%;
   height: auto;
   font-family: 'Londrina Shadow';
-  font-size: 13vh;
+  font-size: 6.5rem;
   font-weight: 600;
   line-height: 20vh;
   letter-spacing: 0.25em;
@@ -108,12 +109,12 @@ form {
 }
 .App-FormName h4 {
   font-family: 'Londrina Shadow';
-  font-size: 6vh;
+  font-size: 2.5rem;
   letter-spacing: 0.15em;
   color: #1E1E1E;
-  padding-bottom: 1.5vh;
-  margin: 0px;
-  margin-top: 15%;
+  padding-bottom: 1vh;
+  margin: 0;
+  margin-top: 2.5rem;
 }
 /* Style for the query section */
 .App-Query {
@@ -137,7 +138,7 @@ form {
   position: relative;
   align-items: center; 
   justify-content: center;
-  background: rgba(214, 205, 188, 0.86);
+  background: rgba(232, 225, 212, 0.86);
   border: 2px solid #301313;
   border-radius: 2vw;
 }
@@ -146,8 +147,7 @@ form {
   background: transparent;
   border: none;
   font-family: 'Gaegu';
-  font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   width: 90%;
   padding-top: 1%;
   padding-bottom: 1%;
@@ -163,7 +163,7 @@ form {
   text-align: start;
   font-family: 'Gaegu';
   font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   color: #301313;
 }
 
@@ -184,7 +184,7 @@ form {
   font-family: 'Gaegu';
   font-style: normal;
   font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   line-height: 3vw;
   display: flex;
   align-items: center;
@@ -200,29 +200,33 @@ form {
 }
 
 .App-Button {
+  position: relative;
   min-height: 30px;
-  height: 6vh;
-  width: 11vw;
+  height: 3rem;
+  width: 11rem;
   border: 2px solid #301313;
-  border-radius: 2vw;
-  background-color: #D6CDBCDB;
+  border-radius: 2rem;
+  background-color: #EAE4D8;
   color: black; 
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   font-family: 'Gaegu';
   cursor: pointer;
   text-align: center;
   transition: color 0.1s ease, background-color 0.1s ease;
   white-space: nowrap;
+  z-index: 5;
 }
 
 .App-Button:hover {
   background-color: #301313;
-  color: #D6CDBCDB;
+  color: #f4f0eadb;
+  z-index: 5;
 }
 
 .App-Button:active {
   transform: scale(0.9);
-  color: white
+  color: white;
+  z-index: 5;
 }
 
 input:-webkit-autofill,
@@ -248,7 +252,7 @@ input:-webkit-autofill:active {
   border: none;
   font-family: 'Gaegu';
   font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   width: 90%;
   padding-top: 1%;
   padding-bottom: 1%;
@@ -260,7 +264,7 @@ input:-webkit-autofill:active {
   font-family: 'Gaegu';
   line-height: 85%;
   text-align: left;
-  font-size: 1.4vw;
+  font-size: 1.1rem;
   color: #ab1212;
   margin-top: 2%;
 }
@@ -269,7 +273,323 @@ input:-webkit-autofill:active {
   text-align: center;
   font-family: 'Gaegu';
   font-weight: 400;
-  font-size: 1.7vw;
+  font-size: 1.5rem;
   color: #301313;
   padding-bottom: 1vh;
+}
+
+/* Styling for the Tic-Tac-Toe board */
+.Playboard {
+  align-items: center;
+  margin: 5vh;
+  z-index: 2;
+}
+
+/* Style for each row */
+.row {
+  display: flex;
+  justify-content: center;
+  z-index: 2;
+}
+
+.Playboard-NormalText {
+  text-align: center;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: #301313;
+  z-index: 2;
+}
+
+/* Style for each square button */
+.square {
+  width: 15vh;
+  height: 15vh;
+  background-color: rgba(0, 0, 0, 0);
+  border: 0;
+  font-size: 4rem;
+  font-family: 'Gaegu';
+  color: #301313;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  z-index: 2;
+}
+
+.square:disabled {
+  background-color: #DFD8CB;
+  cursor: not-allowed;
+}
+
+/* Hover and active state for the game buttons */
+.square:hover:not(:disabled) {
+  background-color: #f1ece3;
+}
+
+.square#a3 {
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+}
+
+.square#a2 {
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
+}
+
+.square#a1 {
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
+}
+
+.square#b3 {
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+}
+
+.square#b2 {
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
+}
+
+.square#b1 {
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+  border-right: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
+}
+
+.square#c3 {
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+}
+
+.square#c2 {
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+  border-bottom: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
+}
+
+.square#c1 {
+  border-left: 4px solid rgba(48, 19, 19, 0.45);
+  border-top: 4px solid rgba(48, 19, 19, 0.45);
+}
+
+.Playboard-container {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center;     /* Center vertically */
+  flex-wrap: wrap;
+  width: 100%;
+  height: 85%;
+  overflow-y: hidden;
+}
+
+/* Default hidden state for the side-tab */
+.side-tab {
+  position: fixed;
+  top: 0;
+  right: -40rem; /* Hidden by default */
+  width: 20rem;  /* Default width for desktop */
+  height: 100vh; /* Full screen height */
+  background: #EAE4D8;
+  transition: right 0.4s ease; /* Smooth sliding effect */
+  z-index: 1000;
+  border: 2px solid rgb(35, 18, 18); /* Slight border for definition */
+  border-radius: 3rem 0 0 3rem; /* Rounded corners */
+  padding-top: 1.6rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: 3rem;
+}
+
+/* When side-tab is active (open) */
+.side-tab.active {
+  right: 0; /* Slide in to show the side-tab */
+}
+
+/* Styling for the toggle icon */
+.Icon {
+  position: absolute;
+  margin-top: 1rem;
+  margin-right: 1rem;
+  width: 1.5rem;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease; /* Hover scaling effect */
+  z-index: 1001;
+}
+
+.Icon:hover {
+  transform: scale(1.1); /* Slight hover zoom effect */
+}
+
+/* Account type text style */
+.account-type {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.edit-container {
+  display: flex;  /* Use flexbox to align elements */
+  justify-content: space-between;  /* Space between text and icon */
+  align-items: center;  /* Vertically align the items */
+  width: 100%;  /* Make sure the container spans the full width */
+  margin-top: 3vh; /* Add some space below the container */
+}
+
+.edit-icon {
+  cursor: pointer;  /* Change the cursor to indicate it's clickable */
+  width: 1.4rem;
+  padding-bottom: 0.3rem;
+}
+
+.Small-Button {
+  height: 1.6rem;
+  width: 4.5rem;
+  border: 1px solid #301313;
+  border-radius: 1rem;
+  background-color: #EAE4D8;
+  color: rgb(0, 0, 0); 
+  font-size: 1.1rem;
+  font-family: 'Gaegu';
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.1s ease, background-color 0.1s ease;
+  white-space: nowrap;
+  margin: 1rem 0.3rem 0rem 0.3rem;
+  z-index: 5;
+}
+
+.Small-Button:hover {
+  background-color: #301313;
+  color: #f4efe6db;
+  z-index: 5;
+}
+
+.Small-Button:active {
+  transform: scale(0.9);
+  color: white;
+  z-index: 5;
+}
+
+
+/* Game History Styling */
+.GameHistory {
+  margin: 2rem auto;
+  padding: 2rem;
+  max-width: 80vw;
+  background-color: #f4efe664;
+  border: 4px solid #301313;
+  border-radius: 1rem;
+  font-family: 'Gaegu';
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: #301313;
+}
+
+/* Styling for the game table */
+.game-table, .moves-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 1.2rem;
+}
+
+/* Header style for both tables */
+.game-table th, .moves-table th {
+  background-color: #301313;
+  color: #f4efe6;
+  padding: 0.75rem;
+  text-align: center;
+  border-bottom: 2px solid #301313;
+}
+
+/* Row and column styling for game and moves tables */
+.game-table td, .moves-table td {
+  padding: 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid #d6cdbc;
+  color: #301313;
+}
+
+/* Alternating row color for better readability */
+.game-table tbody tr:nth-child(even), 
+.moves-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.game-table tbody tr:nth-child(odd),
+.moves-table tbody tr:nth-child(odd) {
+  background-color: #f4efe6;
+}
+
+/* Hover effect on table rows */
+.game-table tbody tr:hover,
+.moves-table tbody tr:hover {
+  background-color: #ddd5c8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .GameHistory {
+    padding: 1rem;
+    max-width: 95vw;
+  }
+
+  .game-table, .moves-table {
+    font-size: 1rem;
+  }
+}
+
+/* Logging panel container */
+.logging-panel {
+  width: 50vw;
+  height: auto;
+  background-color: #e6ded100;;
+  color: #301313;
+  border: 2px solid #301313;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  margin-left: 4rem;
+  margin-right: 4rem;
+  font-family: 'Courier New', Courier;
+  font-weight: 600;
+  text-align: left;
+  z-index: 5;
+}
+
+/* Title for the logging panel */
+.logging-panel h3 {
+  color: #301313;
+  margin-left: 1.5rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+/* Log entries section inside the panel */
+.log-entries {
+  height: 55vh;
+  background-color: #eae4d869;
+  border: 2px solid #301313;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-y: scroll;
+}
+
+/* Individual log entry */
+.log-entry {
+  margin: 5px 0;
+  padding: 2px 0;
+  color: #301313;
+  font-family: 'Courier New';
+  font-size: 0.9rem;
+  line-height: 1.2rem;
+  white-space: pre-wrap;
 }

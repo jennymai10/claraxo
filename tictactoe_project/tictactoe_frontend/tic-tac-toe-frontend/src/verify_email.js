@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import board from './assets/board.png';
-import './app.css';
 import ruler from './assets/ruler.png';
 import pencil from './assets/pencil.png';
+import './app.css';
 import { useNavigate, useParams } from 'react-router-dom';
 
-/**
- * Retrieves the value of a specific cookie by its name.
- * 
- * @param {string} name - The name of the cookie to retrieve.
- * @returns {string|null} - Returns the value of the cookie if found, otherwise null.
- */
 function get_cookie(name) {
     let cookie_value = null;
     if (document.cookie && document.cookie !== '') {
@@ -26,99 +20,94 @@ function get_cookie(name) {
     return cookie_value;
 }
 
-/**
- * VerifyEmail component handles the email verification process.
- * It displays a form to input username and verification code, validates inputs, 
- * and makes an API call to verify the provided code.
- */
 function VerifyEmail() {
-    const params = useParams(); // Hook to access the route parameters.
-    const [username, set_username] = useState(params.username || ''); // State to store the username, initialized with route param if available.
-    const [verification_code, set_verification_code] = useState(''); // State to store the verification code input.
-    const [error, set_error] = useState({}); // State to store error messages for the form.
-    const navigate = useNavigate(); // React Router's hook for programmatic navigation.
+    const api_url = process.env.REACT_APP_API_URL;
+    const params = useParams();
+    const [username, set_username] = useState(params.username || '');
+    const [verification_code, set_verification_code] = useState('');
+    const [error, set_error] = useState({});
+    const [resend_visible, set_resend_visible] = useState(false); // State for showing the resend form
+    const [resend_username, set_resend_username] = useState(''); // State for resend username input
+    const [resend_message, set_resend_message] = useState(''); // State for success/error message after resend
+    const navigate = useNavigate();
 
-        /**
-     * Higher-order function that handles input changes and optionally validates the input.
-     * 
-     * @param {Function} setter - State setter function for updating the input value.
-     * @param {Function} [validate_fn] - Optional validation function to validate input in real-time.
-     * @returns {Function} - Returns an event handler function for input change.
-     */
     const handle_change = (setter, validate_fn) => (event) => {
         setter(event.target.value);
         if (validate_fn) validate_fn(event.target.value);
     };
 
-    /**
-     * Validates the verification code format (6 digits only).
-     * 
-     * @param {string} value - The verification code input to validate.
-     * @returns {boolean} - Returns true if the code is valid, otherwise false.
-     */
     const is_valid_verification_code = (value) => {
         const code_pattern = /^\d{6}$/;
         if (!code_pattern.test(value)) {
             set_error(prev => ({ ...prev, verification_code: 'Invalid Verification Code. Must be 6 digits.' }));
             return false;
         }
-        set_error(prev => ({ ...prev, verification_code: '' })); // Clear previous errors if the input is valid.
+        set_error(prev => ({ ...prev, verification_code: '' }));
         return true;
     };
 
-        /**
-     * Handles the verify button click event.
-     * Validates the verification code and sends a verification request to the server.
-     * 
-     * @param {Event} event - The click event triggered by the verify button.
-     * @returns {void}
-     */
     const handle_verify_click = async (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior.
-        set_error({}); // Clear any previous error messages.
-
-        // Validate the verification code input before making the verification request.
+        event.preventDefault();
+        set_error({});
         if (is_valid_verification_code(verification_code)) {
             try {
-                 // Prepare the form data for sending in the API request.
                 const form_data = new URLSearchParams();
                 form_data.append('username', username);
                 form_data.append('verification_code', verification_code);
 
-                // Send a POST request to the email verification API endpoint.
-                const response = await fetch("http://35.238.92.0:8000/verifyemail/", {
-                    method: 'POST', // HTTP method to use for the request.
+                const response = await fetch(`${api_url}/verifyemail/`, {
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded', // Content type for form data submission.
-                        'X-CSRFToken': get_cookie('csrftoken'), // CSRF token for security to protect against cross-site request forgery attacks.
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': get_cookie('csrftoken'),
                     },
-                    credentials: 'include', // Include credentials such as cookies in the request.
-                    body: form_data.toString(), // The form data to be sent in the request body.
+                    credentials: 'include',
+                    body: form_data.toString(),
                 });
 
-                // Parse the response as JSON.
                 const data = await response.json();
-
-                // Check if the response status is OK (status code 200-299).
                 if (response.ok) {
-                    // If the verification is successful, redirect the user to the provided URL.
                     if (data.status === 'success') {
-                        navigate(data.redirect_url); // Redirect to the success page.
+                        navigate(data.redirect_url);
                     }
                 } else {
-                    console.log(data.errors);
-                    // If the response contains errors, display them on the form.
                     if (data.errors) {
-                        set_error(data.errors); // Display validation errors returned from the server.
+                        set_error(data.errors);
                     } else {
-                        set_error({ submit: data.message }); // Display a general error message if available.
+                        set_error({ submit: data.message });
                     }
                 }
             } catch (error) {
-                // Log any error that occurs during the request and set a general error message.
-                console.error('Error:', error);
                 set_error(prev => ({ ...prev, submit: 'An error occurred during verification. Please try again.' }));
             }
+        }
+    };
+
+    // Function to handle resending email
+    const handle_resend_click = async (event) => {
+        event.preventDefault();
+        try {
+            const form_data = new URLSearchParams();
+            form_data.append('username', resend_username);
+
+            const response = await fetch(`${api_url}/resend_email/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': get_cookie('csrftoken'),
+                },
+                credentials: 'include',
+                body: form_data.toString(),
+            });
+
+            // const data = await response.json();
+            if (response.ok) {
+                set_resend_message('Verification email resent successfully!');
+            } else {
+                set_resend_message('Error resending email. Please try again.');
+            }
+        } catch (error) {
+            set_resend_message('An error occurred while resending the email.');
         }
     };
 
@@ -144,7 +133,7 @@ function VerifyEmail() {
                                         type="text"
                                         value={username}
                                         placeholder=""
-                                        onChange={(e) => set_username(e.target.value)} 
+                                        onChange={(e) => set_username(e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -164,11 +153,37 @@ function VerifyEmail() {
                                 {error.verification_code && <p className='Form-Error'>{error.verification_code}</p>}
                             </div>
                             {error.submit && <p className='Form-Error'>{error.submit}</p>}
+                            {/* Resend verification link */}
+                            <p onClick={() => set_resend_visible(!resend_visible)} className="App-NormalText" style={{ marginTop: '1rem', textDecoration: 'underline', cursor: 'pointer' }}>
+                                didn't receive verification code?
+                            </p>
+                            {resend_visible && (
+                                <div className="Signup-Query">
+                                    <div className="App-NormalText">
+                                        <p>username</p>
+                                    </div>
+                                    <div className="App-Rectangle">
+                                        <input
+                                            type="text"
+                                            value={resend_username}
+                                            placeholder=""
+                                            onChange={(e) => set_resend_username(e.target.value)}
+                                        />
+                                    </div>
+                                    <button className="App-Button" onClick={handle_resend_click} style={{marginTop: '1rem'}}>
+                                        resend email
+                                    </button>
+                                    {resend_message && <p className="Form-Message">{resend_message}</p>}
+                                </div>
+                            )}
+
                             <div className="App-Panel">
                                 <button className="App-Button" onClick={handle_verify_click}>
                                     verify
                                 </button>
                             </div>
+
+                            
                         </form>
                     </div>
                 </div>
