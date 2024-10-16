@@ -31,6 +31,8 @@ function Login() {
 
   // Handle input changes and validate in real-time
   const handle_change = (setter, validate_fn) => (event) => {
+    set_is_loading(false);
+    set_error({});
     setter(event.target.value);
     if (validate_fn) validate_fn(event.target.value);
   };
@@ -39,6 +41,7 @@ function Login() {
   const is_valid_username = (value) => {
     const username_pattern = /^[A-Za-z0-9_.-]{5,15}$/;
     if (!username_pattern.test(value)) {
+      set_is_loading(false);
       set_error(prev => ({ ...prev, username: 'Username must be 5-15 characters long and can only contain letters, numbers, (_), (-), and (.).' }));
       return false;
     } else if (value === '') {
@@ -52,6 +55,7 @@ function Login() {
   const is_valid_password = (value) => {
     const password_pattern = /^(?=.*[A-Z])(?=.*\d).{7,25}$/;
     if (!password_pattern.test(value)) {
+      set_is_loading(false);
       set_error(prev => ({ ...prev, password: 'Password must be 7-25 characters, with at least 1 uppercase letter and 1 number.' }));
       return false;
     } else if (value === '') {
@@ -129,6 +133,7 @@ function Login() {
                 </div>
                 <div className='App-Rectangle'>
                   <input
+                    id = "username"
                     type="text"
                     value={username}
                     onChange={handle_change(set_username)}
@@ -143,6 +148,7 @@ function Login() {
                 </div>
                 <div className='App-Rectangle'>
                   <input
+                    id = "password"
                     type="password"
                     value={password}
                     onChange={handle_change(set_password)}
@@ -156,11 +162,11 @@ function Login() {
               {error.submit && <p className='Form-Error'>{error.submit}</p>}
               <div className='App-LoginSignup'>
                 <div className='App-or'>
-                  <button className="App-Button" onClick={handle_login_click} disabled={is_loading}>
+                  <button className="App-Button" onClick={handle_login_click} disabled={is_loading} id='login_button' >
                     {is_loading ? 'loading...' : 'log in'}
                   </button>
                   <p className="App-Or-text">or</p>
-                  <button className="App-Button" onClick={() => navigate('/signup')}>
+                  <button className="App-Button" onClick={() => navigate('/signup')} id='signup_button'>
                     sign up
                   </button>
                 </div>

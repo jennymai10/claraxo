@@ -1,4 +1,4 @@
 from .game_model import Game, GameLog
-from .user_model import TicTacToeUser #, TicTacToeUserManager
+from .user_model import TicTacToeUser
 
-__all__ = ['Game', 'GameLog', 'TicTacToeUser', 'TicTacToeUserManager']
+__all__ = ['Game', 'GameLog', 'TicTacToeUser']

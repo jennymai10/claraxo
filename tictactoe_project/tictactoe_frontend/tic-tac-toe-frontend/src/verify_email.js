@@ -32,6 +32,8 @@ function VerifyEmail() {
     const navigate = useNavigate();
 
     const handle_change = (setter, validate_fn) => (event) => {
+        set_error({});
+        set_resend_message('');
         setter(event.target.value);
         if (validate_fn) validate_fn(event.target.value);
     };
@@ -124,39 +126,52 @@ function VerifyEmail() {
                             <h4>verify email</h4>
                         </div>
                         <form>
-                            <div className="Signup-Query">
-                                <div className="App-NormalText">
-                                    <p>username</p>
-                                </div>
-                                <div className="App-Rectangle">
-                                    <input
-                                        type="text"
-                                        value={username}
-                                        placeholder=""
-                                        onChange={(e) => set_username(e.target.value)}
-                                    />
-                                </div>
-                            </div>
+                        {!resend_visible && (
+                                <>
+                                    <div className="Signup-Query">
+                                        <div className="App-NormalText">
+                                            <p>username</p>
+                                        </div>
+                                        <div className="App-Rectangle">
+                                            <input
+                                                type="text"
+                                                value={username}
+                                                placeholder=""
+                                                onChange={(e) => set_username(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
 
-                            <div className="Signup-Query">
-                                <div className="App-NormalText">
-                                    <p>verification code</p>
-                                </div>
-                                <div className="App-Rectangle">
-                                    <input
-                                        type="text"
-                                        value={verification_code}
-                                        placeholder=""
-                                        onChange={handle_change(set_verification_code, is_valid_verification_code)}
-                                    />
-                                </div>
-                                {error.verification_code && <p className='Form-Error'>{error.verification_code}</p>}
-                            </div>
-                            {error.submit && <p className='Form-Error'>{error.submit}</p>}
-                            {/* Resend verification link */}
-                            <p onClick={() => set_resend_visible(!resend_visible)} className="App-NormalText" style={{ marginTop: '1rem', textDecoration: 'underline', cursor: 'pointer' }}>
-                                didn't receive verification code?
-                            </p>
+                                    <div className="Signup-Query">
+                                        <div className="App-NormalText">
+                                            <p>verification code</p>
+                                        </div>
+                                        <div className="App-Rectangle">
+                                            <input
+                                                id="verification_code"
+                                                type="text"
+                                                value={verification_code}
+                                                placeholder=""
+                                                onChange={handle_change(set_verification_code, is_valid_verification_code)}
+                                            />
+                                        </div>
+                                        {error.verification_code && <p className='Form-Error'>{error.verification_code}</p>}
+                                    </div>
+                                    {error.submit && <p className='Form-Error'>{error.submit}</p>}
+                                    {/* Resend verification link */}
+                                    <p
+                                        id = "resend_link"
+                                        onClick={() => set_resend_visible(!resend_visible)}
+                                        className="App-NormalText"
+                                        style={{ marginTop: '1rem', textDecoration: 'underline', cursor: 'pointer', textAlign: 'center' }}>
+                                        didn't get a verification code?
+                                    </p>
+                                    <div className="App-Panel">
+                                        <button className="App-Button" onClick={handle_verify_click}>verify</button>
+                                    </div>
+                                </>
+                            )}
+                            
                             {resend_visible && (
                                 <div className="Signup-Query">
                                     <div className="App-NormalText">
@@ -164,26 +179,29 @@ function VerifyEmail() {
                                     </div>
                                     <div className="App-Rectangle">
                                         <input
+                                            id="resend_username"
                                             type="text"
                                             value={resend_username}
                                             placeholder=""
-                                            onChange={(e) => set_resend_username(e.target.value)}
+                                            onChange={handle_change(set_resend_username, null)}
                                         />
                                     </div>
+                                    {error.submit && <p className='Form-Error'>{error.submit}</p>}
+                                    {resend_message && <p className="Form-Message">{resend_message}</p>}
+                                    {/* Resend verification link */}
+                                    <p
+                                        id = "resend_link"
+                                        onClick={() => set_resend_visible(!resend_visible)}
+                                        className="App-NormalText"
+                                        style={{ marginTop: '1rem', textDecoration: 'underline', cursor: 'pointer', textAlign: 'center'}}>
+                                        found your verification code?
+                                    </p>
                                     <button className="App-Button" onClick={handle_resend_click} style={{marginTop: '1rem'}}>
                                         resend email
                                     </button>
-                                    {resend_message && <p className="Form-Message">{resend_message}</p>}
+                                    
                                 </div>
                             )}
-
-                            <div className="App-Panel">
-                                <button className="App-Button" onClick={handle_verify_click}>
-                                    verify
-                                </button>
-                            </div>
-
-                            
                         </form>
                     </div>
                 </div>

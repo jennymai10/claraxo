@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from ..forms import UserRegistrationForm, LoginForm, UserProfileForm
 from ..models import TicTacToeUser
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.conf import settings
+from django.template.loader import render_to_string
 import random, json
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
@@ -78,13 +79,7 @@ def update_profile(request):
             user.is_active = False  # Mark user inactive until email is verified
             user.save()  # Save the email change first
             # Here you should trigger the email verification process
-            send_mail(
-                'C-Lara | Email Verification',
-                f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
+            send_verification_email(user)
 
         # Update full name (profile name)
         if 'fullname' in data:
@@ -213,13 +208,7 @@ def register_user(request):
             user.verification_code = random.randint(100000, 999999)  # Generate a random 6-digit verification code
             user.is_active = False  # Set user as inactive until email is verified
             user.save()
-            send_mail(
-                'C-Lara | Email Verification',
-                f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
+            send_verification_email(user)
             # Redirect to the email verification page
             redirect_url = '/verifyemail/' + user.username
             return JsonResponse({
@@ -434,13 +423,7 @@ def login_user(request):
                     user_object = TicTacToeUser.objects.get(username=username)
                     # If the user's email is not verified
                     if not user_object.is_active:
-                        send_mail(
-                            'C-Lara | Email Verification',
-                            f'Hi {user_object.profile_name}! Your verification code is {user_object.verification_code}',
-                            settings.EMAIL_HOST_USER,
-                            [user_object.email],
-                            fail_silently=False,
-                        )
+                        send_verification_email(user_object)
                         # If email is not verified, redirect to the email verification page
                         redirect_url = '/verifyemail/' + user_object.username
                         return JsonResponse({
@@ -503,13 +486,7 @@ def verifyemail_resend(request):
             user.is_active = False  # Activate the user account
             user.verification_code = random.randint(100000, 999999)  # Clear the verification code
             user.save()
-            send_mail(
-                    'C-Lara | Email Verification',
-                    f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
-                    settings.EMAIL_HOST_USER,
-                    [user.email],
-                    fail_silently=False,
-                )
+            send_verification_email(user)
             return JsonResponse({
                     'status': 'success',
                     'redirect_url': "/verifyemail/",
@@ -526,3 +503,25 @@ def verifyemail_resend(request):
                         'message': "Invalid GET Request.",
                         'errors': errors,
                     }, status=500)
+
+def send_verification_email(user_object):
+    subject = 'ClaraXO | Email Verification'
+    from_email = settings.EMAIL_HOST_USER
+    to_email = [user_object.email]
+
+    # Load HTML email content from template
+    html_content = render_to_string('emails/verification_email.html', {
+        'profile_name': user_object.profile_name,
+        'verification_code': user_object.verification_code,
+        'username': user_object.username
+    })
+
+    # Fallback plain text version of the email
+    text_content = f"Hi {user_object.profile_name},\nYour verification code is {user_object.verification_code}."
+
+    # Create the email with both HTML and plain text versions
+    email = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+    email.attach_alternative(html_content, "text/html")
+
+    # Send the email
+    email.send()
