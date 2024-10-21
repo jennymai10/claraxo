@@ -67,6 +67,7 @@ jobs:
           source venv/bin/activate
           nohup python manage.py runserver 0.0.0.0:8000 &
           sleep 20  # Allow the backend time to fully start
+          curl http://localhost:8000  # Verify the server is running
 
       # Step 9: Start Frontend Server
       - name: Start Frontend Server
@@ -74,6 +75,7 @@ jobs:
           cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
           nohup npm start & 
           sleep 20 # Give time for the frontend server to start
+          curl http://localhost:3000  # Verify the server is running
 
       # Step 10: Run Selenium Tests
       - name: Run Selenium Tests
