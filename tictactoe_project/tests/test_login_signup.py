@@ -2,6 +2,7 @@ import pytest
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -12,16 +13,29 @@ options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(options=options)
 
 @pytest.fixture(scope="function")
+# def driver():
+#     """
+#     This fixture sets up and tears down the WebDriver instance for each test.
+#     """
+#     service = Service("/Users/jennymai/chromedriver-mac-x64/chromedriver")
+#     driver = webdriver.Chrome(service=service)
+#     driver.maximize_window()
+#     yield driver
+#     driver.quit()
 def driver():
     """
     This fixture sets up and tears down the WebDriver instance for each test.
     """
-    service = Service("/Users/jennymai/chromedriver-mac-x64/chromedriver")
-    driver = webdriver.Chrome(service=service)
-    driver.maximize_window()
-    yield driver
-    driver.quit()
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Ensure headless mode
+    chrome_options.add_argument("--no-sandbox")  # Required for some CI environments
+    chrome_options.add_argument("--disable-dev-shm-usage")  # Helps in CI environments to avoid memory issues
 
+    # Initialize the driver with the headless option
+    service = Service("/usr/local/bin/chromedriver")  # Make sure the path is correct
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+    return driver
 
 def wait_for_element(driver, by, value, timeout=10):
     """
