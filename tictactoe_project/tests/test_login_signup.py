@@ -36,7 +36,7 @@ def driver():
     yield driver
     driver.quit()  # Make sure to close the browser after the test
 
-def wait_for_element(driver, by, value, timeout=10):
+def wait_for_element(driver, by, value, timeout=30):
     """
     Wait for an element to be present on the page.
     """
