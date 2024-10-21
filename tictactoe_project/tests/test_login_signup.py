@@ -12,7 +12,7 @@ driver = webdriver.Chrome()
 options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(options=options)
 
-@pytest.fixture(scope="function")
+
 # def driver():
 #     """
 #     This fixture sets up and tears down the WebDriver instance for each test.
@@ -22,6 +22,7 @@ driver = webdriver.Chrome(options=options)
 #     driver.maximize_window()
 #     yield driver
 #     driver.quit()
+@pytest.fixture(scope="function")
 def driver():
     """
     This fixture sets up and tears down the WebDriver instance for each test.
