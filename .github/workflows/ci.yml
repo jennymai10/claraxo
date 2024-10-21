@@ -10,8 +10,9 @@ on:
     branches:
       - main
 
+# CI Pipeline YAML
+
 jobs:
-  # Backend job
   backend:
     runs-on: ubuntu-latest
 
@@ -26,7 +27,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      # Step 3: Install dependencies
+      # Step 3: Install dependencies and activate virtual environment
       - name: Install Backend Dependencies
         run: |
           cd tictactoe_project
@@ -34,28 +35,37 @@ jobs:
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          
+      # Step 4: Verify virtual environment is active
+      - name: Verify Virtual Environment
+        run: |
+          source venv/bin/activate
+          which python  # Should point to the venv location
+          python -m django --version  # To check if Django is installed
 
-      # Step 4: Run migrations
+      # Step 5: Run migrations
       - name: Run Django migrations
         run: |
+          source venv/bin/activate
           python manage.py makemigrations
           python manage.py migrate
 
-      # Step 5: Start Django server in the background (necessary for Selenium tests)
+      # Step 6: Start Django server in the background (necessary for Selenium tests)
       - name: Start Django Server (background)
         run: |
+          source venv/bin/activate
           nohup python manage.py runserver 0.0.0.0:8000 &
       
-      # Step 6: Run Selenium tests
+      # Step 7: Run Selenium tests
       - name: Run Backend Tests
         run: |
+          source venv/bin/activate
           pytest
       
-      # Step 7: Stop Django server
+      # Step 8: Stop Django server
       - name: Stop Django Server
         run: |
           pkill -f "python manage.py runserver"
-
           
   # Frontend job
   frontend:
