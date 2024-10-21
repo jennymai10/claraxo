@@ -1,0 +1,88 @@
+name: CI Pipeline
+
+# Trigger the workflow on every push or pull request to the main branch
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Backend job
+  backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Python 3.12 environment
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+
+      # Step 3: Install dependencies
+      - name: Install backend dependencies
+        run: |
+          cd tictactoe_project
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: Run migrations
+      - name: Run Django migrations
+        run: |
+          source venv/bin/activate
+          python manage.py makemigrations
+          python manage.py migrate
+
+      # Step 5: Start Django server in the background (necessary for Selenium tests)
+      - name: Start Django server (background)
+        run: |
+          source venv/bin/activate
+          nohup python manage.py runserver 0.0.0.0:8000 &
+      
+      # Step 6: Run Selenium tests
+      - name: Run Selenium tests
+        run: |
+          source venv/bin/activate
+          pytest
+      
+      # Step 7: Stop Django server
+      - name: Stop Django server
+        run: |
+          pkill -f "python manage.py runserver"
+
+          
+  # Frontend job
+  frontend:
+    runs-on: ubuntu-latest
+    needs: backend # This ensures the frontend job starts only if the backend job succeeds
+
+    steps:
+      # Step 1: Checkout code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Node.js 16.x
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+
+      # Step 3: Install frontend dependencies
+      - name: Install frontend dependencies
+        run: |
+          cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
+          npm install
+
+      # Step 4: Run frontend tests
+      - name: Run frontend tests
+        run: |
+          cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
+          npm test
