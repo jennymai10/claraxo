@@ -123,8 +123,11 @@ function Login() {
         <img src={pencil} className="App-pencil" draggable="false" />
         <div className="App-container">
           <div className="App-Title">
-            <p>tic. tac. toe.</p>
+            <p>tic.</p>
+            <p>tac.</p>
+            <p>toe.</p>
           </div>
+          
           <div className='App-LoginForm'>
             <form>
               <div className='App-Query'>

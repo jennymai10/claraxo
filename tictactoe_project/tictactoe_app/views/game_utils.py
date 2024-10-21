@@ -107,20 +107,11 @@ def create_easy_prompt(board, unoccupied, opponent_move):
     1. Horizontal wins: [a1, a2, a3], [b1, b2, b3], [c1, c2, c3]
     2. Vertical wins: [a1, b1, c1], [a2, b2, c2], [a3, b3, c3]
     3. Diagonal wins: [a1, b2, c3], [a3, b2, c1]
-    Decision Strategy:
-    1. Immediate Win: If you can win in this move, choose the move that completes one of the winning combinations listed above.
-    2. Block the Opponent: If 'X' can win on their next move, block them by placing your 'O' in the square that prevents them from completing a winning combination.
-    3. Strategic Setup for Future Wins: 
-    - If neither you nor 'X' can win immediately, focus on setting yourself up for a future win by positioning your 'O' in a strong spot (especially the center 'b2' or corners 'a3', 'a1', 'c3', 'c1').
-    - Think about creating two potential winning lines at once, which forces 'X' to block only one, giving you the advantage on your next turn.
-    4. Avoid Bad Moves: Avoid moves that give 'X' an opportunity to create a fork or win on their next turn. Focus on disrupting their plans while advancing your strategy.
     You are playing Tic-Tac-Toe as 'O'. Your goal is to win the game. Here is the current state of the board:
     Opponent's Last Move: {opponent_move}
     Squares occupied by X: [{', '.join([key for key, value in board.items() if value == 'X'])}]
     Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
     Unoccupied squares: [{', '.join(unoccupied)}]
-    Remember that: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
-    Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
     In this game, the player has chosen difficulty level: easy. Make simple reasoning for your move selection to simulate an easy-level game.
     Required Output (follow strictly please):
     1. First, provide your though for the potential reasons why the Opponent played such move (which is: {opponent_move}) in plain text (no special formatting, no styling, no ### or **, no bold or italic text).
@@ -182,7 +173,10 @@ def create_hard_prompt(board, unoccupied, opponent_move):
     move_characteristics = evaluate_all_moves(board, unoccupied, 'hard')
     # Create a string representation of the move scores to pass into the prompt
     move_characteristics_str = ', '.join([f"{move}: {score}" for move, score in move_characteristics.items()])
-    print(f"Move scores: {move_characteristics}")
+    # Generate heuristic description for all available moves
+    move_characteristics_des = evaluate_all_moves(board, unoccupied, 'medium')
+    # Create a string representation of the move descriptions to pass into the prompt
+    move_characteristics_des_str = ', '.join([f"{move}: {score}" for move, score in move_characteristics_des.items()])
     prompt = f"""
     Board Layout: The Tic-Tac-Toe board is indexed using a chess-like notation where:
     - 'a' refers to the left column, 'b' refers to the middle column, and 'c' refers to the right column.
@@ -211,6 +205,7 @@ def create_hard_prompt(board, unoccupied, opponent_move):
     Unoccupied squares: [{', '.join(unoccupied)}]
     Remember that: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
     Heuristic Scores: {move_characteristics_str}
+    Heuristic Descriptions: {move_characteristics_des_str}
     Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
     In this game, the player has chosen difficulty level: hard. Make extensive and strong reasoning for your move selection to simulate a hard-level unbeatable game.
     Required Output (follow strictly please):
@@ -387,7 +382,7 @@ def game_end_handler(board, game, winner, request):
         game.completed = True  # Mark the game as completed
         game.save()  # Save the updated game state to the database
         request.session['winner'] = 'Draw'  # Store the draw result in the session
-        return "Draw" # JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
+        return "draw" # JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
     # If the game is not over, return None
     return None
