@@ -43,6 +43,17 @@ jobs:
           source venv/bin/activate
           which python
           python -m django --version
+      
+      # Step 4: Install Chrome and ChromeDriver
+      - name: Set up ChromeDriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install ./google-chrome-stable_current_amd64.deb
+          wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
 
       # Step 5: Run migrations
       - name: Run Django migrations

@@ -6,6 +6,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+# For CI Pipeline
+driver = webdriver.Chrome()
+options = webdriver.ChromeOptions()
+driver = webdriver.Chrome(options=options)
+
 @pytest.fixture(scope="function")
 def driver():
     """
