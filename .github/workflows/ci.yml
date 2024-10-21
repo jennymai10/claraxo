@@ -40,8 +40,8 @@ jobs:
       - name: Verify Virtual Environment
         run: |
           source venv/bin/activate
-          which python  # Should point to the venv location
-          python -m django --version  # To check if Django is installed
+          which python
+          python -m django --version
 
       # Step 5: Run migrations
       - name: Run Django migrations
