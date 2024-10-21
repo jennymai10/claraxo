@@ -39,6 +39,7 @@ jobs:
       # Step 4: Verify virtual environment is active
       - name: Verify Virtual Environment
         run: |
+          cd tictactoe_project
           source venv/bin/activate
           which python
           python -m django --version
@@ -46,6 +47,7 @@ jobs:
       # Step 5: Run migrations
       - name: Run Django migrations
         run: |
+          cd tictactoe_project
           source venv/bin/activate
           python manage.py makemigrations
           python manage.py migrate
@@ -53,12 +55,14 @@ jobs:
       # Step 6: Start Django server in the background (necessary for Selenium tests)
       - name: Start Django Server (background)
         run: |
+          cd tictactoe_project
           source venv/bin/activate
           nohup python manage.py runserver 0.0.0.0:8000 &
       
       # Step 7: Run Selenium tests
       - name: Run Backend Tests
         run: |
+          cd tictactoe_project
           source venv/bin/activate
           pytest
       
