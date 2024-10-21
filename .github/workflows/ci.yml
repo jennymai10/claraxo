@@ -27,7 +27,7 @@ jobs:
           python-version: '3.12'
 
       # Step 3: Install dependencies
-      - name: Install backend dependencies
+      - name: Install Backend Dependencies
         run: |
           cd tictactoe_project
           python -m venv venv
@@ -42,17 +42,17 @@ jobs:
           python manage.py migrate
 
       # Step 5: Start Django server in the background (necessary for Selenium tests)
-      - name: Start Django server (background)
+      - name: Start Django Server (background)
         run: |
           nohup python manage.py runserver 0.0.0.0:8000 &
       
       # Step 6: Run Selenium tests
-      - name: Run Selenium tests
+      - name: Run Backend Tests
         run: |
           pytest
       
       # Step 7: Stop Django server
-      - name: Stop Django server
+      - name: Stop Django Server
         run: |
           pkill -f "python manage.py runserver"
 
@@ -74,13 +74,13 @@ jobs:
           node-version: '16.x'
 
       # Step 3: Install frontend dependencies
-      - name: Install frontend dependencies
+      - name: Install Frontend Dependencies
         run: |
           cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
           npm install
 
       # Step 4: Run frontend tests
-      - name: Run frontend tests
+      - name: Run Frontend Tests
         run: |
           cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
           npm test
