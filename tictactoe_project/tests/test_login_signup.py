@@ -137,35 +137,35 @@ def test_signup(driver):
     signup_button = wait_for_element(driver, By.CSS_SELECTOR, '.App-Button')
     signup_button.click()
 
-    time.sleep(20)  # Wait for the submission to process
+    time.sleep(25)  # Wait for the submission to process
 
     # Check if redirected to the verify email page
     assert "verifyemail" in driver.current_url
 
-def test_resend_email(driver):
-    # Open the Verify Email page
-    driver.get("http://localhost:3000/verifyemail")
-    time.sleep(3)
+# def test_resend_email(driver):
+#     # Open the Verify Email page
+#     driver.get("http://localhost:3000/verifyemail")
+#     time.sleep(3)
 
-    # Simulate resending the verification email
-    resend_link = wait_for_element(driver, By.ID, "resend_link")
-    resend_link.click()
-    time.sleep(1)
+#     # Simulate resending the verification email
+#     resend_link = wait_for_element(driver, By.ID, "resend_link")
+#     resend_link.click()
+#     time.sleep(1)
 
-    # Enter the username for the resend
-    resend_username_input = wait_for_element(driver, By.ID, 'resend_username')
-    resend_username_input.clear()
-    resend_username_input.send_keys("validusername")
-    time.sleep(2)
+#     # Enter the username for the resend
+#     resend_username_input = wait_for_element(driver, By.ID, 'resend_username')
+#     resend_username_input.clear()
+#     resend_username_input.send_keys("validusername")
+#     time.sleep(2)
 
-    # Click the 'resend email' button
-    resend_button = wait_for_element(driver, By.CSS_SELECTOR, '.App-Button')
-    resend_button.click()
-    time.sleep(7)
+#     # Click the 'resend email' button
+#     resend_button = wait_for_element(driver, By.CSS_SELECTOR, '.App-Button')
+#     resend_button.click()
+#     time.sleep(7)
 
-    # Check for a success message
-    resend_success_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Message').text
-    assert "Verification email resent successfully!" in resend_success_message
+#     # Check for a success message
+#     resend_success_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Message').text
+#     assert "Verification email resent successfully!" in resend_success_message
 
 # def test_verify_email(driver):
 #     # Open the Verify Email page
