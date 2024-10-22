@@ -396,49 +396,63 @@ def login_user(request):
         JsonResponse: A JSON response indicating success or failure of the login attempt, along with a redirect URL.
     """
     if request.method == 'POST':
-        form = LoginForm(request.POST)  # Bind the form with the POST data
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
+        # Parse encrypted password and username from the request
+        encrypted_password = json.loads(request.POST.get('password'))
+        encrypted_username = json.loads(request.POST.get('username'))
+        print(encrypted_password)
+        
+        # Ensure both encrypted fields contain 'ciphertext' and 'iv'
+        if 'ciphertext' not in encrypted_password or 'iv' not in encrypted_password:
+            return JsonResponse({'status': 'error', 'message': 'Invalid encrypted password data.'}, status=400)
+        
+        if 'ciphertext' not in encrypted_username or 'iv' not in encrypted_username:
+            return JsonResponse({'status': 'error', 'message': 'Invalid encrypted username data.'}, status=400)
+
+        # Decrypt the password and username
+        decrypted_password = decrypt_data(encrypted_password['ciphertext'], None, encrypted_password['iv'])
+        decrypted_username = decrypt_data(encrypted_username['ciphertext'], None, encrypted_username['iv'])
+
+        if not decrypted_password or not decrypted_username:
+            return JsonResponse({'status': 'error', 'message': 'Failed to decrypt username or password.'}, status=400)
+
+        # Use Django's built-in authentication system
+        user = authenticate(request, username=decrypted_username, password=decrypted_password)
             
-            # Authenticate the user with the provided credentials
-            user = authenticate(request, username=username, password=password)
+        if user is not None:
+            # Check if the API key is expiring soon (less than 7 days)
+            if user.api_key_expiry_date:
+                user.api_key_expiry_date = datetime.now(timezone.utc) + timedelta(days=90)
             
-            if user is not None:
-                # Check if the API key is expiring soon (less than 7 days)
-                if user.api_key_expiry_date:
-                    user.api_key_expiry_date = datetime.now(timezone.utc) + timedelta(days=90)
-                
-                # Check if the user's email is verified (is_active is True)
-                if user.is_active:
-                    # Log in the user
-                    login(request, user)
-                    return JsonResponse({
-                        'status': 'success',
-                        'redirect_url': '/new_game/'
-                    })
-            else:
-                # Handle when authentication fails (incorrect username or password)
-                try:
-                    user_object = TicTacToeUser.objects.get(username=username)
-                    # If the user's email is not verified
-                    if not user_object.is_active:
-                        send_verification_email(user_object)
-                        # If email is not verified, redirect to the email verification page
-                        redirect_url = '/verifyemail/' + user_object.username
-                        return JsonResponse({
-                            'status': 'error',
-                            'message': 'Email has not been verified.',
-                            'errors': {'submit': 'Email has not been verified. You will be redirected to verify your email in 5s.'},
-                            'redirect_url': redirect_url,
-                        }, status=401)
-                except TicTacToeUser.DoesNotExist:
-                    # If the username does not exist in the database
+            # Check if the user's email is verified (is_active is True)
+            if user.is_active:
+                # Log in the user
+                login(request, user)
+                return JsonResponse({
+                    'status': 'success',
+                    'redirect_url': '/new_game/'
+                })
+        else:
+            # Handle when authentication fails (incorrect username or password)
+            try:
+                user_object = TicTacToeUser.objects.get(username=decrypted_username)
+                # If the user's email is not verified
+                if not user_object.is_active:
+                    send_verification_email(user_object)
+                    # If email is not verified, redirect to the email verification page
+                    redirect_url = '/verifyemail/' + user_object.username
                     return JsonResponse({
                         'status': 'error',
-                        'message': 'Incorrect username or password.',
-                        'errors': {'submit': 'Incorrect username or password.'},
+                        'message': 'Email has not been verified.',
+                        'errors': {'submit': 'Email has not been verified. You will be redirected to verify your email in 5s.'},
+                        'redirect_url': redirect_url,
                     }, status=401)
+            except TicTacToeUser.DoesNotExist:
+                # If the username does not exist in the database
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Incorrect username or password.',
+                    'errors': {'submit': 'Incorrect username or password.'},
+                }, status=401)
     else:
         # For a GET request, render an empty login form
         form = LoginForm()

@@ -65,7 +65,7 @@ jobs:
         run: |
           cd tictactoe_project
           source venv/bin/activate
-          nohup python manage.py runserver 0.0.0.0:8000 &
+          nohup python manage.py runserver 0.0.0.0:8000 --noreload &
           sleep 20  # Allow the backend time to fully start
           curl http://localhost:8000  # Verify the server is running
 

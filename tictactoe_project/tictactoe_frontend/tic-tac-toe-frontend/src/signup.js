@@ -151,7 +151,6 @@ function Signup() {
             is_valid_account_type(account_type)
         ) {
             try {
-                console.log(encryptData(api_key, secretKey));  // Log encrypted API key data
                 const form_data = new URLSearchParams();
                 form_data.append('account_type', account_type);
                 form_data.append('email', email);
