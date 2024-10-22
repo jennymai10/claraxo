@@ -67,7 +67,7 @@ jobs:
           source venv/bin/activate
           nohup python manage.py runserver 0.0.0.0:8000 --noreload &
           sleep 20  # Allow the backend time to fully start
-          curl http://localhost:8000  # Verify the server is running
+          curl http://localhost:8000/swagger/  # Verify the server is running
 
       # Step 9: Start Frontend Server
       - name: Start Frontend Server
