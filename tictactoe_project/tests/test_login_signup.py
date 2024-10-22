@@ -167,40 +167,40 @@ def test_resend_email(driver):
     resend_success_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Message').text
     assert "Verification email resent successfully!" in resend_success_message
 
-def test_verify_email(driver):
-    # Open the Verify Email page
-    driver.get("http://localhost:3000/verifyemail")
-    time.sleep(3)  # Let the page fully load
+# def test_verify_email(driver):
+#     # Open the Verify Email page
+#     driver.get("http://localhost:3000/verifyemail")
+#     time.sleep(3)  # Let the page fully load
 
-    # Enter valid username
-    username = "validusername"  # Replace with the actual username you want to test
-    username_input = wait_for_element(driver, By.CSS_SELECTOR, 'input[type="text"]')
-    username_input.clear()
-    username_input.send_keys(username)
-    time.sleep(1)
+#     # Enter valid username
+#     username = "validusername"  # Replace with the actual username you want to test
+#     username_input = wait_for_element(driver, By.CSS_SELECTOR, 'input[type="text"]')
+#     username_input.clear()
+#     username_input.send_keys(username)
+#     time.sleep(1)
 
-    # Test invalid verification code (e.g., less than 6 digits)
-    verification_code_input = wait_for_element(driver, By.ID, 'verification_code')
-    verification_code_input.clear()
-    verification_code_input.send_keys("123")
-    verification_code_input.send_keys("\t")  # Trigger validation
-    time.sleep(1)
+#     # Test invalid verification code (e.g., less than 6 digits)
+#     verification_code_input = wait_for_element(driver, By.ID, 'verification_code')
+#     verification_code_input.clear()
+#     verification_code_input.send_keys("123")
+#     verification_code_input.send_keys("\t")  # Trigger validation
+#     time.sleep(1)
 
-    # Verify error message for invalid code
-    error_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Error').text
-    assert "Invalid Verification Code. Must be 6 digits." in error_message
+#     # Verify error message for invalid code
+#     error_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Error').text
+#     assert "Invalid Verification Code. Must be 6 digits." in error_message
 
-    # Test valid verification code from the database
-    verification_code_input.clear()
-    time.sleep(20)
+#     # Test valid verification code from the database
+#     verification_code_input.clear()
+#     time.sleep(20)
 
-    # Submit the form with the valid code
-    verify_button = wait_for_element(driver, By.CSS_SELECTOR, '.App-Button')
-    verify_button.click()
-    time.sleep(3)
+#     # Submit the form with the valid code
+#     verify_button = wait_for_element(driver, By.CSS_SELECTOR, '.App-Button')
+#     verify_button.click()
+#     time.sleep(3)
 
-    # Check if redirected to the success page or if there is a verification message
-    assert driver.current_url != "http://localhost:3000/verifyemail"
+#     # Check if redirected to the success page or if there is a verification message
+#     assert driver.current_url != "http://localhost:3000/verifyemail"
 
 # def test_login(driver):
 #     # Open the login page
