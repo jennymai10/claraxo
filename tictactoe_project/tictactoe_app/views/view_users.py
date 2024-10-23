@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from ..forms import UserRegistrationForm, LoginForm, UserProfileForm
 from ..models import TicTacToeUser
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.conf import settings
+from django.template.loader import render_to_string
 import random, json
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
@@ -78,13 +79,7 @@ def update_profile(request):
             user.is_active = False  # Mark user inactive until email is verified
             user.save()  # Save the email change first
             # Here you should trigger the email verification process
-            send_mail(
-                'C-Lara | Email Verification',
-                f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
+            send_verification_email(user)
 
         # Update full name (profile name)
         if 'fullname' in data:
@@ -213,13 +208,7 @@ def register_user(request):
             user.verification_code = random.randint(100000, 999999)  # Generate a random 6-digit verification code
             user.is_active = False  # Set user as inactive until email is verified
             user.save()
-            send_mail(
-                'C-Lara | Email Verification',
-                f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
+            send_verification_email(user)
             # Redirect to the email verification page
             redirect_url = '/verifyemail/' + user.username
             return JsonResponse({
@@ -407,55 +396,63 @@ def login_user(request):
         JsonResponse: A JSON response indicating success or failure of the login attempt, along with a redirect URL.
     """
     if request.method == 'POST':
-        form = LoginForm(request.POST)  # Bind the form with the POST data
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
+        # Parse encrypted password and username from the request
+        encrypted_password = json.loads(request.POST.get('password'))
+        encrypted_username = json.loads(request.POST.get('username'))
+        print(encrypted_password)
+        
+        # Ensure both encrypted fields contain 'ciphertext' and 'iv'
+        if 'ciphertext' not in encrypted_password or 'iv' not in encrypted_password:
+            return JsonResponse({'status': 'error', 'message': 'Invalid encrypted password data.'}, status=400)
+        
+        if 'ciphertext' not in encrypted_username or 'iv' not in encrypted_username:
+            return JsonResponse({'status': 'error', 'message': 'Invalid encrypted username data.'}, status=400)
+
+        # Decrypt the password and username
+        decrypted_password = decrypt_data(encrypted_password['ciphertext'], None, encrypted_password['iv'])
+        decrypted_username = decrypt_data(encrypted_username['ciphertext'], None, encrypted_username['iv'])
+
+        if not decrypted_password or not decrypted_username:
+            return JsonResponse({'status': 'error', 'message': 'Failed to decrypt username or password.'}, status=400)
+
+        # Use Django's built-in authentication system
+        user = authenticate(request, username=decrypted_username, password=decrypted_password)
             
-            # Authenticate the user with the provided credentials
-            user = authenticate(request, username=username, password=password)
+        if user is not None:
+            # Check if the API key is expiring soon (less than 7 days)
+            if user.api_key_expiry_date:
+                user.api_key_expiry_date = datetime.now(timezone.utc) + timedelta(days=90)
             
-            if user is not None:
-                # Check if the API key is expiring soon (less than 7 days)
-                if user.api_key_expiry_date:
-                    user.api_key_expiry_date = datetime.now(timezone.utc) + timedelta(days=90)
-                
-                # Check if the user's email is verified (is_active is True)
-                if user.is_active:
-                    # Log in the user
-                    login(request, user)
-                    return JsonResponse({
-                        'status': 'success',
-                        'redirect_url': '/new_game/'
-                    })
-            else:
-                # Handle when authentication fails (incorrect username or password)
-                try:
-                    user_object = TicTacToeUser.objects.get(username=username)
-                    # If the user's email is not verified
-                    if not user_object.is_active:
-                        send_mail(
-                            'C-Lara | Email Verification',
-                            f'Hi {user_object.profile_name}! Your verification code is {user_object.verification_code}',
-                            settings.EMAIL_HOST_USER,
-                            [user_object.email],
-                            fail_silently=False,
-                        )
-                        # If email is not verified, redirect to the email verification page
-                        redirect_url = '/verifyemail/' + user_object.username
-                        return JsonResponse({
-                            'status': 'error',
-                            'message': 'Email has not been verified.',
-                            'errors': {'submit': 'Email has not been verified. You will be redirected to verify your email in 5s.'},
-                            'redirect_url': redirect_url,
-                        }, status=401)
-                except TicTacToeUser.DoesNotExist:
-                    # If the username does not exist in the database
+            # Check if the user's email is verified (is_active is True)
+            if user.is_active:
+                # Log in the user
+                login(request, user)
+                return JsonResponse({
+                    'status': 'success',
+                    'redirect_url': '/new_game/'
+                })
+        else:
+            # Handle when authentication fails (incorrect username or password)
+            try:
+                user_object = TicTacToeUser.objects.get(username=decrypted_username)
+                # If the user's email is not verified
+                if not user_object.is_active:
+                    send_verification_email(user_object)
+                    # If email is not verified, redirect to the email verification page
+                    redirect_url = '/verifyemail/' + user_object.username
                     return JsonResponse({
                         'status': 'error',
-                        'message': 'Incorrect username or password.',
-                        'errors': {'submit': 'Incorrect username or password.'},
+                        'message': 'Email has not been verified.',
+                        'errors': {'submit': 'Email has not been verified. You will be redirected to verify your email in 5s.'},
+                        'redirect_url': redirect_url,
                     }, status=401)
+            except TicTacToeUser.DoesNotExist:
+                # If the username does not exist in the database
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Incorrect username or password.',
+                    'errors': {'submit': 'Incorrect username or password.'},
+                }, status=401)
     else:
         # For a GET request, render an empty login form
         form = LoginForm()
@@ -503,13 +500,7 @@ def verifyemail_resend(request):
             user.is_active = False  # Activate the user account
             user.verification_code = random.randint(100000, 999999)  # Clear the verification code
             user.save()
-            send_mail(
-                    'C-Lara | Email Verification',
-                    f'Hi {user.profile_name}! Your verification code is {user.verification_code}',
-                    settings.EMAIL_HOST_USER,
-                    [user.email],
-                    fail_silently=False,
-                )
+            send_verification_email(user)
             return JsonResponse({
                     'status': 'success',
                     'redirect_url': "/verifyemail/",
@@ -526,3 +517,25 @@ def verifyemail_resend(request):
                         'message': "Invalid GET Request.",
                         'errors': errors,
                     }, status=500)
+
+def send_verification_email(user_object):
+    subject = 'ClaraXO | Email Verification'
+    from_email = settings.EMAIL_HOST_USER
+    to_email = [user_object.email]
+
+    # Load HTML email content from template
+    html_content = render_to_string('emails/verification_email.html', {
+        'profile_name': user_object.profile_name,
+        'verification_code': user_object.verification_code,
+        'username': user_object.username
+    })
+
+    # Fallback plain text version of the email
+    text_content = f"Hi {user_object.profile_name},\nYour verification code is {user_object.verification_code}."
+
+    # Create the email with both HTML and plain text versions
+    email = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+    email.attach_alternative(html_content, "text/html")
+
+    # Send the email
+    email.send()

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Gaegu|Londrina+Shadow">
+
+    <style>
+        /* Set the global font-family and body styles to reflect ClaraXO branding */
+        body {
+            font-family: 'Gaegu', 'arial';
+            background-color: #f9f4ee;
+            color: #301313;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container for the entire email with consistent padding and a centered layout */
+        .email-container {
+            background-color: #EAE4D8;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            max-width: 600px;
+            margin: 3rem auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 2px solid #301313;
+        }
+
+        /* Header section, using brand colors and a playful font */
+        .email-header {
+            background-color: #301313;
+            color: #f4efe6;
+            padding: 1.5rem;
+            text-align: center;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            font-family: 'Londrina Shadow', 'arial';
+            letter-spacing: 0.15em;
+            font-size: 2rem;
+        }
+
+        /* Body section of the email */
+        .email-body {
+            padding: 1.5rem;
+            text-align: left;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+        }
+
+        /* Body text styling */
+        .email-body p {
+            font-family: 'Gaegu', 'arial';
+            font-size: 1rem;
+            color: #301313;
+            margin-bottom: 1rem;
+        }
+
+        /* Highlighted verification code */
+        .email-body strong {
+            font-size: 1.5rem;
+            color: #301313;
+        }
+
+        /* Call-to-action button that reflects the ClaraXO branding */
+        .cta-button {
+            display: inline-block;
+            background-color: #EAE4D8;
+            color: black;
+            padding: 12px 24px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-family: 'Gaegu', 'arial';
+            border-radius: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Hover effect for the CTA button */
+        .cta-button:hover {
+            background-color: #301313;
+            color: #fbfaf7;
+        }
+
+        /* Footer section of the email */
+        .email-footer {
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #777777;
+        }
+
+        /* Footer text for a more subtle tone */
+        .email-footer p {
+            font-family: 'Gaegu', 'arial';
+            color: #301313;
+            font-size: 1rem;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header for the Email, aligned with ClaraXO branding -->
+        <div class="email-header">
+            <h1>verify your email</h1>
+        </div>
+
+        <!-- Body content with ClaraXO colors and fonts -->
+        <div class="email-body">
+            <p>hi {{ profile_name }}!</p>
+            <p>we're so happy you're joining ClaraXO! to complete your registration, please verify your email address.</p>
+            <p>your verification code is: <strong>{{ verification_code }}</strong></p>
+            <p>or you can click the button below to go to the email verification page:</p>
+            <!-- Call-to-action button -->
+            <a href="http://localhost:3000/verifyemail/{{ username }}" class="cta-button">let's verify</a>
+        </div>
+
+        <!-- Footer section with consistent branding -->
+        <div class="email-footer">
+            <p>if you didn’t sign up for ClaraXO, please ignore this email.</p>
+            <p>© 2024 ClaraXO. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

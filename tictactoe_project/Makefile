@@ -34,9 +34,6 @@ clean:
 install:
 	pip install -r requirements.txt
 
-run_cloud:
-	python3 manage.py runserver 0.0.0.0:8000
-
 all: migrate run
 
 migrate:

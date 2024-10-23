@@ -116,7 +116,7 @@ const SideTab = ({ user }) => {
         {isOpen && (
           <div>
             <div className="App-FormName">
-              <h4 style={{ fontSize: '1.6rem', textAlign: 'center', margin: 0, marginRight: '3rem' }}>tic. tac. toe.</h4>
+              <h4 style={{ fontSize: '1.6rem', textAlign: 'center', margin: 0, marginRight: '3rem' }}>ClaraXO</h4>
             </div>
             <div className="App-NormalText" style={{textAlign: 'left', marginTop: '5vh', marginBottom: '10vh'}}>
               <p style={{textAlign: 'center'}}>

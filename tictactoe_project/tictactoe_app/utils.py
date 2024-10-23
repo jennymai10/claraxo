@@ -1,36 +1,18 @@
-from google.cloud import secretmanager
-from datetime import datetime
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
-import base64, json
-secret_key = 'YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY='
-
-# class Command(BaseCommand):
-#     help = "Clean up expired secrets in Google Cloud Secret Manager"
-
-#     def handle(self, *args, **kwargs):
-#         client = secretmanager.SecretManagerServiceClient()
-#         project_id = 'c-lara'
-#         secrets = client.list_secrets(request={"parent": f"projects/{project_id}"})
-        
-#         for secret in secrets:
-#             # Check metadata or fetch secret version creation date and compare with current date
-#             # Here you would use the metadata you stored previously (like the TTL or expiration date)
-#             # Assume that we stored TTL in a database and fetched it here for simplicity
-#             secret_name = secret.name
-#             expiration_date = get_expiration_for_secret(secret_name)  # Custom function
-            
-#             if expiration_date < datetime.utcnow():
-#                 try:
-#                     client.delete_secret(request={"name": secret_name})
-#                     print(f"Deleted expired secret: {secret_name}")
-#                 except Exception as e:
-#                     print(f"Failed to delete secret {secret_name}: {str(e)}")
+import base64, os
+from dotenv import load_dotenv
+load_dotenv(dotenv_path='./.env.development') # MODIFY FOR PRODUCTION
 
 # AES-CBC Decryption function with IV
 def decrypt_data(encrypted_data, secret_key_64, iv_64):
     try:
-        secret_key_64 = 'YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY='
+        # Retrieve the secret key from backend environment variable
+        secret_key_64 = os.getenv("SECRET_KEY")
+        
+        if not secret_key_64:
+            raise ValueError("SECRET_KEY is not set in environment variables.")
+        
         # Decode the base64-encoded secret key and IV
         secret_key = base64.b64decode(secret_key_64)
         iv = base64.b64decode(iv_64)

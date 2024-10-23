@@ -8,7 +8,7 @@ import SideTab from './sidetab';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 
-const secretKey = 'YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=';
+
 function get_cookie(name) {
     let cookie_value = null;
     if (document.cookie && document.cookie !== '') {
@@ -41,6 +41,7 @@ const encryptData = (data, secretKey) => {
 };
 
 function Settings() {
+    const secretKey = process.env.REACT_APP_SECRET_KEY;
     const api_url = process.env.REACT_APP_API_URL;
     const [username, set_username] = useState('');
     const [account_type, set_account_type] = useState('');

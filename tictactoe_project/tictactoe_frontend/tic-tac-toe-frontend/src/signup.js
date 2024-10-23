@@ -51,7 +51,7 @@ function Signup() {
     const [error, set_error] = useState({});
     const [is_loading, set_is_loading] = useState(false);
     const navigate = useNavigate();
-    const secretKey = 'YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=';
+    const secretKey = process.env.REACT_APP_SECRET_KEY;
 
     const handle_change = (setter, validate_fn) => (event) => {
         setter(event.target.value);
@@ -151,7 +151,6 @@ function Signup() {
             is_valid_account_type(account_type)
         ) {
             try {
-                console.log(encryptData(api_key, secretKey));  // Log encrypted API key data
                 const form_data = new URLSearchParams();
                 form_data.append('account_type', account_type);
                 form_data.append('email', email);
@@ -215,6 +214,7 @@ function Signup() {
                                 </div>
                                 <div className="App-Rectangle">
                                     <input
+                                        id = "signup_username"
                                         type="text"
                                         value={username}
                                         placeholder=""
@@ -230,6 +230,7 @@ function Signup() {
                                 </div>
                                 <div className="App-Rectangle">
                                     <select
+                                        id = "signup_account_type"
                                         className="Signup-AccountTypeSelect"
                                         value={account_type}
                                         onChange={handle_change(set_account_type, is_valid_account_type)}
@@ -248,6 +249,7 @@ function Signup() {
                                 </div>
                                 <div className="App-Rectangle">
                                     <input
+                                        id = "signup_email"
                                         type="text"
                                         value={email}
                                         placeholder=""
@@ -263,6 +265,7 @@ function Signup() {
                                 </div>
                                 <div className="App-Rectangle">
                                     <input
+                                        id = "signup_password"
                                         type="password"
                                         value={password}
                                         placeholder=""
@@ -278,6 +281,7 @@ function Signup() {
                                 </div>
                                 <div className="App-Rectangle">
                                     <input
+                                        id = "signup_password2"
                                         type="password"
                                         value={password2}
                                         placeholder=""
@@ -293,6 +297,7 @@ function Signup() {
                                 </div>
                                 <div className="App-Rectangle">
                                     <input
+                                        id = "signup_api_key"
                                         type="password"
                                         value={api_key}
                                         placeholder=""
@@ -307,6 +312,7 @@ function Signup() {
                                 </div>
                                 <div className="App-Rectangle">
                                     <input
+                                        id = "signup_age"
                                         type="number"
                                         value={age}
                                         placeholder=""
@@ -322,6 +328,7 @@ function Signup() {
                                 </div>
                                 <div className="App-Rectangle">
                                     <input
+                                        id = "signup_fullname"
                                         type="text"
                                         value={fullname}
                                         placeholder=""
