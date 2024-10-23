@@ -51,7 +51,7 @@ function Signup() {
     const [error, set_error] = useState({});
     const [is_loading, set_is_loading] = useState(false);
     const navigate = useNavigate();
-    const secretKey = 'YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=';
+    const secretKey = process.env.REACT_APP_SECRET_KEY;
 
     const handle_change = (setter, validate_fn) => (event) => {
         setter(event.target.value);
