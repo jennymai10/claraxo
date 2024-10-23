@@ -14,8 +14,8 @@ SECRET_KEY = 'django-insecure-2aio4@tf(i32gpb%z-c27o0-d2p$%v&1+(u8f8n>'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-# Since you don't have a domain yet, we use the external IP
-ALLOWED_HOSTS = ['35.238.92.0', 'localhost']
+# We use the external IP temporarily
+ALLOWED_HOSTS = ['35.238.92.0', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
