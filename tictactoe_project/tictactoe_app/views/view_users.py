@@ -62,7 +62,6 @@ def get_csrf_token(request):
 @login_required
 @api_view(['POST'])
 def update_profile(request):
-    print(request.data)
     user = request.user  # Get the current logged-in user
     data = request.data  # Assuming POST data comes in as JSON or form data
 
@@ -99,7 +98,6 @@ def update_profile(request):
         if 'api_key' in data and data['api_key'] != 'PLACEHOLDER':
             encrypted_api_key = json.loads(request.POST.get('api_key'))
             decrypted_api_key = decrypt_data(encrypted_api_key['ciphertext'], None, encrypted_api_key['iv'])
-            print("API Key: ", decrypted_api_key)
             if decrypted_api_key != 'PLACEHOLDER':
                 user.store_api_key_in_secret_manager(decrypted_api_key, user.api_key_secret_id, True)
                 user.save()
@@ -108,7 +106,6 @@ def update_profile(request):
         if 'password' in data:
             encrypted_password = json.loads(request.POST.get('password'))
             decrypted_password = decrypt_data(encrypted_password['ciphertext'], None, encrypted_password['iv'])
-            print("Password: ", decrypted_password)
             if decrypted_password != 'PLACEHOLDER':
                 user.set_password(decrypted_password)  # Update the password securely
                 user.save()
@@ -116,16 +113,17 @@ def update_profile(request):
 
         # Save the user and profile changes
         user.save()
-        print("Profile updated successfully.")
         # Return success response
         return JsonResponse({'status': 'success', 'message': 'Account updated successfully.'}, status=200)
     except IntegrityError as e:
+        print(e)
         # Check if the error is related to the email field and return a user-friendly message
         if 'tictactoe_app_tictactoeuser.email' in str(e):
             return JsonResponse({'status': 'error', 'message': 'Email is already in use.'}, status=400)
         elif 'tictactoe_app_tictactoeuser.username' in str(e):
             return JsonResponse({'status': 'error', 'message': 'Username is already in use.'}, status=400)
     except Exception as e:
+        print(e)
         # Return error message in case something goes wrong
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
@@ -173,9 +171,6 @@ def register_user(request):
         encrypted_password = json.loads(request.POST.get('password'))
         encrypted_password2 = json.loads(request.POST.get('password2'))
         encrypted_api_key = json.loads(request.POST.get('api_key'))
-        print(encrypted_password)
-        print(encrypted_password2)
-        print(encrypted_api_key)
 
         # Ensure the fields contain both 'ciphertext' and 'iv'
         if 'ciphertext' not in encrypted_password or 'iv' not in encrypted_password:
@@ -187,9 +182,6 @@ def register_user(request):
         decrypted_password = decrypt_data(encrypted_password['ciphertext'], None, encrypted_password['iv'])
         decrypted_password2 = decrypt_data(encrypted_password2['ciphertext'], None, encrypted_password2['iv'])
         decrypted_api_key = decrypt_data(encrypted_api_key['ciphertext'], None, encrypted_api_key['iv'])
-        print("Password: ",decrypted_password)
-        print(decrypted_password2)
-        print("API: ", decrypted_api_key)
 
         if not decrypted_password or decrypted_password != decrypted_password2:
             return JsonResponse({'status': 'error', 'message': 'Failed to decrypt data or passwords do not match.'}, status=400)
@@ -399,7 +391,6 @@ def login_user(request):
         # Parse encrypted password and username from the request
         encrypted_password = json.loads(request.POST.get('password'))
         encrypted_username = json.loads(request.POST.get('username'))
-        print(encrypted_password)
         
         # Ensure both encrypted fields contain 'ciphertext' and 'iv'
         if 'ciphertext' not in encrypted_password or 'iv' not in encrypted_password:
