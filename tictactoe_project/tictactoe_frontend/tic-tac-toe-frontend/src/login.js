@@ -39,9 +39,7 @@ const encryptData = (data, secretKey) => {
 };
 
 function Login() {
-  console.log('React Environment:', process.env.NODE_ENV);
   const api_url = process.env.REACT_APP_API_URL;
-  console.log('API URL:', api_url);
   const [username, set_username] = useState('');
   const [password, set_password] = useState('');
   const [is_loading, set_is_loading] = useState(false);

@@ -50,7 +50,6 @@ const SideTab = ({ user }) => {
       
       if (response.ok) {
         const data = await response.json();
-        console.log(data); // Debugging step: Check the structure of the returned data
         setAccountType(data.account_type === 2 ? 'researcher' : 'player');
         setUsername(data.username);
       } else {
