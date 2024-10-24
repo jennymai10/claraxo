@@ -2,13 +2,13 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 import base64, os
 from dotenv import load_dotenv
-load_dotenv(dotenv_path='./.env.development') # MODIFY FOR PRODUCTION
+load_dotenv(dotenv_path='./.env.production') # MODIFY FOR PRODUCTION
 
 # AES-CBC Decryption function with IV
 def decrypt_data(encrypted_data, secret_key_64, iv_64):
     try:
         # Retrieve the secret key from backend environment variable
-        secret_key_64 = os.getenv("SECRET_KEY")
+        secret_key_64 = os.getenv("ENC_SECRET_KEY")
         
         if not secret_key_64:
             raise ValueError("SECRET_KEY is not set in environment variables.")
