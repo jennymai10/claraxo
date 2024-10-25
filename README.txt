@@ -1,4 +1,3 @@
-
 1. Purpose of C-LARA
 
 C-LARA is a complete reimplementation of the Learning And Reading Assistant

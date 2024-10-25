@@ -378,10 +378,10 @@ def game_end_handler(board, game, winner, request):
 
     # If the board is full and there is no winner, it's a draw
     if '' not in board.values() or winner == None:
-        game.winner = 'Draw'  # Set the winner as 'Draw'
+        game.winner = 'draw'  # Set the winner as 'Draw'
         game.completed = True  # Mark the game as completed
         game.save()  # Save the updated game state to the database
-        request.session['winner'] = 'Draw'  # Store the draw result in the session
+        request.session['winner'] = 'draw'  # Store the draw result in the session
         return "draw" # JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
     # If the game is not over, return None
