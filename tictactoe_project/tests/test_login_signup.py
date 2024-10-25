@@ -7,34 +7,34 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# @pytest.fixture(scope="function")
-# def driver():
-#     """
-#     This fixture sets up and tears down the WebDriver instance for each test.
-#     """
-#     service = Service("/Users/jennymai/chromedriver-mac-x64/chromedriver")
-#     driver = webdriver.Chrome(service=service)
-#     driver.maximize_window()
-#     yield driver
-#     driver.quit()
 @pytest.fixture(scope="function")
 def driver():
     """
     This fixture sets up and tears down the WebDriver instance for each test.
     """
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Ensure headless mode
-    chrome_options.add_argument("--no-sandbox")  # Required for some CI environments
-    chrome_options.add_argument("--disable-dev-shm-usage")  # Helps in CI environments to avoid memory issues
-    chrome_options.add_argument("--disable-gpu")  # Disable GPU rendering
-    chrome_options.add_argument("--window-size=1920,1080")  # Set a large window size to avoid issues
-
-    # Initialize the Chrome WebDriver
-    service = Service("/usr/local/bin/chromedriver")  # Make sure the path is correct in your environment
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    
+    service = Service("/Users/jennymai/chromedriver-mac-x64/chromedriver")
+    driver = webdriver.Chrome(service=service)
+    driver.maximize_window()
     yield driver
-    driver.quit()  # Make sure to close the browser after the test
+    driver.quit()
+# @pytest.fixture(scope="function")
+# def driver():
+#     """
+#     This fixture sets up and tears down the WebDriver instance for each test.
+#     """
+#     chrome_options = Options()
+#     chrome_options.add_argument("--headless")  # Ensure headless mode
+#     chrome_options.add_argument("--no-sandbox")  # Required for some CI environments
+#     chrome_options.add_argument("--disable-dev-shm-usage")  # Helps in CI environments to avoid memory issues
+#     chrome_options.add_argument("--disable-gpu")  # Disable GPU rendering
+#     chrome_options.add_argument("--window-size=1920,1080")  # Set a large window size to avoid issues
+
+#     # Initialize the Chrome WebDriver
+#     service = Service("/usr/local/bin/chromedriver")  # Make sure the path is correct in your environment
+#     driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+#     yield driver
+#     driver.quit()  # Make sure to close the browser after the test
 
 def wait_for_element(driver, by, value, timeout=30):
     """
@@ -82,7 +82,7 @@ def test_signup(driver):
 
     # Test valid email
     email_input.clear()
-    email_input.send_keys("validemail@example.com")
+    email_input.send_keys("johnsmith@gmail.com")
     time.sleep(2)
 
     # Test weak password
@@ -142,83 +142,71 @@ def test_signup(driver):
     # Check if redirected to the verify email page
     assert "verifyemail" in driver.current_url
 
-# def test_resend_email(driver):
-#     # Open the Verify Email page
-#     driver.get("http://localhost:3000/verifyemail")
-#     time.sleep(3)
+def test_resend_email(driver):
+    # Open the Verify Email page
+    driver.get("http://localhost:3000/verifyemail")
+    time.sleep(3)
 
-#     # Simulate resending the verification email
-#     resend_link = wait_for_element(driver, By.ID, "resend_link")
-#     resend_link.click()
-#     time.sleep(1)
+    # Simulate resending the verification email
+    resend_link = wait_for_element(driver, By.ID, "resend_link")
+    resend_link.click()
+    time.sleep(1)
 
-#     # Enter the username for the resend
-#     resend_username_input = wait_for_element(driver, By.ID, 'resend_username')
-#     resend_username_input.clear()
-#     resend_username_input.send_keys("validusername")
-#     time.sleep(2)
+    # Enter the username for the resend
+    resend_username_input = wait_for_element(driver, By.ID, 'resend_username')
+    resend_username_input.clear()
+    resend_username_input.send_keys("validusername")
+    time.sleep(2)
 
-#     # Click the 'resend email' button
-#     resend_button = wait_for_element(driver, By.CSS_SELECTOR, '.App-Button')
-#     resend_button.click()
-#     time.sleep(7)
+    # Click the 'resend email' button
+    resend_button = wait_for_element(driver, By.CSS_SELECTOR, '.App-Button')
+    resend_button.click()
+    time.sleep(7)
 
-#     # Check for a success message
-#     resend_success_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Message').text
-#     assert "Verification email resent successfully!" in resend_success_message
+    # Check for a success message
+    resend_success_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Message').text
+    assert "Verification email resent successfully!" in resend_success_message
 
-# def test_verify_email(driver):
-#     # Open the Verify Email page
-#     driver.get("http://localhost:3000/verifyemail")
-#     time.sleep(3)  # Let the page fully load
+def test_verify_email(driver):
+    # Open the Verify Email page
+    driver.get("http://localhost:3000/verifyemail")
+    time.sleep(3)  # Let the page fully load
 
-#     # Enter valid username
-#     username = "validusername"  # Replace with the actual username you want to test
-#     username_input = wait_for_element(driver, By.CSS_SELECTOR, 'input[type="text"]')
-#     username_input.clear()
-#     username_input.send_keys(username)
-#     time.sleep(1)
+    # Enter valid username
+    username = "validusername"  # Replace with the actual username you want to test
+    username_input = wait_for_element(driver, By.CSS_SELECTOR, 'input[type="text"]')
+    username_input.clear()
+    username_input.send_keys(username)
+    time.sleep(1)
 
-#     # Test invalid verification code (e.g., less than 6 digits)
-#     verification_code_input = wait_for_element(driver, By.ID, 'verification_code')
-#     verification_code_input.clear()
-#     verification_code_input.send_keys("123")
-#     verification_code_input.send_keys("\t")  # Trigger validation
-#     time.sleep(1)
+    # Test invalid verification code (e.g., less than 6 digits)
+    verification_code_input = wait_for_element(driver, By.ID, 'verification_code')
+    verification_code_input.clear()
+    verification_code_input.send_keys("123")
+    verification_code_input.send_keys("\t")  # Trigger validation
+    time.sleep(1)
 
-#     # Verify error message for invalid code
-#     error_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Error').text
-#     assert "Invalid Verification Code. Must be 6 digits." in error_message
+    # Verify error message for invalid code
+    error_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Error').text
+    assert "Invalid Verification Code. Must be 6 digits." in error_message
 
-#     # Test valid verification code from the database
-#     verification_code_input.clear()
-#     time.sleep(20)
+def test_login(driver):
+    # Open the login page
+    driver.get("http://localhost:3000/login")
+    time.sleep(3)  # Let the page fully load
 
-#     # Submit the form with the valid code
-#     verify_button = wait_for_element(driver, By.CSS_SELECTOR, '.App-Button')
-#     verify_button.click()
-#     time.sleep(3)
+    # Test invalid username (less than 5 characters)
+    username_input = wait_for_element(driver, By.ID, 'username')
+    username_input.clear()
+    username_input.send_keys("usr")
+    username_input.send_keys("\t")  # Trigger validation
+    login_button = wait_for_element(driver, By.ID, 'login_button')
+    login_button.click()
+    time.sleep(2)
 
-#     # Check if redirected to the success page or if there is a verification message
-#     assert driver.current_url != "http://localhost:3000/verifyemail"
-
-# def test_login(driver):
-#     # Open the login page
-#     driver.get("http://localhost:3000/login")
-#     time.sleep(3)  # Let the page fully load
-
-#     # Test invalid username (less than 5 characters)
-#     username_input = wait_for_element(driver, By.ID, 'username')
-#     username_input.clear()
-#     username_input.send_keys("usr")
-#     username_input.send_keys("\t")  # Trigger validation
-#     login_button = wait_for_element(driver, By.ID, 'login_button')
-#     login_button.click()
-#     time.sleep(2)
-
-#     # Verify the error message for invalid username
-#     error_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Error').text
-#     assert "Username must be 5-15 characters" in error_message
+    # Verify the error message for invalid username
+    error_message = wait_for_element(driver, By.CSS_SELECTOR, '.Form-Error').text
+    assert "Username must be 5-15 characters" in error_message
 
 #     # Test valid username
 #     username_input.clear()

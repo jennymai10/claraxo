@@ -10,8 +10,11 @@ test:
 pytest:
 	pytest
 
-clean:
+cleandatabase:
 	rm db.sqlite3
+
+cleancloud:
+	python secret_manager_clean.py
 
 install:
 	pip install -r requirements.txt
