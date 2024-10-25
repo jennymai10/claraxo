@@ -81,3 +81,4 @@ npm-debug.log*
 /transformers
 jenny.py
 tictactoe_project/tictactoe_app/migrations
+tictactoe_project/google-cloud-key.json
