@@ -8,6 +8,37 @@ from google.api_core.exceptions import AlreadyExists, PermissionDenied, NotFound
 from datetime import timedelta, datetime, timezone
 import uuid
 
+class TicTacToeUserManager(BaseUserManager):
+    def create_user(self, username, email, password=None, **extra_fields):
+        """
+        Creates and saves a regular user with the given username, email, and password.
+        """
+        if not email:
+            raise ValueError('The Email field must be set')
+        if not username:
+            raise ValueError('The Username field must be set')
+
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)  # Set the password using the built-in method
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, email, password=None, **extra_fields):
+        """
+        Creates and saves a superuser with the given username, email, and password.
+        """
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(username, email, password, **extra_fields)
+
+
 class TicTacToeUser(AbstractBaseUser, PermissionsMixin):
     """
     Custom user model for the Tic Tac Toe application.
@@ -33,6 +64,7 @@ class TicTacToeUser(AbstractBaseUser, PermissionsMixin):
         store_api_key_in_secret_manager(api_key, secret_id, update_secret=False):
             Stores the API key securely in Google Cloud Secret Manager, optionally updating an existing secret.
     """
+    objects = TicTacToeUserManager()
 
     ACCOUNT_TYPE_CHOICES = (
         (1, 'Player'),

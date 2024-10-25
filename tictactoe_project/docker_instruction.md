@@ -1,4 +1,4 @@
-### Docker Deployment Step
+## Docker Deployment Step
 
 #### 1. Build docker images
 
