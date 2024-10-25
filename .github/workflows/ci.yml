@@ -40,31 +40,31 @@ jobs:
           source venv/bin/activate
           which python
           python -m django --version
+
+      # Step 5: Install Chrome and ChromeDriver
+      - name: Set up ChromeDriver
+        uses: nanasess/setup-chromedriver@v2.2.2
+
+      # Step 6: Run migrations
+      - name: Run Django migrations
+        run: |
+          cd tictactoe_project
+          source venv/bin/activate
+          python manage.py makemigrations
+          python manage.py migrate
+
+      # Step 7: Install Frontend Dependencies
+      - name: Install Frontend Dependencies
+        run: |
+          cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
+          npm install
       
-      # Step 4b: Verify virtual environment is active
+      # Step 7b: Verify virtual environment is active
       - name: Run Backend Unit Tests
         run: |
           cd tictactoe_project
           source venv/bin/activate
           python manage.py test
-
-      # # Step 5: Install Chrome and ChromeDriver
-      # - name: Set up ChromeDriver
-      #   uses: nanasess/setup-chromedriver@v2.2.2
-
-      # # Step 6: Run migrations
-      # - name: Run Django migrations
-      #   run: |
-      #     cd tictactoe_project
-      #     source venv/bin/activate
-      #     python manage.py makemigrations
-      #     python manage.py migrate
-
-      # # Step 7: Install Frontend Dependencies
-      # - name: Install Frontend Dependencies
-      #   run: |
-      #     cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
-      #     npm install
 
       # # Step 8: Start Backend Server in the Background
       # - name: Start Backend Server
