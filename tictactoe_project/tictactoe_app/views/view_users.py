@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from ..forms import UserRegistrationForm, LoginForm, UserProfileForm
+from ..forms import UserRegistrationForm, LoginForm
 from ..models import TicTacToeUser
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -168,9 +168,9 @@ def register_user(request):
     """
     if request.method == 'POST':
         # Parse encrypted password and API key from JSON
-        encrypted_password = json.loads(request.POST.get('password'))
-        encrypted_password2 = json.loads(request.POST.get('password2'))
-        encrypted_api_key = json.loads(request.POST.get('api_key'))
+        encrypted_password = json.loads(request.data.get('password'))
+        encrypted_password2 = json.loads(request.data.get('password2'))
+        encrypted_api_key = json.loads(request.data.get('api_key'))
 
         # Ensure the fields contain both 'ciphertext' and 'iv'
         if 'ciphertext' not in encrypted_password or 'iv' not in encrypted_password:

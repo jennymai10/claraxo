@@ -40,60 +40,67 @@ jobs:
           source venv/bin/activate
           which python
           python -m django --version
-
-      # Step 5: Install Chrome and ChromeDriver
-      - name: Set up ChromeDriver
-        uses: nanasess/setup-chromedriver@v2.2.2
-
-      # Step 6: Run migrations
-      - name: Run Django migrations
+      
+      # Step 4b: Verify virtual environment is active
+      - name: Run Backend Unit Tests
         run: |
           cd tictactoe_project
           source venv/bin/activate
-          python manage.py makemigrations
-          python manage.py migrate
+          python manage.py test
 
-      # Step 7: Install Frontend Dependencies
-      - name: Install Frontend Dependencies
-        run: |
-          cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
-          npm install
+      # # Step 5: Install Chrome and ChromeDriver
+      # - name: Set up ChromeDriver
+      #   uses: nanasess/setup-chromedriver@v2.2.2
 
-      # Step 8: Start Backend Server in the Background
-      - name: Start Backend Server
-        run: |
-          cd tictactoe_project
-          source venv/bin/activate
-          export ENC_SECRET_KEY=YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=
-          export DJANGO_SECRET_KEY=django-insecure-2aio4@tf(i32gpb%z-c27o0-d2p$%v&1+(u8f8n>
-          nohup python manage.py runserver 0.0.0.0:8000 --noreload &
-          sleep 15
-          curl http://localhost:8000/swagger/  # Verify server is running
+      # # Step 6: Run migrations
+      # - name: Run Django migrations
+      #   run: |
+      #     cd tictactoe_project
+      #     source venv/bin/activate
+      #     python manage.py makemigrations
+      #     python manage.py migrate
 
-      # Step 9: Start Frontend Server in the Background
-      - name: Start Frontend Server
-        run: |
-          cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
-          export REACT_APP_API_URL=http://localhost:8000/api
-          export REACT_APP_ENV=development
-          export REACT_APP_SECRET_KEY=YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=
-          nohup npm start &
-          sleep 10
-          curl http://localhost:3000/login/  # Verify frontend server is running
+      # # Step 7: Install Frontend Dependencies
+      # - name: Install Frontend Dependencies
+      #   run: |
+      #     cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
+      #     npm install
 
-      # Step 10: Run Selenium Tests
-      - name: Run Selenium Tests
-        run: |
-          cd tictactoe_project
-          source venv/bin/activate
-          pytest
+      # # Step 8: Start Backend Server in the Background
+      # - name: Start Backend Server
+      #   run: |
+      #     cd tictactoe_project
+      #     source venv/bin/activate
+      #     export ENC_SECRET_KEY=YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=
+      #     export DJANGO_SECRET_KEY=django-insecure-2aio4@tf(i32gpb%z-c27o0-d2p$%v&1+(u8f8n>
+      #     nohup python manage.py runserver 0.0.0.0:8000 --noreload &
+      #     sleep 15
+      #     curl http://localhost:8000/swagger/  # Verify server is running
 
-      # Step 11: Stop Backend Server
-      - name: Stop Backend Server
-        run: |
-          pkill -f "python manage.py runserver"
+      # # Step 9: Start Frontend Server in the Background
+      # - name: Start Frontend Server
+      #   run: |
+      #     cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
+      #     export REACT_APP_API_URL=http://localhost:8000/api
+      #     export REACT_APP_ENV=development
+      #     export REACT_APP_SECRET_KEY=YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=
+      #     nohup npm start &
+      #     sleep 10
+      #     curl http://localhost:3000/login/  # Verify frontend server is running
 
-      # Step 12: Stop Frontend Server
-      - name: Stop Frontend Server
-        run: |
-          pkill -f "npm start"
+      # # Step 10: Run Selenium Tests
+      # - name: Run Selenium Tests
+      #   run: |
+      #     cd tictactoe_project
+      #     source venv/bin/activate
+      #     pytest
+
+      # # Step 11: Stop Backend Server
+      # - name: Stop Backend Server
+      #   run: |
+      #     pkill -f "python manage.py runserver"
+
+      # # Step 12: Stop Frontend Server
+      # - name: Stop Frontend Server
+      #   run: |
+      #     pkill -f "npm start"

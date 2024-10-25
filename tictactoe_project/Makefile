@@ -5,6 +5,9 @@ collectstatic:
 	python3 manage.py collectstatic
 
 test:
+	python3 manage.py test
+
+pytest:
 	pytest
 
 clean:

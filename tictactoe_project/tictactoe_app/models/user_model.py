@@ -131,7 +131,7 @@ class TicTacToeUser(AbstractBaseUser, PermissionsMixin):
     verification_code = models.IntegerField(blank=True, null=True)
 
     # Use the custom manager to handle user creation
-    objects = BaseUserManager()
+    # objects = BaseUserManager()
 
     # Define the unique identifier for authentication (username in this case)
     USERNAME_FIELD = 'username'
