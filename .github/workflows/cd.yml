@@ -17,6 +17,12 @@ jobs:
       DOCKER_COMPOSE_FILE: "docker-compose.prod.yml"
 
     steps:
+      # Pre-build Docker cleanup
+      - name: Clean up Docker to free space
+        run: |
+          docker system prune -af
+          docker volume prune -f
+          
       # Step 1: Check out the code
       - name: Checkout code
         uses: actions/checkout@v2
