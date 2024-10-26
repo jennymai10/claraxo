@@ -65,7 +65,6 @@ jobs:
           cd tictactoe_project
           source venv/bin/activate
           export ENC_SECRET_KEY="YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY="
-          export SECRET_KEY="django-insecure-2aio4@tf(i32gpb%z-c27o0-d2p$%v&1+(u8f8n>"
           export GOOGLE_APPLICATION_CREDENTIALS="google-cloud-key.json"
           python manage.py test
 
@@ -74,6 +73,8 @@ jobs:
         run: |
           cd tictactoe_project
           source venv/bin/activate
+          export ENC_SECRET_KEY="YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY="
+          export GOOGLE_APPLICATION_CREDENTIALS="google-cloud-key.json"
           nohup python manage.py runserver 0.0.0.0:8000 --noreload &
           sleep 15
           curl http://localhost:8000/api/swagger/  # Verify server is running
