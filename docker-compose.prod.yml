@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  frontend:
+    image: tictactoe/frontend:latest
+    restart: always
+    environment:
+      BACKEND_URL: http://backend:8000
+      NODE_ENV: production
+    ports:
+      - "80:3000"
+
+  backend:
+    image: tictactoe/backend:latest
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DEBUG: False
+      EMAIL_HOST_USER: 'clara.tictactoe@gmail.com'
+      EMAIL_HOST_PASSWORD: 'coxh ynsl eaef funt'
+      DEFAULT_FROM_EMAIL: 'clara.tictactoe@gmail.com'

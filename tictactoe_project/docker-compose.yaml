@@ -42,7 +42,6 @@ services:
       EMAIL_HOST_USER: 'clara.tictactoe@gmail.com'
       EMAIL_HOST_PASSWORD: 'coxh ynsl eaef funt'
       DEFAULT_FROM_EMAIL: 'clara.tictactoe@gmail.com'
-      PERSONAL_TOKEN: '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'
     command: python3 manage.py runserver 0.0.0.0:8000  # Start Django with hot-reload
     logging:
       driver: "json-file"
