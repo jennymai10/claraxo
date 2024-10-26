@@ -1,3 +1,4 @@
+from typing import Any
 from django.db import models
 from .user_model import TicTacToeUser
 
@@ -42,6 +43,12 @@ class Game(models.Model):
 
     # Indicates the winner of the game ('X', 'O', or None).
     winner = models.CharField(max_length=1, blank=True, null=True)
+
+    # A log field to record game moves, AI prompts, and responses.
+    game_log = models.TextField(blank=True, null=True)
+
+    # A field to store the AI's difficulty level.
+    ai_difficulty = models.CharField(max_length=10, default='easy')
 
     def __str__(self):
         """
@@ -114,7 +121,7 @@ class GameLog(models.Model):
         indexes = [
             models.Index(fields=['game', 'turn_number']),
         ]
-    
+
     def __str__(self):
         """
         Provides a human-readable representation of the GameLog instance.

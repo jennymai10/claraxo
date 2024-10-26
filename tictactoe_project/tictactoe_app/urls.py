@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/get_moves/', game_moves, name='game_moves'),
     path('api/update_account/', update_profile, name='update_profile'),
     path('api/resend_email/', verifyemail_resend, name='verifyemail_resend'),
+    path('api/game_log/', get_game_log, name='game_log'),
     
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
