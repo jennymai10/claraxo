@@ -32,8 +32,8 @@ jobs:
           echo "$GCP_SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ls -la ~/.ssh
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $GCP_USERNAME@$GCP_VM_IP 'echo "SSH connection successful"'
-          ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $GCP_USERNAME@$GCP_VM_IP 'echo "SSH connection successful"'
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $GCP_USERNAME@$claraxo 'echo "SSH connection successful"'
+          ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $GCP_USERNAME@$claraxo 'echo "SSH connection successful"'
 
 
       # Step 1: Check out the code
