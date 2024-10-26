@@ -36,8 +36,6 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $GCP_USERNAME@$GCP_VM_IP 'echo "SSH connection successful"'
       
-
-
       # Step 1: Check out the code
       - name: Checkout code
         uses: actions/checkout@v2
@@ -75,6 +73,9 @@ jobs:
       - name: Deploy on VM
         run: |
           ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $GCP_USERNAME@$GCP_VM_IP << EOF
+            sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep tag_name | cut -d '"' -f 4)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            docker-compose --version
             cd /home/$GCP_USERNAME
             docker load < frontend.tar
             docker load < backend.tar
