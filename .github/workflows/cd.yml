@@ -9,7 +9,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
+    environment: deployment
     env:
       FRONTEND_IMAGE: "tictactoe/frontend:latest"
       BACKEND_IMAGE: "tictactoe/backend:latest"
