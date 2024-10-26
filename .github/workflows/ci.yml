@@ -43,7 +43,10 @@ jobs:
 
       # Step 4: Prepare Google Cloud credentials
       - name: Prepare Google Cloud credentials
-        run: echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > $GOOGLE_APPLICATION_CREDENTIALS
+        run: |
+          mkdir -p "$(dirname "$GOOGLE_APPLICATION_CREDENTIALS")"  # Ensure directory exists
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > "$GOOGLE_APPLICATION_CREDENTIALS"
+        shell: bash
 
       # Step 5: Install Chrome and ChromeDriver
       - name: Set up ChromeDriver
