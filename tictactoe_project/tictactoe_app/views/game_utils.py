@@ -127,7 +127,6 @@ def create_medium_prompt(board, unoccupied, opponent_move):
     move_characteristics = evaluate_all_moves(board, unoccupied, 'medium')
     # Create a string representation of the move scores to pass into the prompt
     move_characteristics_str = ', '.join([f"{move}: {score}" for move, score in move_characteristics.items()])
-    print(f"Move scores: {move_characteristics}")
     prompt = f"""
     Board Layout: The Tic-Tac-Toe board is indexed using a chess-like notation where:
     - 'a' refers to the left column, 'b' refers to the middle column, and 'c' refers to the right column.
@@ -372,6 +371,7 @@ def game_end_handler(board, game, winner, request):
     if winner:
         game.winner = winner  # Set the winner in the game object
         game.completed = True  # Mark the game as completed
+        game.game_log = game.game_log + f"\nGame Over: {winner} wins!"  # Log the game result
         game.save()  # Save the updated game state to the database
         request.session['winner'] = winner  # Store the winner in the session
         return winner #JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
@@ -380,9 +380,11 @@ def game_end_handler(board, game, winner, request):
     if '' not in board.values() or winner == None:
         game.winner = 'draw'  # Set the winner as 'Draw'
         game.completed = True  # Mark the game as completed
+        game.game_log = game.game_log + "\nGame Over: Draw!"
         game.save()  # Save the updated game state to the database
         request.session['winner'] = 'draw'  # Store the draw result in the session
         return "draw" # JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
+    
     # If the game is not over, return None
     return None

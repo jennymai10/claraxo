@@ -82,9 +82,9 @@ jobs:
       - name: Start Frontend Server
         run: |
           cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
-          export REACT_APP_API_URL=http://localhost:8000/api
-          export REACT_APP_ENV=development
-          export REACT_APP_SECRET_KEY=YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY=
+          export REACT_APP_API_URL="http://localhost:8000/api"
+          export REACT_APP_ENV="development"
+          export REACT_APP_SECRET_KEY="YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY="
           nohup npm start &
           sleep 10
           curl http://localhost:3000/login/  # Verify frontend server is running

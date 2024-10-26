@@ -56,7 +56,7 @@ def get_secret(secret_name):
 def game_history(request):
     user = request.user  # Get the currently logged-in user
     completed_games = Game.objects.filter(player_id=user.id).values(
-        'game_id', 'date', 'completed', 'winner'
+        'game_id', 'ai_difficulty', 'date', 'completed', 'winner'
     )  # Get relevant fields of completed games
 
     games_list = list(completed_games)  # Convert QuerySet to list of dicts
@@ -172,10 +172,22 @@ def make_move(request):
             if board[move] != '':
                 return JsonResponse({'status': 'error', 'message': 'Invalid move'}, status=400)
 
+            if game.game_log == None or game.game_log == '':
+                game.game_log = ""
+                game.game_log = game.game_log + f"Game ID: {game.game_id}\n"  # Update the game log
+                game.game_log = game.game_log + f"Game Date: {game.date}\n"  # Update the game log
+                game.game_log = game.game_log + f"Game Difficulty: {game.ai_difficulty}\n"  # Update the game log
+                game.game_log = game.game_log + f"Player: {game.player.username}\nPlayer's Symbol: {game.player_symbol}\nAI's Symbol: {game.ai_symbol}\n"  # Update the game log
+                game.save()
+            
+            game.ai_difficulty = difficulty  # Set the AI difficulty level for the game
             # Player's move
             turn_number = GameLog.objects.filter(game=game).count() + 1  # Calculate the turn number
             board[move] = 'X'  # Place the player's move on the board
             GameLog.objects.create(game=game, turn_number=turn_number, player='X', cell=move)  # Log the move
+            
+            game.game_log = game.game_log + f"Turn {turn_number}: Player X played at {move}\n"  # Update the game log
+            game.game_log = game.game_log + f"Board state: \n{board['a3']} | {board['b3']} | {board['c3']}\n{board['a2']} | {board['b2']} | {board['c2']}\n{board['a1']} | {board['b1']} | {board['c1']}\n"  # Log the board state
             game.save()
 
             # Check if the player wins
@@ -203,12 +215,16 @@ def make_move(request):
 
             # Generate AI's move
             ai_move, _, prompt_log, ai_response_log = generate_ai_move_with_logging(board, unoccupied, model, difficulty, move)  # Generate the AI's move
-
             board[ai_move] = 'O'  # Place the AI's move on the board
 
             # Log the AI's move
             turn_number += 1
             GameLog.objects.create(game=game, turn_number=turn_number, player='O', cell=ai_move)
+            game.game_log = game.game_log + f"Prompt: {prompt_log}\n"  # Update the game log
+            game.game_log = game.game_log + f"AI Response: {ai_response_log}\n"  # Update the game log
+            game.game_log = game.game_log + f"Turn {turn_number}: AI O played at {ai_move}\n"  # Update the game log
+            game.game_log = game.game_log + f"Board state: \n{board['a3']} | {board['b3']} | {board['c3']}\n{board['a2']} | {board['b2']} | {board['c2']}\n{board['a1']} | {board['b1']} | {board['c1']}\n"  # Log the board state
+            game.save()
 
             # Check if the AI wins
             winner = check_win(board)
@@ -229,16 +245,6 @@ def make_move(request):
             # Save the updated board state in the session
             request.session['board'] = board
             game.save()
-
-            # if error_code == 1:
-            #     return JsonResponse({
-            #         'status': 'success',
-            #         'ai_move': ai_move,
-            #         'message': 'Invalid API key or Insufficient quota.\nA random move was played.',
-            #         'errors': {'all': 'Invalid API key or Insufficient quota.\nA random move was played.'},
-            #         'prompt_log': prompt_log,  # Include the prompt sent to Gemini
-            #         'ai_response_log': ai_response_log  # Include the AI response from Gemini
-            #     }, status=200)
 
             # Return AI move in the response, including prompt and AI response logs
             return JsonResponse({'status': 'success', 'ai_move': ai_move, 'prompt_log': prompt_log, 'ai_response_log': ai_response_log})
@@ -327,3 +333,24 @@ def reset_game(request):
 
     # Redirect the user to the Tic Tac Toe game page
     return JsonResponse({'status': 'success', 'message': 'Game reset successfully.'}, status=200)
+
+@api_view(['POST'])
+def get_game_log(request):
+    """
+    Retrieve the game log for the current game.
+
+    This view retrieves the game log for the current game from the session and returns it as a JSON response.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        JsonResponse: A JSON response containing the game log.
+    """
+    game_id = request.data.get('game_id')
+    if not game_id:
+        return JsonResponse({'error': 'Invalid Game ID.'}, status=400)
+    print(game_id)
+    game_log = Game.objects.get(game_id=game_id).game_log
+    print(game_log)
+    return JsonResponse({'game_log': game_log}, status=200)
