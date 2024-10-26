@@ -225,7 +225,7 @@ function Settings() {
                                     <img
                                         src={edit}
                                         className="edit-icon"
-                                        alt="edit"
+                                        alt="edit_button"
                                         onClick={() => handle_edit('username')}
                                     />
                                 </div>
@@ -236,6 +236,7 @@ function Settings() {
                                         placeholder=""
                                         onChange={handle_change(set_username, is_valid_username)}
                                         disabled={is_field_locked('username')}
+                                        alt='username'
                                     />
                                 </div>
                                 {is_editing === 'username' && (
@@ -254,7 +255,7 @@ function Settings() {
                                     <img
                                         src={edit}
                                         className="edit-icon"
-                                        alt="edit"
+                                        alt="edit_button"
                                         onClick={() => handle_edit('account_type')}
                                     />
                                 </div>
@@ -284,7 +285,7 @@ function Settings() {
                                     <img
                                         src={edit}
                                         className="edit-icon"
-                                        alt="edit"
+                                        alt="edit_button"
                                         onClick={() => handle_edit('email')}
                                     />
                                 </div>
@@ -295,6 +296,7 @@ function Settings() {
                                         placeholder=""
                                         onChange={handle_change(set_email, is_valid_email)}
                                         disabled={is_field_locked('email')}
+                                        alt='email'
                                     />
                                 </div>
                                 {is_editing === 'email' && (
@@ -313,7 +315,7 @@ function Settings() {
                                     <img
                                         src={edit}
                                         className="edit-icon"
-                                        alt="edit"
+                                        alt="edit_button"
                                         onClick={() => handle_edit('password')}
                                     />
                                 </div>
@@ -324,6 +326,7 @@ function Settings() {
                                         placeholder="enter new password"
                                         onChange={handle_change(set_password, is_valid_password)}
                                         disabled={is_field_locked('password')}
+                                        alt='password'
                                     />
                                 </div>
                                 {is_editing === 'password' && (
@@ -334,6 +337,7 @@ function Settings() {
                                                 value={password2}
                                                 placeholder="re-enter new password"
                                                 onChange={handle_change(set_password2, validate_passwords)}
+                                                alt='password2'
                                             />
                                         </div>
                                         <button className='Small-Button' onClick={(e) => handle_submit(e, 'password')}>submit</button>
@@ -351,7 +355,7 @@ function Settings() {
                                     <img
                                         src={edit}
                                         className="edit-icon"
-                                        alt="edit"
+                                        alt="edit_button"
                                         onClick={() => handle_edit('api_key')}
                                     />
                                 </div>
@@ -362,6 +366,7 @@ function Settings() {
                                         placeholder="enter new api key"
                                         onChange={handle_change(set_api_key)}
                                         disabled={is_field_locked('api_key')}
+                                        api_key="api_key"
                                     />
                                 </div>
                                 {is_editing === 'api_key' && (
@@ -379,7 +384,7 @@ function Settings() {
                                     <img
                                         src={edit}
                                         className="edit-icon"
-                                        alt="edit"
+                                        alt="edit_button"
                                         onClick={() => handle_edit('age')}
                                     />
                                 </div>
@@ -390,6 +395,7 @@ function Settings() {
                                         placeholder=""
                                         onChange={handle_change(set_age)}
                                         disabled={is_field_locked('age')}
+                                        alt='age'
                                     />
                                 </div>
                                 {is_editing === 'age' && (
@@ -408,7 +414,7 @@ function Settings() {
                                     <img
                                         src={edit}
                                         className="edit-icon"
-                                        alt="edit"
+                                        alt="edit_button"
                                         onClick={() => handle_edit('fullname')}
                                     />
                                 </div>
@@ -419,6 +425,7 @@ function Settings() {
                                         placeholder=""
                                         onChange={handle_change(set_fullname)}
                                         disabled={is_field_locked('fullname')}
+                                        alt='fullname'
                                     />
                                 </div>
                                 {is_editing === 'fullname' && (

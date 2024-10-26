@@ -280,6 +280,9 @@ const TicTacToe = () => {
     return (
         <div className="App">
             <header className="App-header">
+                    <img src={board} className="App-board" draggable="false" alt="Board" />
+                    <img src={ruler} className="App-ruler" draggable="false" alt="Ruler" />
+                    <img src={pencil} className="App-pencil" draggable="false" alt="Pencil" />
                 <SideTab />
                 <div className='App-FormName' style={{ marginBottom: '2rem' }}>
                     <h4>play game</h4>

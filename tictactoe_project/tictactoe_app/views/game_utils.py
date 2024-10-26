@@ -127,7 +127,6 @@ def create_medium_prompt(board, unoccupied, opponent_move):
     move_characteristics = evaluate_all_moves(board, unoccupied, 'medium')
     # Create a string representation of the move scores to pass into the prompt
     move_characteristics_str = ', '.join([f"{move}: {score}" for move, score in move_characteristics.items()])
-    print(f"Move scores: {move_characteristics}")
     prompt = f"""
     Board Layout: The Tic-Tac-Toe board is indexed using a chess-like notation where:
     - 'a' refers to the left column, 'b' refers to the middle column, and 'c' refers to the right column.
@@ -156,7 +155,7 @@ def create_medium_prompt(board, unoccupied, opponent_move):
     Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
     Unoccupied squares: [{', '.join(unoccupied)}]
     Remember that: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
-    Your move options: {move_characteristics_str}
+    ** Your move options: {move_characteristics_str} **
     In this game, the player has chosen difficulty level: medium. Make medium reasoning for your move selection to simulate a medium-level game.
     Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
     Required Output (follow strictly please):
@@ -204,8 +203,8 @@ def create_hard_prompt(board, unoccupied, opponent_move):
     Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
     Unoccupied squares: [{', '.join(unoccupied)}]
     Remember that: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
-    Heuristic Scores: {move_characteristics_str}
-    Heuristic Descriptions: {move_characteristics_des_str}
+    ## **Heuristic Scores: {move_characteristics_str}**
+    **Heuristic Descriptions: {move_characteristics_des_str}**
     Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
     In this game, the player has chosen difficulty level: hard. Make extensive and strong reasoning for your move selection to simulate a hard-level unbeatable game.
     Required Output (follow strictly please):
@@ -372,6 +371,7 @@ def game_end_handler(board, game, winner, request):
     if winner:
         game.winner = winner  # Set the winner in the game object
         game.completed = True  # Mark the game as completed
+        game.game_log = game.game_log + f"\nGame Over: {winner} wins!"  # Log the game result
         game.save()  # Save the updated game state to the database
         request.session['winner'] = winner  # Store the winner in the session
         return winner #JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
@@ -380,9 +380,11 @@ def game_end_handler(board, game, winner, request):
     if '' not in board.values() or winner == None:
         game.winner = 'draw'  # Set the winner as 'Draw'
         game.completed = True  # Mark the game as completed
+        game.game_log = game.game_log + "\nGame Over: Draw!"
         game.save()  # Save the updated game state to the database
         request.session['winner'] = 'draw'  # Store the draw result in the session
         return "draw" # JsonResponse({'status': 'success', 'redirect_url': '/tictactoe_result/'})
 
+    
     # If the game is not over, return None
     return None
