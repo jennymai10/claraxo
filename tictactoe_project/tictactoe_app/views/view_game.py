@@ -350,7 +350,5 @@ def get_game_log(request):
     game_id = request.data.get('game_id')
     if not game_id:
         return JsonResponse({'error': 'Invalid Game ID.'}, status=400)
-    print(game_id)
     game_log = Game.objects.get(game_id=game_id).game_log
-    print(game_log)
     return JsonResponse({'game_log': game_log}, status=200)
