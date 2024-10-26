@@ -26,15 +26,14 @@ def driver():
     chrome_options.add_argument("--headless")  # Ensure headless mode
     chrome_options.add_argument("--no-sandbox")  # Required for some CI environments
     chrome_options.add_argument("--disable-dev-shm-usage")  # Helps in CI environments to avoid memory issues
-    chrome_options.add_argument("--disable-gpu")  # Disable GPU rendering
     chrome_options.add_argument("--window-size=1920,1080")  # Set a large window size to avoid issues
 
     # Initialize the Chrome WebDriver
-    service = Service("/usr/local/bin/chromedriver")  # Make sure the path is correct in your environment
+    service = Service("/usr/local/bin/chromedriver")
     driver = webdriver.Chrome(service=service, options=chrome_options)
     
     yield driver
-    driver.quit()  # Make sure to close the browser after the test
+    driver.quit()
 
 def wait_for_element(driver, by, value, timeout=30):
     """
