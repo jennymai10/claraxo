@@ -219,6 +219,7 @@ function Signup() {
                                         value={username}
                                         placeholder=""
                                         onChange={handle_change(set_username, is_valid_username)}
+                                        alt='username'
                                     />
                                 </div>
                                 {error.username && <p className='Form-Error'>{error.username}</p>}
@@ -254,6 +255,7 @@ function Signup() {
                                         value={email}
                                         placeholder=""
                                         onChange={handle_change(set_email, is_valid_email)}
+                                        alt='email'
                                     />
                                 </div>
                                 {error.email && <p className='Form-Error'>{error.email}</p>}
@@ -270,6 +272,7 @@ function Signup() {
                                         value={password}
                                         placeholder=""
                                         onChange={handle_change(set_password, is_valid_password)}
+                                        alt='password'
                                     />
                                 </div>
                                 {error.password && <p className='Form-Error'>{error.password}</p>}
@@ -286,6 +289,7 @@ function Signup() {
                                         value={password2}
                                         placeholder=""
                                         onChange={handle_change(set_password2, validate_passwords)}
+                                        alt='password2'
                                     />
                                 </div>
                                 {error.password2 && <p className='Form-Error'>{error.password2}</p>}
@@ -302,6 +306,7 @@ function Signup() {
                                         value={api_key}
                                         placeholder=""
                                         onChange={handle_change(set_api_key)}
+                                        alt='api_key'
                                     />
                                 </div>
                             </div>
@@ -317,6 +322,7 @@ function Signup() {
                                         value={age}
                                         placeholder=""
                                         onChange={handle_change(set_age, is_valid_age)}
+                                        alt='age'
                                     />
                                 </div>
                                 {error.age && <p className='Form-Error'>{error.age}</p>}
@@ -333,6 +339,7 @@ function Signup() {
                                         value={fullname}
                                         placeholder=""
                                         onChange={handle_change(set_fullname, is_valid_fullname)}
+                                        alt='fullname'
                                     />
                                 </div>
                                 {error.fullname && <p className='Form-Error'>{error.fullname}</p>}

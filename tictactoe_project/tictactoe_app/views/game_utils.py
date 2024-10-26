@@ -156,7 +156,7 @@ def create_medium_prompt(board, unoccupied, opponent_move):
     Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
     Unoccupied squares: [{', '.join(unoccupied)}]
     Remember that: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
-    Your move options: {move_characteristics_str}
+    ** Your move options: {move_characteristics_str} **
     In this game, the player has chosen difficulty level: medium. Make medium reasoning for your move selection to simulate a medium-level game.
     Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
     Required Output (follow strictly please):
@@ -204,8 +204,8 @@ def create_hard_prompt(board, unoccupied, opponent_move):
     Squares occupied by O: [{', '.join([key for key, value in board.items() if value == 'O'])}]
     Unoccupied squares: [{', '.join(unoccupied)}]
     Remember that: a3: top left, b3: top middle, c3: top right, a2: middle left, b2: center, c2: middle right, a1: bottom left, b1: bottom middle, c1: bottom right
-    Heuristic Scores: {move_characteristics_str}
-    Heuristic Descriptions: {move_characteristics_des_str}
+    ## **Heuristic Scores: {move_characteristics_str}**
+    **Heuristic Descriptions: {move_characteristics_des_str}**
     Make sure your chosen move aligns with the strategy above and maximizes your chances of winning while minimizing 'X's advantage.
     In this game, the player has chosen difficulty level: hard. Make extensive and strong reasoning for your move selection to simulate a hard-level unbeatable game.
     Required Output (follow strictly please):

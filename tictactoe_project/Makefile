@@ -32,7 +32,7 @@ killserver:
 	sudo killall gunicorn
 
 gunicorn:
-	gunicorn --workers 3 --bind 0.0.0.0:8000 tictactoe_backend.wsgi:application &
+	nohup gunicorn --workers 3 --bind 0.0.0.0:8000 tictactoe_backend.wsgi:application &
 
 lsof:
 	sudo lsof -i :8000
