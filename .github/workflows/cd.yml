@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - game/api_integration
 
 jobs:
   deploy:
