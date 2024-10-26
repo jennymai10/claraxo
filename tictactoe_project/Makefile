@@ -14,7 +14,7 @@ cleandatabase:
 	rm db.sqlite3
 
 cleancloud:
-	python secret_manager_clean.py
+	python3 secret_manager_clean.py
 
 install:
 	pip install -r requirements.txt

@@ -12,7 +12,15 @@ on:
 jobs:
   end_to_end_tests:
     runs-on: ubuntu-latest
-
+    environment: development 
+    env:
+      ENC_SECRET_KEY: ${{ secrets.ENC_SECRET_KEY }}
+      GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      GOOGLE_APPLICATION_CREDENTIALS: "$HOME/google-cloud-key.json"
+      REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
+      REACT_APP_ENV: ${{ vars.REACT_APP_ENV }}
+      REACT_APP_SECRET_KEY: ${{ secrets.REACT_APP_SECRET_KEY }}
+    
     steps:
       # Step 1: Checkout code from the repository
       - name: Checkout code
@@ -33,13 +41,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 4: Verify virtual environment is active
-      - name: Verify Virtual Environment
+      # Step 4: Prepare Google Cloud credentials
+      - name: Prepare Google Cloud credentials
         run: |
-          cd tictactoe_project
-          source venv/bin/activate
-          which python
-          python -m django --version
+          mkdir -p "$(dirname "$GOOGLE_APPLICATION_CREDENTIALS")"  # Ensure directory exists
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > "$GOOGLE_APPLICATION_CREDENTIALS"
+        shell: bash
 
       # Step 5: Install Chrome and ChromeDriver
       - name: Set up ChromeDriver
@@ -64,8 +71,6 @@ jobs:
         run: |
           cd tictactoe_project
           source venv/bin/activate
-          export ENC_SECRET_KEY="YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY="
-          export GOOGLE_APPLICATION_CREDENTIALS="google-cloud-key.json"
           python manage.py test
 
       # Step 8: Start Backend Server in the Background
@@ -73,8 +78,6 @@ jobs:
         run: |
           cd tictactoe_project
           source venv/bin/activate
-          export ENC_SECRET_KEY="YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY="
-          export GOOGLE_APPLICATION_CREDENTIALS="google-cloud-key.json"
           nohup python manage.py runserver 0.0.0.0:8000 --noreload &
           sleep 15
           curl http://localhost:8000/api/swagger/  # Verify server is running
@@ -83,9 +86,6 @@ jobs:
       - name: Start Frontend Server
         run: |
           cd tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend
-          export REACT_APP_API_URL="http://localhost:8000/api"
-          export REACT_APP_ENV="development"
-          export REACT_APP_SECRET_KEY="YX9YLwraTdKLCvmLauhs100EGaSiTF+r0SdYz1jx1oY="
           nohup npm start &
           sleep 10
           curl http://localhost:3000/login/  # Verify frontend server is running
