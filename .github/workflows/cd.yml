@@ -34,7 +34,7 @@ jobs:
       # Debugging SSH connection with corrected IP
       - name: Test SSH connection
         run: |
-          ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $mtqn0310@$GCP_VM_IP 'echo "SSH connection successful"'
+          ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $GCP_USERNAME@$GCP_VM_IP 'echo "SSH connection successful"'
       
 
 
@@ -62,20 +62,20 @@ jobs:
       # Step 5: Copy Docker images and Compose file to VM
       - name: Copy files to VM
         run: |
-          scp -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" frontend.tar $mtqn0310@$GCP_VM_IP:/home/$mtqn0310/
-          scp -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" backend.tar $mtqn0310@$GCP_VM_IP:/home/$mtqn0310/
-          scp -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $DOCKER_COMPOSE_FILE $mtqn0310@$GCP_VM_IP:/home/$mtqn0310/
+          scp -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" frontend.tar $GCP_USERNAME@$GCP_VM_IP:/home/$GCP_USERNAME/
+          scp -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" backend.tar $GCP_USERNAME@$GCP_VM_IP:/home/$GCP_USERNAME/
+          scp -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $DOCKER_COMPOSE_FILE $GCP_USERNAME@$GCP_VM_IP:/home/$GCP_USERNAME/
       
       # Verify files
       - name: Verify files on VM
         run: |
-          ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $mtqn0310@$GCP_VM_IP "ls -la /home/$mtqn0310/frontend.tar /home/$mtqn0310/backend.tar /home/$mtqn0310/$DOCKER_COMPOSE_FILE"
+          ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $GCP_USERNAME@$GCP_VM_IP "ls -la /home/$GCP_USERNAME/frontend.tar /home/$GCP_USERNAME/backend.tar /home/$GCP_USERNAME/$DOCKER_COMPOSE_FILE"
 
       # Step 6: SSH into VM and deploy with Docker Compose
       - name: Deploy on VM
         run: |
-          ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $mtqn0310@$GCP_VM_IP << EOF
-            cd /home/$mtqn0310
+          ssh -o StrictHostKeyChecking=no -i "$HOME/.ssh/deploy_key" $GCP_USERNAME@$GCP_VM_IP << EOF
+            cd /home/$GCP_USERNAME
             docker load < frontend.tar
             docker load < backend.tar
             docker-compose -f $DOCKER_COMPOSE_FILE up -d --build
