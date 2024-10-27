@@ -11,8 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = get_random_secret_key()
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DJANGO_ENV = 'production'
+
+DEBUG = DJANGO_ENV == 'production'
 
 # We use the external IP temporarily
 ALLOWED_HOSTS = ['35.238.92.0', 'localhost', '127.0.0.1', '34.170.212.220']

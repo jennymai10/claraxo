@@ -17,6 +17,7 @@ jobs:
       GCP_VM_IP: ${{ vars.GCP_VM_IP }}
       GCP_USERNAME: ${{ vars.GCP_USERNAME }}
       GCP_SSH_PRIVATE_KEY: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+      DJANGO_ENV: "production"
 
     steps:
       # Pre-build Docker cleanup
