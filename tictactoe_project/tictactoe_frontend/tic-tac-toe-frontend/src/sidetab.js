@@ -31,8 +31,7 @@ const SideTab = ({ user }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchAccountType();
-    if (isOpen && accountType==='' && username==='') {
+    if (accountType==='' && username==='') {
       // Fetch the account type when the side-tab opens
       fetchAccountType();
     }
@@ -58,8 +57,8 @@ const SideTab = ({ user }) => {
         setAccountType(data.account_type === 2 ? 'researcher' : 'player');
         setUsername(data.username);
       } else {
-        console.error('Error fetching user data:', response.statusText);
         navigate('/login');
+        console.error('Error fetching user data:', response.statusText);
       }
     } catch (error) {
       console.error('Error:', error);
