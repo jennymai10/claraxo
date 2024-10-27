@@ -81,4 +81,5 @@ jobs:
             docker load < frontend.tar
             docker load < backend.tar
             docker-compose -f $DOCKER_COMPOSE_FILE up -d --build
+            docker-compose logs -f
           EOF

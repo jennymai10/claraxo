@@ -17,13 +17,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # Run the necessary Django commands: makemigrations, migrate, and runserver
-# CMD ["sh", "-c", "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"]
+CMD ["sh", "-c", "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"]
 
-# Copy entrypoint script to container root
-COPY entrypoint.sh /app/entrypoint.sh
+# # Copy entrypoint script to container root
+# COPY entrypoint.sh /app/entrypoint.sh
 
-# Ensure entrypoint.sh is executable
-RUN chmod +x /app/entrypoint.sh
+# # Ensure entrypoint.sh is executable
+# RUN chmod +x /app/entrypoint.sh
 
-# Set the entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"]
+# # Set the entrypoint
+# ENTRYPOINT ["/app/entrypoint.sh"]
