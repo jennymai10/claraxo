@@ -57,12 +57,10 @@ const SideTab = ({ user }) => {
         setAccountType(data.account_type === 2 ? 'researcher' : 'player');
         setUsername(data.username);
       } else {
-        navigate('/login');
         console.error('Error fetching user data:', response.statusText);
       }
     } catch (error) {
       console.error('Error:', error);
-      navigate('/login');
     }
   };
   
