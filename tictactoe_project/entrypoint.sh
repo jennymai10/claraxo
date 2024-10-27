@@ -8,4 +8,4 @@ python3 manage.py migrate
 
 # Start Django server
 echo "Starting ClaraXO Django server..."
-python3 manage.py runserver 0.0.0.0:8000
+gunicorn --workers 4 --bind 0.0.0.0:8000 tictactoe_backend.wsgi:application
