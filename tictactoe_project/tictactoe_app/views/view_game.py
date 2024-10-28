@@ -14,136 +14,209 @@ from drf_yasg import openapi
 def get_secret(secret_name):
     """
     Retrieve a secret value from Google Cloud Secret Manager.
-
     This function accesses the specified secret in Google Cloud Secret Manager and returns its value.
-
     Args:
         secret_name (str): The name of the secret to retrieve.
-
     Returns:
         str: The value of the secret.
     """
+    
+    # Initialize the Secret Manager client to access Google Cloud secrets
     client = secretmanager.SecretManagerServiceClient()
+
+    # Define the project ID and format the secret version path for access
     project_id = 'c-lara'
     name = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
+
+    # Access the latest version of the specified secret
     response = client.access_secret_version(name=name)
+
+    # Decode the secret payload from bytes to a UTF-8 string and return it
     return response.payload.data.decode('UTF-8')
 
 @swagger_auto_schema(
     method='get',
     operation_description="Get the game history of the logged-in user",
     responses={
-        200: openapi.Response('Game History', openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'games': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'player': openapi.Schema(type=openapi.TYPE_STRING),
-                        'date': openapi.Schema(type=openapi.TYPE_STRING),
-                        'completed': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                        'winner': openapi.Schema(type=openapi.TYPE_STRING),
-                    }
-                )),
-            }
-        )),
+        200: openapi.Response(
+            'Game History', 
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'games': openapi.Schema(
+                        type=openapi.TYPE_ARRAY, 
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="Unique game ID"),
+                                'player': openapi.Schema(type=openapi.TYPE_STRING, description="Username of the player"),
+                                'date': openapi.Schema(type=openapi.TYPE_STRING, description="Date of the game"),
+                                'completed': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Status of the game completion"),
+                                'winner': openapi.Schema(type=openapi.TYPE_STRING, description="Winner of the game"),
+                                'ai_difficulty': openapi.Schema(type=openapi.TYPE_STRING, description="AI difficulty level for the game"),
+                            }
+                        )
+                    )
+                }
+            )
+        ),
         401: 'Unauthorized',
     }
 )
 @login_required
 @api_view(['GET'])
 def game_history(request):
-    user = request.user  # Get the currently logged-in user
+    """
+    Retrieve the completed game history for the logged-in user.
+    Returns a JSON response with game details including ID, AI difficulty, date,
+    completion status, and winner.
+    """
+    
+    user = request.user  # Get the current user
+
+    # Fetch completed games for the user, selecting relevant fields only
     completed_games = Game.objects.filter(player_id=user.id).values(
         'game_id', 'ai_difficulty', 'date', 'completed', 'winner'
-    )  # Get relevant fields of completed games
+    )
 
-    games_list = list(completed_games)  # Convert QuerySet to list of dicts
+    # Convert QuerySet to a list of dictionaries for JSON response
+    games_list = list(completed_games)
 
-    return JsonResponse({'games': games_list}, status=200)
-
-
-@login_required
-@api_view(['POST'])
-def game_moves(request):
-    game_id = request.data.get('game_id')
-    
-    if not game_id:
-        return JsonResponse({'error': 'Game ID is required.'}, status=400)
-    
-    # Fetch moves for the given game_id
-    game_moves = GameLog.objects.filter(game_id=game_id).values(
-        'turn_number', 'player', 'cell', 'timestamp'
-    ).order_by('turn_number')  # Ensure the moves are ordered by turn number
-
-    moves_list = list(game_moves)  # Convert QuerySet to list of dicts
-
-    return JsonResponse({'moves': moves_list}, status=200)
+    return JsonResponse({'games': games_list}, status=200)  # Return data with HTTP 200 status
 
 @swagger_auto_schema(
-    method='get',
-    operation_description="Get the result of the current game with the final board state",
+    method='post',
+    operation_description="Retrieve the moves for a specific game by its ID",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['game_id'],
+        properties={
+            'game_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="Unique identifier for the game"),
+        }
+    ),
     responses={
-        200: openapi.Response('Game Result', openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'winner': openapi.Schema(type=openapi.TYPE_STRING),
-                'board_list': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'cell': openapi.Schema(type=openapi.TYPE_STRING),
-                        'value': openapi.Schema(type=openapi.TYPE_STRING),
-                    }
-                )),
-            }
-        )),
+        200: openapi.Response(
+            'Moves Retrieved Successfully',
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'moves': openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'turn_number': openapi.Schema(type=openapi.TYPE_INTEGER, description="Turn sequence number"),
+                                'player': openapi.Schema(type=openapi.TYPE_STRING, description="Player who made the move"),
+                                'cell': openapi.Schema(type=openapi.TYPE_STRING, description="Cell position of the move"),
+                                'timestamp': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME, description="Time of move"),
+                            }
+                        )
+                    )
+                }
+            )
+        ),
+        400: 'Bad Request: Game ID is required',
         401: 'Unauthorized',
     }
 )
 @login_required
-@api_view(['GET'])
-def tictactoe_result(request):
+@api_view(['POST'])
+def game_moves(request):
     """
-        Render the Tic Tac Toe result page showing the winner or draw and the final board.
-
-        This view retrieves the winner and final board state from the session and renders
-        them on the result page. If no winner is stored, it defaults to "No winner".
-
-        Args:
-            request (HttpRequest): The HTTP request object.
-
-        Returns:
-            HttpResponse: Renders the result page with the game winner and final board state.
+    Retrieve move history for a specified game.
+    Expects a game ID in the request data and returns the ordered list of moves
+    including turn number, player, cell, and timestamp.
     """
-    winner = request.session.get('winner', 'No winner')  # Retrieve the winner from the session
-    board = request.session.get('board', initialize_board())  # Retrieve the board state or initialize if not found
+    
+    game_id = request.data.get('game_id')  # Get game ID from request data
+    
+    # Check if game_id is provided, else return error
+    if not game_id:
+        return JsonResponse({'error': 'Game ID is required.'}, status=400)
+    
+    # Query game moves by game ID, ordered by turn number
+    game_moves = GameLog.objects.filter(game_id=game_id).values(
+        'turn_number', 'player', 'cell', 'timestamp'
+    ).order_by('turn_number')
 
-    board_keys = ['a3', 'b3', 'c3', 'a2', 'b2', 'c2', 'a1', 'b1', 'c1']
-    board_list = [(cell, board[cell]) for cell in board_keys]  # Create a list of board cells and their values
+    moves_list = list(game_moves)  # Convert QuerySet to list format for JSON response
 
-    return render(request, 'tictactoe_app/tictactoe_result.html', {'winner': winner, 'board_list': board_list})
+    return JsonResponse({'moves': moves_list}, status=200)  # Return moves with HTTP 200 status
 
 @swagger_auto_schema(
     method='post',
-    operation_description="Handle the player's move and respond with the AI's move",
+    operation_description="Process the player's move, update the game state, and generate the AI's move in response.",
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
+        required=['move'],
         properties={
-            'move': openapi.Schema(type=openapi.TYPE_STRING, description='The player\'s move in chess notation (e.g., a1, b2, etc.)')
-        },
-        required=['move']
+            'move': openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description="The cell position where the player wants to make a move (e.g., 'a1', 'b2')."
+            ),
+            'difficulty': openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description="AI difficulty level (e.g., 'easy', 'medium', 'hard'). Defaults to 'medium'.",
+                enum=['easy', 'medium', 'hard']
+            ),
+        }
     ),
     responses={
-        200: openapi.Response('Success', openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'status': openapi.Schema(type=openapi.TYPE_STRING),
-                'ai_move': openapi.Schema(type=openapi.TYPE_STRING, description='The AI\'s move in chess notation (e.g., a1, b2, etc.)'),
-            }
-        )),
-        400: 'Invalid Request',
-        401: 'Unauthorized',
+        200: openapi.Response(
+            description="Move processed successfully",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'status': openapi.Schema(
+                        type=openapi.TYPE_STRING, 
+                        description="Indicates success of the operation, typically 'success'."
+                    ),
+                    'ai_move': openapi.Schema(
+                        type=openapi.TYPE_STRING, 
+                        description="The cell where the AI made its move."
+                    ),
+                    'prompt_log': openapi.Schema(
+                        type=openapi.TYPE_STRING, 
+                        description="Log of the prompt sent to the AI for move generation."
+                    ),
+                    'ai_response_log': openapi.Schema(
+                        type=openapi.TYPE_STRING, 
+                        description="Log of the response generated by the AI."
+                    ),
+                    'winner': openapi.Schema(
+                        type=openapi.TYPE_STRING, 
+                        description="Indicates the winner ('X' for player, 'O' for AI) if the game ended with this move.",
+                        enum=['X', 'O', None]
+                    ),
+                    'message': openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="Additional message regarding game outcome, e.g., 'Player X wins', 'The game is a draw'."
+                    ),
+                }
+            )
+        ),
+        400: openapi.Response(
+            description="Bad Request: Invalid move or game state",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'status': openapi.Schema(type=openapi.TYPE_STRING, description="Indicates error status."),
+                    'message': openapi.Schema(type=openapi.TYPE_STRING, description="Error message describing the issue.")
+                }
+            )
+        ),
+        401: 'Unauthorized: Authentication required',
+        405: 'Method Not Allowed: Only POST is allowed',
+        500: openapi.Response(
+            description="Server Error: Internal issue processing the move",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'status': openapi.Schema(type=openapi.TYPE_STRING, description="Indicates error status."),
+                    'message': openapi.Schema(type=openapi.TYPE_STRING, description="Error message describing the server issue.")
+                }
+            )
+        ),
     }
 )
 @login_required
@@ -156,39 +229,46 @@ def make_move(request):
     """
     if request.method == 'POST':
         try:
-            # Retrieve or initialize the game board
+            # Load the game board from the session or initialize a new board
             board = request.session.get('board', initialize_board())
             if not board:
                 board = initialize_board()
-            move = request.POST.get('move')  # Get the player's move from the request
-            difficulty = request.POST.get('difficulty', 'medium')  # Get the AI difficulty level (default: medium)
-            # Load or create the game object based on the session ID
+            move = request.POST.get('move') # Get the player's move from the request data
+            difficulty = request.POST.get('difficulty', 'medium') # Get the AI difficulty level from the request data
+            
+            # Validate the move: Check if the selected move is valid (the cell is empty)
             if not request.session.get('game_id'):
-                game = Game.objects.create(player=request.user)  # Create a new game if not found
+                game = Game.objects.create(player=request.user) # Create a new game instance
                 request.session['game_id'] = game.game_id
             else:
                 game = Game.objects.get(game_id=request.session['game_id'])
+
             # Validate the move: Check if the selected move is valid (the cell is empty)
             if board[move] != '':
                 return JsonResponse({'status': 'error', 'message': 'Invalid move'}, status=400)
 
+            # Check if the game log is empty, if so, initialize it
             if game.game_log == None or game.game_log == '':
                 game.game_log = ""
-                game.game_log = game.game_log + f"Game ID: {game.game_id}\n"  # Update the game log
-                game.game_log = game.game_log + f"Game Date: {game.date}\n"  # Update the game log
-                game.game_log = game.game_log + f"Game Difficulty: {game.ai_difficulty}\n"  # Update the game log
-                game.game_log = game.game_log + f"Player: {game.player.username}\nPlayer's Symbol: {game.player_symbol}\nAI's Symbol: {game.ai_symbol}\n"  # Update the game log
+                game.game_log = game.game_log + f"Game ID: {game.game_id}\n"
+                game.game_log = game.game_log + f"Game Date: {game.date}\n"
+                game.game_log = game.game_log + f"Game Difficulty: {game.ai_difficulty}\n"
+                game.game_log = game.game_log + f"Player: {game.player.username}\nPlayer's Symbol: {game.player_symbol}\nAI's Symbol: {game.ai_symbol}\n"
                 game.save()
             
-            game.ai_difficulty = difficulty  # Set the AI difficulty level for the game
-            # Player's move
-            turn_number = GameLog.objects.filter(game=game).count() + 1  # Calculate the turn number
-            board[move] = 'X'  # Place the player's move on the board
-            GameLog.objects.create(game=game, turn_number=turn_number, player='X', cell=move)  # Log the move
+            # Update the game difficulty level
+            game.ai_difficulty = difficulty
             
-            game.game_log = game.game_log + f"Turn {turn_number}: Player X played at {move}\n"  # Update the game log
-            game.game_log = game.game_log + f"Board state: \n{board['a3']} | {board['b3']} | {board['c3']}\n{board['a2']} | {board['b2']} | {board['c2']}\n{board['a1']} | {board['b1']} | {board['c1']}\n"  # Log the board state
+            # Check if the player wins
+            turn_number = GameLog.objects.filter(game=game).count() + 1 # Get the current turn number
+            board[move] = 'X' # Place the player's move on the board
+            GameLog.objects.create(game=game, turn_number=turn_number, player='X', cell=move) # Log the player's move
+            
+            # Log the player's move
+            game.game_log = game.game_log + f"Turn {turn_number}: Player X played at {move}\n"
+            game.game_log = game.game_log + f"Board state: \n{board['a3']} | {board['b3']} | {board['c3']}\n{board['a2']} | {board['b2']} | {board['c2']}\n{board['a1']} | {board['b1']} | {board['c1']}\n"
             game.save()
+
 
             # Check if the player wins
             winner = check_win(board)
@@ -198,7 +278,7 @@ def make_move(request):
                 request.session['game_id'] = None
                 return JsonResponse({'status': 'success', 'message': 'Player X wins', 'winner': 'X', 'ai_move': None})
 
-            # Check for a draw (if all squares are filled and no winner)
+            # Check if the board is full (draw)
             unoccupied = [key for key, value in board.items() if value == '']
             if not unoccupied:
                 _ = game_end_handler(board, game, winner, request)
@@ -206,6 +286,7 @@ def make_move(request):
                 request.session['game_id'] = None
                 return JsonResponse({'status': 'success', 'message': 'The game is a draw.'})
 
+            # Generate AI's move
             if not request.user.api_key_expiry_date:
                 api_key = 'Invalid'
             else:
@@ -220,9 +301,11 @@ def make_move(request):
             # Log the AI's move
             turn_number += 1
             GameLog.objects.create(game=game, turn_number=turn_number, player='O', cell=ai_move)
-            game.game_log = game.game_log + f"Prompt: {prompt_log}\n"  # Update the game log
-            game.game_log = game.game_log + f"AI Response: {ai_response_log}\n"  # Update the game log
-            game.game_log = game.game_log + f"Turn {turn_number}: AI O played at {ai_move}\n"  # Update the game log
+
+            # Log the AI's move
+            game.game_log = game.game_log + f"Prompt: {prompt_log}\n"   
+            game.game_log = game.game_log + f"AI Response: {ai_response_log}\n" 
+            game.game_log = game.game_log + f"Turn {turn_number}: AI O played at {ai_move}\n"   
             game.game_log = game.game_log + f"Board state: \n{board['a3']} | {board['b3']} | {board['c3']}\n{board['a2']} | {board['b2']} | {board['c2']}\n{board['a1']} | {board['b1']} | {board['c1']}\n"  # Log the board state
             game.save()
 
@@ -234,7 +317,7 @@ def make_move(request):
                 request.session['game_id'] = None
                 return JsonResponse({'status': 'success', 'message': 'AI wins', 'ai_move': ai_move, 'winner': 'O', 'prompt_log': prompt_log, 'ai_response_log': ai_response_log})
 
-            # Check again for a draw after AI's move
+            # Check if the board is full (draw)
             unoccupied = [key for key, value in board.items() if value == '']
             if not unoccupied:
                 _ = game_end_handler(board, game, None, request)
@@ -242,113 +325,60 @@ def make_move(request):
                 request.session['game_id'] = None
                 return JsonResponse({'status': 'draw', 'ai_move': 'None\nThe game is a draw', 'message': 'The game is a draw.'})
 
-            # Save the updated board state in the session
+            # Save the updated board to the session
             request.session['board'] = board
             game.save()
-
-            # Return AI move in the response, including prompt and AI response logs
             return JsonResponse({'status': 'success', 'ai_move': ai_move, 'prompt_log': prompt_log, 'ai_response_log': ai_response_log})
-
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
-
-
 @swagger_auto_schema(
-    method='get',
-    operation_description="Render the current state of the Tic-Tac-Toe game board",
+    method='post',
+    operation_description="Retrieve the game log for a specified game by game ID.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['game_id'],
+        properties={
+            'game_id': openapi.Schema(
+                type=openapi.TYPE_INTEGER, 
+                description="Unique identifier for the game"
+            ),
+        }
+    ),
     responses={
-        200: openapi.Response('Game Board', openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'grid_cells': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
-                'board_list': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'cell': openapi.Schema(type=openapi.TYPE_STRING),
-                        'value': openapi.Schema(type=openapi.TYPE_STRING),
-                    }
-                )),
-            }
-        )),
+        200: openapi.Response(
+            'Game Log Retrieved',
+            openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'game_log': openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        description="The log of moves for the specified game"
+                    ),
+                }
+            )
+        ),
+        400: 'Bad Request: Invalid Game ID',
         401: 'Unauthorized',
     }
 )
-@login_required
-@api_view(['GET'])
-def tictactoe_game(request):
-    """
-    Render the Tic Tac Toe game page.
-
-    This view initializes or retrieves the current game board from the session and
-    prepares it for display on the game page. The board is represented as a dictionary
-    where each key corresponds to a cell on the Tic Tac Toe grid (e.g., 'a3', 'b2'),
-    and each value is either 'X', 'O', or an empty string indicating an unoccupied cell.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponse: Renders the Tic Tac Toe game page with the current state of the game board.
-    """
-    # Retrieve the current board state from the session or initialize a new board if not found
-    board = request.session.get('board', initialize_board())
-
-    # Define the keys for each cell on the board in display order
-    board_keys = ['a3', 'b3', 'c3', 'a2', 'b2', 'c2', 'a1', 'b1', 'c1']
-
-    # Create a list of tuples containing each cell and its current value
-    board_list = [(cell, board[cell]) for cell in board_keys]
-
-    # Render the game page template with the grid cells and the board list
-    return render(request, 'tictactoe_app/tictactoe_game.html', {'grid_cells': board_keys, 'board_list': board_list})
-
-
-@login_required
-@api_view(['POST'])
-def reset_game(request):
-    """
-    Reset the game by clearing the session board.
-
-    This view clears the current game state stored in the session and resets the game board.
-    It then redirects the user to the main game page to start a new game. This function is
-    typically used when a user wants to start a fresh game after finishing or abandoning a previous one.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponseRedirect: Redirects the user to the Tic Tac Toe game page.
-    """
-    # Initialize a new empty game board
-    board = initialize_board()
-
-    # Save the new board state in the session
-    request.session['board'] = board
-
-    # Remove the game ID from the session, effectively ending the current game
-    request.session.pop('game_id', None)
-
-    # Redirect the user to the Tic Tac Toe game page
-    return JsonResponse({'status': 'success', 'message': 'Game reset successfully.'}, status=200)
-
 @api_view(['POST'])
 def get_game_log(request):
     """
-    Retrieve the game log for the current game.
+    Retrieve the game log for a specific game.
 
-    This view retrieves the game log for the current game from the session and returns it as a JSON response.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        JsonResponse: A JSON response containing the game log.
+    Expects a game ID in the request data and returns the corresponding game log as JSON.
     """
-    game_id = request.data.get('game_id')
+
+    game_id = request.data.get('game_id')  # Get game ID from the request data
+
+    # Validate that a game ID was provided
     if not game_id:
         return JsonResponse({'error': 'Invalid Game ID.'}, status=400)
+
+    # Retrieve the game log for the given game ID
     game_log = Game.objects.get(game_id=game_id).game_log
+
+    # Return the game log as a JSON response
     return JsonResponse({'game_log': game_log}, status=200)

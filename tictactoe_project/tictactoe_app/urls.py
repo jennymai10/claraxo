@@ -31,10 +31,9 @@ urlpatterns = [
    path('api/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
    path('api/reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
-    path('api/game/', tictactoe_game, name='tictactoe_game'),
+   #  path('api/game/', tictactoe_game, name='tictactoe_game'),
     path('api/make_move/', make_move, name='make_move'),
-    path('api/new_game/', reset_game, name='reset_game'),
-    path('api/tictactoe_result/', tictactoe_result, name='tictactoe_result'),
+   #  path('api/new_game/', reset_game, name='reset_game'),
     path('api/history/', game_history, name='game_history'),
     path('api/get_moves/', game_moves, name='game_moves'),
     path('api/update_account/', update_profile, name='update_profile'),
