@@ -64,8 +64,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-
-    # Added IT Project 64 app
+    
     'tictactoe_app',
     'rest_framework',
 ]
