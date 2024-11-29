@@ -172,7 +172,7 @@ server {
     ssl_certificate_key /etc/nginx/ssl/nginx-selfsigned.key;
 
     # Serve React frontend
-    root /home/niijenn_0310/it_project_064/tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend/build;
+    root /home/niijenn_0310/project_064/tictactoe_project/tictactoe_frontend/tic-tac-toe-frontend/build;
     index index.html;
 
     location / {
@@ -216,10 +216,10 @@ After=network.target
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/home/niijenn_0310/it_project_064/tictactoe_project
-ExecStart=/home/niijenn_0310/it_project_064/tictactoe_project/venv/bin/gunicorn \
+WorkingDirectory=/home/niijenn_0310/project_064/tictactoe_project
+ExecStart=/home/niijenn_0310/project_064/tictactoe_project/venv/bin/gunicorn \
           --workers 3 \
-          --bind unix:/home/niijenn_0310/it_project_064/tictactoe_project/gunicorn.sock \
+          --bind unix:/home/niijenn_0310/project_064/tictactoe_project/gunicorn.sock \
           tictactoe_backend.wsgi:application
 
 [Install]

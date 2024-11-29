@@ -260,7 +260,3 @@ be inserted into the prompt templates after appropriate preprocessing.
 
 The associated code is in the file $CLARA/clara_app/clara_core/clara_prompt_templates.py and
 the 'edit_prompt' view of $CLARA/clara_app/views.py.
-
-
-
-
